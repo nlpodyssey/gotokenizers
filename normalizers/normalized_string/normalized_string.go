@@ -96,7 +96,7 @@ type RuneChanges struct {
 
 	// `1` = this is a new rune
 	// `-N` = the rune is right before N removed runes
-	// `0` = this runerepresents the old one (even if changed)
+	// `0` = this rune represents the old one (even if changed)
 	// Values greater than `1` are not allowed: if multiple chars are added,
 	// each of them must have a `change` of `1`.
 	Changes int

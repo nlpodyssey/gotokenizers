@@ -310,6 +310,174 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 	run("blank result with an empty original string", ns, 0, 3, "", false)
 }
 
+func TestNormalizedStringTransform(t *testing.T) {
+	run := func(
+		name string,
+		ns NormalizedString,
+		dest []RuneChanges,
+		initialOffset int,
+		expected NormalizedString,
+	) {
+		t.Run(name, func(t *testing.T) {
+			ns.Transform(dest, initialOffset)
+			assertNormalizedStringEqual(t, ns, expected)
+		})
+	}
+
+	run("empty string, empty changes", NewNormalizedString(""),
+		[]RuneChanges{}, 0,
+		NormalizedString{
+			original:   "",
+			normalized: "",
+			alignments: []NormalizedStringAlignment{},
+		})
+
+	run("non-empty string, empty changes", NewNormalizedString("Bar"),
+		[]RuneChanges{}, 0,
+		NormalizedString{
+			original:   "Bar",
+			normalized: "",
+			alignments: []NormalizedStringAlignment{},
+		})
+
+	run("non-empty string, empty changes, offset", NewNormalizedString("Bar"),
+		[]RuneChanges{}, 3,
+		NormalizedString{
+			original:   "Bar",
+			normalized: "",
+			alignments: []NormalizedStringAlignment{},
+		})
+
+	run("1:1 mapping (all Changes = 0)", NewNormalizedString("Bär"),
+		[]RuneChanges{{'S', 0}, {'ü', 0}, {'ß', 0}}, 0,
+		NormalizedString{
+			original:   "Bär",
+			normalized: "Süß",
+			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 3}},
+		})
+
+	run("1:1 mapping (all Changes == 0), with offset",
+		NewNormalizedString("Bär"),
+		[]RuneChanges{{'ü', 0}, {'ß', 0}}, 1,
+		NormalizedString{
+			original:   "Bär",
+			normalized: "üß",
+			alignments: []NormalizedStringAlignment{{0, 2}, {2, 3}},
+		})
+
+	run("adding a rune and deleting the rest (only one Change = 1)",
+		NewNormalizedString("Bar"),
+		[]RuneChanges{{'x', 1}}, 0,
+		NormalizedString{
+			original:   "Bar",
+			normalized: "x",
+			alignments: []NormalizedStringAlignment{{0, 0}},
+		})
+
+	run("adding a rune at the beginning", NewNormalizedString("x"),
+		[]RuneChanges{{'a', 1}, {'x', 0}}, 0,
+		NormalizedString{
+			original:   "x",
+			normalized: "ax",
+			alignments: []NormalizedStringAlignment{{0, 0}, {0, 1}},
+		})
+
+	run("adding more runes at the beginning", NewNormalizedString("x"),
+		[]RuneChanges{{'a', 1}, {'b', 1}, {'x', 0}}, 0,
+		NormalizedString{
+			original:   "x",
+			normalized: "abx",
+			alignments: []NormalizedStringAlignment{{0, 0}, {0, 0}, {0, 1}},
+		})
+
+	run("adding a rune at the end", NewNormalizedString("x"),
+		[]RuneChanges{{'x', 0}, {'a', 1}}, 0,
+		NormalizedString{
+			original:   "x",
+			normalized: "xa",
+			alignments: []NormalizedStringAlignment{
+				// FIXME: shouldn't be {0, 1}, {1, 1}?
+				{0, 1}, {0, 1},
+			},
+		})
+
+	run("adding more runes at the end", NewNormalizedString("x"),
+		[]RuneChanges{{'x', 0}, {'a', 1}, {'b', 1}}, 0,
+		NormalizedString{
+			original:   "x",
+			normalized: "xab",
+			alignments: []NormalizedStringAlignment{
+				// FIXME: shouldn't be {0, 1}, {1, 1}, {1, 1}?
+				{0, 1}, {0, 1}, {0, 1},
+			},
+		})
+
+	run("adding runes at begin and end", NewNormalizedString("x"),
+		[]RuneChanges{{'a', 1}, {'x', 0}, {'b', 1}}, 0,
+		NormalizedString{
+			original:   "x",
+			normalized: "axb",
+			alignments: []NormalizedStringAlignment{
+				// FIXME: shouldn't be {0, 0}, {0, 1}, {1, 1}?
+				{0, 0}, {0, 1}, {0, 1},
+			},
+		})
+
+	run("adding a rune in the middle", NewNormalizedString("ab"),
+		[]RuneChanges{{'a', 0}, {'x', 1}, {'b', 0}}, 0,
+		NormalizedString{
+			original:   "ab",
+			normalized: "axb",
+			alignments: []NormalizedStringAlignment{
+				// FIXME: shouldn't be {0, 1}, {1, 1}, {1, 2}?
+				{0, 1}, {0, 1}, {1, 2},
+			},
+		})
+
+	run("adding multiple runes in the middle", NewNormalizedString("ab"),
+		[]RuneChanges{{'a', 0}, {'x', 1}, {'y', 1}, {'b', 0}}, 0,
+		NormalizedString{
+			original:   "ab",
+			normalized: "axyb",
+			alignments: []NormalizedStringAlignment{
+				// FIXME: shouldn't be {0, 1}, {1, 1}, {1, 1}, {1, 2}?
+				{0, 1}, {0, 1}, {0, 1}, {1, 2},
+			},
+		})
+
+	run("Change -1 at the beginning", NewNormalizedString("Bar"),
+		[]RuneChanges{{'Q', -1}, {'r', 0}}, 0,
+		NormalizedString{
+			original:   "Bar",
+			normalized: "Qr",
+			alignments: []NormalizedStringAlignment{{0, 2}, {2, 3}},
+		})
+
+	run("Change -1 at the end", NewNormalizedString("Bar"),
+		[]RuneChanges{{'B', 0}, {'x', -1}}, 0,
+		NormalizedString{
+			original:   "Bar",
+			normalized: "Bx",
+			alignments: []NormalizedStringAlignment{{0, 1}, {1, 3}},
+		})
+
+	run("Change -1 in the middle", NewNormalizedString("abcd"),
+		[]RuneChanges{{'a', 0}, {'x', -1}, {'d', 0}}, 0,
+		NormalizedString{
+			original:   "abcd",
+			normalized: "axd",
+			alignments: []NormalizedStringAlignment{{0, 1}, {1, 3}, {3, 4}},
+		})
+
+	run("Change -2 in the middle", NewNormalizedString("abcde"),
+		[]RuneChanges{{'a', 0}, {'x', -2}, {'e', 0}}, 0,
+		NormalizedString{
+			original:   "abcde",
+			normalized: "axe",
+			alignments: []NormalizedStringAlignment{{0, 1}, {1, 4}, {4, 5}},
+		})
+}
+
 func TestNormalizedStringAlignmentEqual(t *testing.T) {
 	t.Run("true if `pos` and `changes` are the same", func(t *testing.T) {
 		a := NormalizedStringAlignment{pos: 1, changes: 2}
