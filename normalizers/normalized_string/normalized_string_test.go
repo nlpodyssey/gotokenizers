@@ -632,6 +632,66 @@ func TestNormalizedStringPrepend(t *testing.T) {
 		})
 }
 
+func TestNormalizedStringAppend(t *testing.T) {
+	run := func(
+		name string,
+		ns NormalizedString,
+		s string,
+		expected NormalizedString,
+	) {
+		t.Run(name, func(t *testing.T) {
+			ns.Append(s)
+			assertNormalizedStringEqual(t, ns, expected)
+		})
+	}
+
+	run("append empty string to empty string", NewNormalizedString(""), "",
+		NormalizedString{
+			original:   "",
+			normalized: "",
+			alignments: []NormalizedStringAlignment{},
+		})
+
+	run("append empty string ", NewNormalizedString("ab"), "",
+		NormalizedString{
+			original:   "ab",
+			normalized: "ab",
+			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}},
+		})
+
+	run("append to empty string ", NewNormalizedString(""), "ab",
+		NormalizedString{
+			original:   "",
+			normalized: "ab",
+			alignments: []NormalizedStringAlignment{{0, 0}, {0, 0}},
+		})
+
+	run("append one rune", NewNormalizedString("ab"), "x",
+		NormalizedString{
+			original:   "ab",
+			normalized: "abx",
+			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 2}},
+		})
+
+	run("append more runes", NewNormalizedString("ab"), "xy",
+		NormalizedString{
+			original:   "ab",
+			normalized: "abxy",
+			alignments: []NormalizedStringAlignment{
+				{0, 1}, {1, 2}, {2, 2}, {2, 2},
+			},
+		})
+
+	run("non-ASCII runes", NewNormalizedString("äö"), "süß",
+		NormalizedString{
+			original:   "äö",
+			normalized: "äösüß",
+			alignments: []NormalizedStringAlignment{
+				{0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 2},
+			},
+		})
+}
+
 func TestNormalizedStringAlignmentEqual(t *testing.T) {
 	t.Run("true if `pos` and `changes` are the same", func(t *testing.T) {
 		a := NormalizedStringAlignment{pos: 1, changes: 2}
