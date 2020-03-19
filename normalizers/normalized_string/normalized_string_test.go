@@ -478,6 +478,100 @@ func TestNormalizedStringTransform(t *testing.T) {
 		})
 }
 
+func TestNormalizedStringFilter(t *testing.T) {
+	run := func(
+		name string,
+		ns NormalizedString,
+		filter func(rune) bool,
+		expected NormalizedString,
+	) {
+		t.Run(name, func(t *testing.T) {
+			ns.Filter(filter)
+			assertNormalizedStringEqual(t, ns, expected)
+		})
+	}
+
+	run("filter empty string", NewNormalizedString(""),
+		func(r rune) bool { return true },
+		NormalizedString{
+			original:   "",
+			normalized: "",
+			alignments: []NormalizedStringAlignment{},
+		})
+
+	run("filter all characters true", NewNormalizedString("Bar"),
+		func(r rune) bool { return true },
+		NormalizedString{
+			original:   "Bar",
+			normalized: "Bar",
+			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 3}},
+		})
+
+	run("filter all characters false", NewNormalizedString("Bar"),
+		func(r rune) bool { return false },
+		NormalizedString{
+			original:   "Bar",
+			normalized: "",
+			alignments: []NormalizedStringAlignment{},
+		})
+
+	run("filter one character at the beginning", NewNormalizedString("abcd"),
+		func(r rune) bool { return r > 'a' },
+		NormalizedString{
+			original:   "abcd",
+			normalized: "bcd",
+			alignments: []NormalizedStringAlignment{{0, 2}, {2, 3}, {3, 4}},
+		})
+
+	run("filter more characters at the beginning", NewNormalizedString("abcde"),
+		func(r rune) bool { return r > 'b' },
+		NormalizedString{
+			original:   "abcde",
+			normalized: "cde",
+			alignments: []NormalizedStringAlignment{{0, 3}, {3, 4}, {4, 5}},
+		})
+
+	run("filter one character at the end", NewNormalizedString("abcd"),
+		func(r rune) bool { return r < 'd' },
+		NormalizedString{
+			original:   "abcd",
+			normalized: "abc",
+			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 4}},
+		})
+
+	run("filter more characters at the end", NewNormalizedString("abcde"),
+		func(r rune) bool { return r < 'd' },
+		NormalizedString{
+			original:   "abcde",
+			normalized: "abc",
+			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 5}},
+		})
+
+	run("filter one character in the middle", NewNormalizedString("axb"),
+		func(r rune) bool { return r < 'x' },
+		NormalizedString{
+			original:   "axb",
+			normalized: "ab",
+			alignments: []NormalizedStringAlignment{{0, 2}, {2, 3}},
+		})
+
+	run("filter more characters in the middle", NewNormalizedString("axyb"),
+		func(r rune) bool { return r < 'x' },
+		NormalizedString{
+			original:   "axyb",
+			normalized: "ab",
+			alignments: []NormalizedStringAlignment{{0, 3}, {3, 4}},
+		})
+
+	run("filter non-ASCII runes", NewNormalizedString("süß!"),
+		func(r rune) bool { return r < 'z' },
+		NormalizedString{
+			original:   "süß!",
+			normalized: "s!",
+			alignments: []NormalizedStringAlignment{{0, 3}, {3, 4}},
+		})
+}
+
 func TestNormalizedStringAlignmentEqual(t *testing.T) {
 	t.Run("true if `pos` and `changes` are the same", func(t *testing.T) {
 		a := NormalizedStringAlignment{pos: 1, changes: 2}
