@@ -247,8 +247,7 @@ func (ns *NormalizedString) Filter(filter func(rune) bool) {
 func (ns *NormalizedString) Prepend(s string) {
 	ns.normalized = s + ns.normalized
 	runes := []rune(s)
-	runesLen := len(runes)
-	alignments := make([]NormalizedStringAlignment, runesLen+len(ns.alignments))
+	alignments := make([]NormalizedStringAlignment, len(runes))
 	// By default, all the new alignments have already {pos: 0, changes: 0}
 	ns.alignments = append(alignments, ns.alignments...)
 }
