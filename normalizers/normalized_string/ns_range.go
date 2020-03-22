@@ -17,25 +17,25 @@ type NSRange interface {
 	convertOffset(ns *NormalizedString) (int, int, bool)
 }
 
-type nsRange struct {
+type baseNsRange struct {
 	start int
 	end   int
 }
 
-func (r *nsRange) Start() int         { return r.start }
-func (r *nsRange) End() int           { return r.end }
-func (r *nsRange) Get() (int, int)    { return r.start, r.end }
-func (r *nsRange) SetStart(start int) { r.start = start }
-func (r *nsRange) SetEnd(end int)     { r.end = end }
-func (r *nsRange) Set(start, end int) { r.start, r.end = start, end }
+func (r *baseNsRange) Start() int         { return r.start }
+func (r *baseNsRange) End() int           { return r.end }
+func (r *baseNsRange) Get() (int, int)    { return r.start, r.end }
+func (r *baseNsRange) SetStart(start int) { r.start = start }
+func (r *baseNsRange) SetEnd(end int)     { r.end = end }
+func (r *baseNsRange) Set(start, end int) { r.start, r.end = start, end }
 
 // A range using indices relative to the `original` string
-type NSOriginalRange struct{ nsRange }
+type NSOriginalRange struct{ baseNsRange }
 
 var _ NSRange = &NSOriginalRange{}
 
 func NewNSOriginalRange(start, end int) NSOriginalRange {
-	return NSOriginalRange{nsRange{start: start, end: end}}
+	return NSOriginalRange{baseNsRange{start: start, end: end}}
 }
 
 func (r *NSOriginalRange) originalRange(ns *NormalizedString) (int, int, bool) {
@@ -73,12 +73,12 @@ func (r *NSOriginalRange) convertOffset(ns *NormalizedString) (int, int, bool) {
 }
 
 // A range using indices relative to the `normalized` string
-type NSNormalizedRange struct{ nsRange }
+type NSNormalizedRange struct{ baseNsRange }
 
 var _ NSRange = &NSNormalizedRange{}
 
 func NewNSNormalizedRange(start, end int) NSNormalizedRange {
-	return NSNormalizedRange{nsRange{start: start, end: end}}
+	return NSNormalizedRange{baseNsRange{start: start, end: end}}
 }
 func (r *NSNormalizedRange) originalRange(ns *NormalizedString) (int, int, bool) {
 	if r.start > r.end || r.start < 0 || r.end > len(ns.alignments) {

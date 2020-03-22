@@ -12,7 +12,7 @@ import (
 
 func TestNewNSOriginalRange(t *testing.T) {
 	r := NewNSOriginalRange(1, 2)
-	expected := NSOriginalRange{nsRange{start: 1, end: 2}}
+	expected := NSOriginalRange{baseNsRange{start: 1, end: 2}}
 	if r != expected {
 		t.Errorf("Expected %+v, got %+v", expected, r)
 	}
@@ -38,7 +38,7 @@ func TestNSOriginalRangeGet(t *testing.T) {
 func TestNSOriginalSetStart(t *testing.T) {
 	r := NewNSOriginalRange(2, 3)
 	r.SetStart(1)
-	expected := NSOriginalRange{nsRange{start: 1, end: 3}}
+	expected := NSOriginalRange{baseNsRange{start: 1, end: 3}}
 	if r != expected {
 		t.Errorf("Expected %+v, got %+v", expected, r)
 	}
@@ -47,7 +47,7 @@ func TestNSOriginalSetStart(t *testing.T) {
 func TestNSOriginalSetEnd(t *testing.T) {
 	r := NewNSOriginalRange(2, 3)
 	r.SetEnd(5)
-	expected := NSOriginalRange{nsRange{start: 2, end: 5}}
+	expected := NSOriginalRange{baseNsRange{start: 2, end: 5}}
 	if r != expected {
 		t.Errorf("Expected %+v, got %+v", expected, r)
 	}
@@ -56,7 +56,7 @@ func TestNSOriginalSetEnd(t *testing.T) {
 func TestNSOriginalSet(t *testing.T) {
 	r := NewNSOriginalRange(2, 3)
 	r.Set(1, 5)
-	expected := NSOriginalRange{nsRange{start: 1, end: 5}}
+	expected := NSOriginalRange{baseNsRange{start: 1, end: 5}}
 	if r != expected {
 		t.Errorf("Expected %+v, got %+v", expected, r)
 	}
@@ -64,7 +64,7 @@ func TestNSOriginalSet(t *testing.T) {
 
 func TestNewNSNormalizedRange(t *testing.T) {
 	r := NewNSNormalizedRange(1, 2)
-	expected := NSNormalizedRange{nsRange{start: 1, end: 2}}
+	expected := NSNormalizedRange{baseNsRange{start: 1, end: 2}}
 	if r != expected {
 		t.Errorf("Expected %+v, got %+v", expected, r)
 	}
@@ -90,7 +90,7 @@ func TestNSNormalizedRangeGet(t *testing.T) {
 func TestNSNormalizedSetStart(t *testing.T) {
 	r := NewNSNormalizedRange(2, 3)
 	r.SetStart(1)
-	expected := NSNormalizedRange{nsRange{start: 1, end: 3}}
+	expected := NSNormalizedRange{baseNsRange{start: 1, end: 3}}
 	if r != expected {
 		t.Errorf("Expected %+v, got %+v", expected, r)
 	}
@@ -99,7 +99,7 @@ func TestNSNormalizedSetStart(t *testing.T) {
 func TestNSNormalizedSetEnd(t *testing.T) {
 	r := NewNSNormalizedRange(2, 3)
 	r.SetEnd(5)
-	expected := NSNormalizedRange{nsRange{start: 2, end: 5}}
+	expected := NSNormalizedRange{baseNsRange{start: 2, end: 5}}
 	if r != expected {
 		t.Errorf("Expected %+v, got %+v", expected, r)
 	}
@@ -108,7 +108,7 @@ func TestNSNormalizedSetEnd(t *testing.T) {
 func TestNSNormalizedSet(t *testing.T) {
 	r := NewNSNormalizedRange(2, 3)
 	r.Set(1, 5)
-	expected := NSNormalizedRange{nsRange{start: 1, end: 5}}
+	expected := NSNormalizedRange{baseNsRange{start: 1, end: 5}}
 	if r != expected {
 		t.Errorf("Expected %+v, got %+v", expected, r)
 	}
