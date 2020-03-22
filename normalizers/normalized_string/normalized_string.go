@@ -207,16 +207,14 @@ func (ns *NormalizedString) Filter(filter func(rune) bool) {
 
 func (ns *NormalizedString) Prepend(s string) {
 	ns.normalized = s + ns.normalized
-	runes := []rune(s)
-	alignments := make([]AlignmentRange, len(runes))
-	// By default, all the new alignments have already {pos: 0, changes: 0}
+	alignments := make([]AlignmentRange, len([]rune(s))) // all (0, 0)
 	ns.alignments = append(alignments, ns.alignments...)
 }
 
 func (ns *NormalizedString) Append(s string) {
 	ns.normalized += s
 
-	lastOffset := AlignmentRange{} // {pos: 0, changes: 0}
+	lastOffset := AlignmentRange{} // (0, 0)
 	alignmentsLen := len(ns.alignments)
 	if alignmentsLen > 0 {
 		lastAlignment := ns.alignments[alignmentsLen-1]
@@ -226,6 +224,8 @@ func (ns *NormalizedString) Append(s string) {
 		}
 	}
 
+	// TODO: compare this with appending a slice of alignments
+	//       of size len([]rune(s))
 	for range s { // note that this loops over the string's runes, not bytes
 		ns.alignments = append(ns.alignments, lastOffset)
 	}
