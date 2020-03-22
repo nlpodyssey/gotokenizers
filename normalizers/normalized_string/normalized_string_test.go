@@ -650,7 +650,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "Bär",
 			normalized: "üß",
-			alignments: []AlignmentRange{{0, 2}, {2, 3}},
+			alignments: []AlignmentRange{{1, 2}, {2, 3}},
 		})
 
 	run("adding a rune and deleting the rest (only one Change = 1)",
@@ -738,7 +738,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "Bar",
 			normalized: "Qr",
-			alignments: []AlignmentRange{{0, 2}, {2, 3}},
+			alignments: []AlignmentRange{{0, 1}, {2, 3}},
 		})
 
 	run("change -1 at the end", NewNormalizedString("Bar"),
@@ -746,7 +746,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "Bar",
 			normalized: "Bx",
-			alignments: []AlignmentRange{{0, 1}, {1, 3}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}},
 		})
 
 	run("change -1 in the middle", NewNormalizedString("abcd"),
@@ -754,7 +754,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "abcd",
 			normalized: "axd",
-			alignments: []AlignmentRange{{0, 1}, {1, 3}, {3, 4}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {3, 4}},
 		})
 
 	run("change -2 in the middle", NewNormalizedString("abcde"),
@@ -762,7 +762,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "abcde",
 			normalized: "axe",
-			alignments: []AlignmentRange{{0, 1}, {1, 4}, {4, 5}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {4, 5}},
 		})
 }
 
@@ -808,7 +808,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "abcd",
 			normalized: "bcd",
-			alignments: []AlignmentRange{{0, 2}, {2, 3}, {3, 4}},
+			alignments: []AlignmentRange{{1, 2}, {2, 3}, {3, 4}},
 		})
 
 	run("filter more characters at the beginning", NewNormalizedString("abcde"),
@@ -816,7 +816,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "abcde",
 			normalized: "cde",
-			alignments: []AlignmentRange{{0, 3}, {3, 4}, {4, 5}},
+			alignments: []AlignmentRange{{2, 3}, {3, 4}, {4, 5}},
 		})
 
 	run("filter one character at the end", NewNormalizedString("abcd"),
@@ -824,7 +824,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "abcd",
 			normalized: "abc",
-			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 4}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
 		})
 
 	run("filter more characters at the end", NewNormalizedString("abcde"),
@@ -832,7 +832,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "abcde",
 			normalized: "abc",
-			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 5}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
 		})
 
 	run("filter one character in the middle", NewNormalizedString("axb"),
@@ -840,7 +840,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "axb",
 			normalized: "ab",
-			alignments: []AlignmentRange{{0, 2}, {2, 3}},
+			alignments: []AlignmentRange{{0, 1}, {2, 3}},
 		})
 
 	run("filter more characters in the middle", NewNormalizedString("axyb"),
@@ -848,7 +848,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "axyb",
 			normalized: "ab",
-			alignments: []AlignmentRange{{0, 3}, {3, 4}},
+			alignments: []AlignmentRange{{0, 1}, {3, 4}},
 		})
 
 	run("filter non-ASCII runes", NewNormalizedString("süß!"),
@@ -856,7 +856,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "süß!",
 			normalized: "s!",
-			alignments: []AlignmentRange{{0, 3}, {3, 4}},
+			alignments: []AlignmentRange{{0, 1}, {3, 4}},
 		})
 }
 

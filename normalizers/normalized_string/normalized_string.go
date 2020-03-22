@@ -107,7 +107,7 @@ type RuneChanges struct {
 	// `-N` = the rune is right before N removed runes
 	// `0` = this rune represents the old one (even if changed)
 	// Values greater than `1` are not allowed: if multiple chars are added,
-	// each of them must have a `change` of `1`.
+	// each of them must have `Changes` set to `1`.
 	Changes int
 }
 
@@ -118,88 +118,40 @@ type RuneChanges struct {
 // runes at the beginning of the original one, we need an `initialOffset` which
 // represents the number of removed runes at the very beginning.
 func (ns *NormalizedString) Transform(dest []RuneChanges, initialOffset int) {
-	offset := 0
-	remainingOffset := initialOffset
-
 	var strBuilder strings.Builder
-	alignments := make([]AlignmentRange, 0, len(ns.alignments))
 
-	for index, runeSizePair := range dest {
-		c := runeSizePair.Rune
-		changes := runeSizePair.Changes
+	// Pre-fill the new alignments with (0, 0)
+	alignments := make([]AlignmentRange, len(dest))
+	offset := -initialOffset
 
-		if remainingOffset != 0 {
-			changes -= remainingOffset
-			remainingOffset = 0
-		}
-
-		var uof int
-		if offset < 0 {
-			uof = -offset
-		} else {
-			uof = offset
-		}
+	for index, item := range dest {
+		changes := item.Changes
 
 		// A positive offset means we added characters. So we need to remove
 		// this offset from the current index to find out the previous id
-		var idx int
-		if offset < 0 {
-			idx = index + uof
-		} else {
-			idx = index - uof
-		}
+		oldIndex := index - offset
 
-		alignmentPair := AlignmentRange{-1, -1}
-
-		if changes > 0 {
+		if changes == 0 {
+			// No changes required here
+			alignments[index] = ns.alignments[oldIndex]
+		} else if changes == 1 {
 			// This is a newly inserted character, so we use the alignment
 			// from the previous one
 			offset += 1
-			if idx < 1 {
-				alignmentPair.start = 0
-				alignmentPair.end = 0
-			} else {
-				alignmentPair = ns.alignments[idx-1]
-			}
+			if oldIndex > 0 {
+				alignments[index] = ns.alignments[oldIndex-1]
+			} // otherwise, it is already (0, 0)
 
-		} else if changes == 0 {
-			alignmentPair = ns.alignments[idx]
-
-		} else { // changes < 0
-			// Some characters where removed, so we merge our range with the
-			// one from the removed characters as the new alignment
-			uch := -changes
+		} else if changes < 0 { // changes < 0
+			// Some characters where removed, nothing to change in alignments
 			offset += changes
-
-			lastIndex := idx + uch
-
-			alignmentPair = ns.alignments[idx]
-
-			for alIndex := idx + 1; alIndex <= lastIndex; alIndex++ {
-				al := ns.alignments[alIndex]
-				if al.start < alignmentPair.start {
-					alignmentPair.start = al.start
-				}
-				if al.end < alignmentPair.start {
-					alignmentPair.start = al.end
-				}
-				if al.start > alignmentPair.end {
-					alignmentPair.end = al.start
-				}
-				if al.end > alignmentPair.end {
-					alignmentPair.end = al.end
-				}
-			}
+			alignments[index] = ns.alignments[oldIndex]
+		} else { // changes > 1
+			panic("invalid Changes > 1")
 		}
 
 		// Then we keep only the char for string reconstruction
-		strBuilder.WriteRune(c)
-
-		if alignmentPair.start == -1 {
-			// TODO: is this really possible??
-			panic("Bad alignement in NormalizedString.Transform")
-		}
-		alignments = append(alignments, alignmentPair)
+		strBuilder.WriteRune(item.Rune)
 	}
 
 	ns.normalized = strBuilder.String()
