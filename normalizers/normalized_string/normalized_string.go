@@ -231,8 +231,7 @@ func (ns *NormalizedString) Append(s string) {
 	}
 }
 
-// FIXME: this might be inefficient: prefer direct use of `strings.Map`
-//        on `ns.Get()` and eventually remove this method
+// Maps the runes of the normalized string.
 func (ns *NormalizedString) Map(f func(rune) rune) {
 	ns.normalized = strings.Map(f, ns.normalized)
 }
