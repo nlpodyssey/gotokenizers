@@ -169,22 +169,22 @@ func (ns *NormalizedString) Filter(filter func(rune) bool) {
 	removed := 0
 	filtered := make([]RuneChanges, 0, runesLen)
 
-	lastIndex := len(runes) - 1
+	lastIndex := runesLen - 1
 	_ = runes[lastIndex]
 
 	for runeIndex := lastIndex; runeIndex >= 0; runeIndex-- {
-		c := runes[runeIndex]
-		keep := filter(c)
-		if keep {
+		r := runes[runeIndex]
+
+		if filter(r) {
 			if removed > 0 {
 				filtered = append(filtered, RuneChanges{
-					Rune:    c,
+					Rune:    r,
 					Changes: -removed,
 				})
 				removed = 0
 			} else {
 				filtered = append(filtered, RuneChanges{
-					Rune:    c,
+					Rune:    r,
 					Changes: 0,
 				})
 			}
@@ -195,7 +195,7 @@ func (ns *NormalizedString) Filter(filter func(rune) bool) {
 
 	// Reverse `filtered`
 	lastIndex = len(filtered) - 1
-	if lastIndex >= 0 {
+	if lastIndex > 0 {
 		_ = filtered[lastIndex]
 		for i, j := 0, lastIndex; i < j; i, j = i+1, j-1 {
 			filtered[i], filtered[j] = filtered[j], filtered[i]

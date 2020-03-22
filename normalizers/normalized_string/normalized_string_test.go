@@ -803,7 +803,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 			alignments: []AlignmentRange{},
 		})
 
-	run("filter one character at the beginning", NewNormalizedString("abcd"),
+	run("remove one character at the beginning", NewNormalizedString("abcd"),
 		func(r rune) bool { return r > 'a' },
 		NormalizedString{
 			original:   "abcd",
@@ -811,7 +811,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 			alignments: []AlignmentRange{{1, 2}, {2, 3}, {3, 4}},
 		})
 
-	run("filter more characters at the beginning", NewNormalizedString("abcde"),
+	run("remove more characters at the beginning", NewNormalizedString("abcde"),
 		func(r rune) bool { return r > 'b' },
 		NormalizedString{
 			original:   "abcde",
@@ -819,7 +819,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 			alignments: []AlignmentRange{{2, 3}, {3, 4}, {4, 5}},
 		})
 
-	run("filter one character at the end", NewNormalizedString("abcd"),
+	run("remove one character at the end", NewNormalizedString("abcd"),
 		func(r rune) bool { return r < 'd' },
 		NormalizedString{
 			original:   "abcd",
@@ -827,7 +827,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
 		})
 
-	run("filter more characters at the end", NewNormalizedString("abcde"),
+	run("remove more characters at the end", NewNormalizedString("abcde"),
 		func(r rune) bool { return r < 'd' },
 		NormalizedString{
 			original:   "abcde",
@@ -835,7 +835,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
 		})
 
-	run("filter one character in the middle", NewNormalizedString("axb"),
+	run("remove one character in the middle", NewNormalizedString("axb"),
 		func(r rune) bool { return r < 'x' },
 		NormalizedString{
 			original:   "axb",
@@ -843,12 +843,20 @@ func TestNormalizedStringFilter(t *testing.T) {
 			alignments: []AlignmentRange{{0, 1}, {2, 3}},
 		})
 
-	run("filter more characters in the middle", NewNormalizedString("axyb"),
+	run("remove more characters in the middle", NewNormalizedString("axyb"),
 		func(r rune) bool { return r < 'x' },
 		NormalizedString{
 			original:   "axyb",
 			normalized: "ab",
 			alignments: []AlignmentRange{{0, 1}, {3, 4}},
+		})
+
+	run("remove characters in various places", NewNormalizedString("awxbycz"),
+		func(r rune) bool { return r < 'w' },
+		NormalizedString{
+			original:   "awxbycz",
+			normalized: "abc",
+			alignments: []AlignmentRange{{0, 1}, {3, 4}, {5, 6}},
 		})
 
 	run("filter non-ASCII runes", NewNormalizedString("süß!"),
