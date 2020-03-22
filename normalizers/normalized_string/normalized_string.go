@@ -89,24 +89,13 @@ func (ns *NormalizedString) GetRange(nsRange NSRange) (string, bool) {
 	return getRangeOf(ns.normalized, start, end)
 }
 
-// Return a range of the original string, using a range from the
-// normalized string
-func (ns *NormalizedString) GetRangeOriginal(start, end int) (string, bool) {
-	originalStart, originalEnd := ns.GetOriginalOffsets(start, end)
-	if originalStart == -1 {
+// Returns a range of the original string.
+func (ns *NormalizedString) GetRangeOriginal(nsRange NSRange) (string, bool) {
+	start, end, ok := nsRange.originalRange(ns)
+	if !ok {
 		return "", false
 	}
-	return getRangeOf(ns.original, originalStart, originalEnd)
-}
-
-// Returns the `(start, end)` range of the original string corresponding to the
-// received range on the normalized string.
-// Returns `(-1, -1)` if out of bounds.
-func (ns *NormalizedString) GetOriginalOffsets(start, end int) (int, int) {
-	if end <= start || start < 0 || end > len(ns.alignments) {
-		return -1, -1
-	}
-	return ns.alignments[start].start, ns.alignments[end-1].end
+	return getRangeOf(ns.original, start, end)
 }
 
 // See `NormalizedString.Transform`.

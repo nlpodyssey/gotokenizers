@@ -495,84 +495,107 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 	run := func(
 		name string,
 		ns NormalizedString,
-		start, end int,
+		nsRange NSRange,
 		expStr string,
 		expFlag bool,
 	) {
 		t.Run(name, func(t *testing.T) {
-			s, f := ns.GetRangeOriginal(start, end)
-			if s != expStr || f != expFlag {
+			if s, f := ns.GetRangeOriginal(nsRange); s != expStr || f != expFlag {
 				t.Errorf("Expected (%#v, %v), but got (%#v, %v)",
 					expStr, expFlag, s, f)
 			}
 		})
 	}
 
-	ns := NormalizedString{
-		original:   "süß",
-		normalized: "Foo süß bar",
-		alignments: []AlignmentRange{
-			{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 1}, {1, 2},
-			{2, 3}, {3, 3}, {3, 3}, {3, 3}, {3, 3},
-		},
+	runOriginal := func(
+		name string,
+		ns NormalizedString,
+		start, end int,
+		expStr string,
+		expFlag bool,
+	) {
+		nsRange := NewNSOriginalRange(start, end)
+		run(fmt.Sprintf("NSOriginalRange | %s", name),
+			ns, &nsRange, expStr, expFlag)
 	}
 
-	run("blank result with start > end", ns, 3, 2, "", false)
-	run("blank result with start = end", ns, 3, 3, "", false)
-	run("blank result with start < 0", ns, -1, 3, "", false)
-	run("blank result with start > runes length", ns, 1, 12, "", false)
-	run("blank result starting from a prepended range", ns, 0, 4, "", false)
-	run("blank result starting from an appended range", ns, 7, 11, "", false)
-	run("valid result with partially mapped left-most range",
-		ns, 0, 5, "s", true)
-	run("valid result with partially mapped right-most range",
-		ns, 6, 11, "ß", true)
-	run("valid result with completely mapped range", ns, 4, 7, "süß", true)
-	run("valid result with full string range", ns, 0, 11, "süß", true)
-
-	ns = NormalizedString{
-		original:   "süß",
-		normalized: "süß",
-		alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
+	runNormalized := func(
+		name string,
+		ns NormalizedString,
+		start, end int,
+		expStr string,
+		expFlag bool,
+	) {
+		nsRange := NewNSNormalizedRange(start, end)
+		run(fmt.Sprintf("NSNormalizedRange | %s", name),
+			ns, &nsRange, expStr, expFlag)
 	}
 
-	run("unmodified string - valid result with a left-most range",
-		ns, 0, 1, "s", true)
-	run("unmodified string - valid result with a right-most range",
-		ns, 2, 3, "ß", true)
-	run("unmodified string - valid result with a range in the middle",
-		ns, 1, 2, "ü", true)
-	run("unmodified string - valid result with full string range",
-		ns, 0, 3, "süß", true)
-
-	ns = NormalizedString{
-		original:   "süß",
-		normalized: "sß",
-		alignments: []AlignmentRange{{0, 2}, {2, 3}},
+	runBoth := func(
+		name string,
+		ns NormalizedString,
+		start, end int,
+		expStr string,
+		expFlag bool,
+	) {
+		runOriginal(name, ns, start, end, expStr, expFlag)
+		runNormalized(name, ns, start, end, expStr, expFlag)
 	}
 
-	run("string with deletion - valid result with a left-most range",
-		ns, 0, 1, "sü", true)
-	run("string with deletion - valid result with a right-most range",
-		ns, 1, 2, "ß", true)
-	run("string with deletion - valid result with full string range",
-		ns, 0, 2, "süß", true)
+	ns := NewNormalizedString("")
+	runBoth("empty string, empty range", ns, 0, 0, "", false)
+	runBoth("empty string, start > end", ns, 1, 0, "", false)
+	runBoth("empty string, start < 0", ns, -1, 0, "", false)
+	runBoth("empty string, end > 0", ns, 0, 1, "", false)
 
-	run("blank result with an empty normalized string",
+	ns = NewNormalizedString("Bar")
+	runBoth("no transformations, empty range", ns, 0, 0, "", false)
+	runBoth("no transformations, start > end", ns, 1, 0, "", false)
+	runBoth("no transformations, start < 0", ns, -1, 0, "", false)
+	runBoth("no transformations, end > len", ns, 0, 4, "", false)
+	runBoth("no transformations, leftmost range", ns, 0, 2, "Ba", true)
+	runBoth("no transformations, rightmost", ns, 1, 3, "ar", true)
+	runBoth("no transformations, middle range", ns, 1, 2, "a", true)
+	runBoth("no transformations, full string range", ns, 0, 3, "Bar", true)
+
+	runOriginal("can get deleted characters",
 		NormalizedString{
-			original:   "foo",
+			original:   "Bar",
 			normalized: "",
 			alignments: []AlignmentRange{},
 		},
-		0, 0, "", false)
+		1, 2, "a", true,
+	)
 
-	run("blank result with an empty original string",
+	runNormalized("cannot get newly inserted characters",
 		NormalizedString{
 			original:   "",
-			normalized: "foo",
+			normalized: "Bar",
 			alignments: []AlignmentRange{{0, 0}, {0, 0}, {0, 0}},
 		},
-		0, 3, "", false)
+		1, 2, "", false,
+	)
+
+	runNormalized("range including some deleted characters",
+		NormalizedString{
+			original:   "Bar Qux",
+			normalized: "Baux",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {5, 6}, {6, 7}},
+		},
+		1, 3, "ar Qu", true,
+	)
+
+	runNormalized("range including some added characters",
+		NormalizedString{
+			original:   "abcd",
+			normalized: "abXYcd",
+			// FIXME: should be {0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4}
+			alignments: []AlignmentRange{
+				{0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {3, 4},
+			},
+		},
+		1, 5, "bc", true,
+	)
 }
 
 func TestNormalizedStringTransform(t *testing.T) {
