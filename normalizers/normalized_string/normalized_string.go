@@ -80,8 +80,12 @@ func (ns *NormalizedString) ConvertOffset(nsRange NSRange) (int, int, bool) {
 	return nsRange.convertOffset(ns)
 }
 
-// Returns a range of the normalized string (indexing on runes, not bytes)
-func (ns *NormalizedString) GetRange(start, end int) (string, bool) {
+// Returns a range of the normalized string.
+func (ns *NormalizedString) GetRange(nsRange NSRange) (string, bool) {
+	start, end, ok := nsRange.normalizedRange(ns)
+	if !ok {
+		return "", false
+	}
 	return getRangeOf(ns.normalized, start, end)
 }
 

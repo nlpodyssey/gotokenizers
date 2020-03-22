@@ -385,45 +385,110 @@ func TestNormalizedStringConvertOffsetFromNormalizedlRange(t *testing.T) {
 }
 
 func TestNormalizedStringGetRange(t *testing.T) {
-	run := func(name string,
+	run := func(
+		name string,
 		ns NormalizedString,
-		start, end int,
+		nsRange NSRange,
 		expStr string,
 		expFlag bool,
 	) {
 		t.Run(name, func(t *testing.T) {
-			if s, f := ns.GetRange(start, end); s != expStr || f != expFlag {
+			if s, f := ns.GetRange(nsRange); s != expStr || f != expFlag {
 				t.Errorf("Expected (%#v, %v), but got (%#v, %v)",
 					expStr, expFlag, s, f)
 			}
 		})
 	}
 
-	ns := NormalizedString{
-		original:   "",
-		normalized: "Foo süß bar",
-		alignments: []AlignmentRange{
-			{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},
-			{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},
-		},
+	runOriginal := func(
+		name string,
+		ns NormalizedString,
+		start, end int,
+		expStr string,
+		expFlag bool,
+	) {
+		nsRange := NewNSOriginalRange(start, end)
+		run(fmt.Sprintf("NSOriginalRange | %s", name),
+			ns, &nsRange, expStr, expFlag)
 	}
 
-	run("blank result with start < end", ns, 3, 2, "", false)
-	run("blank result with start = end", ns, 3, 3, "", false)
-	run("blank result with start < 0", ns, -1, 3, "", false)
-	run("blank result with start > runes length", ns, 1, 12, "", false)
-	run("valid result with a left-most range", ns, 0, 3, "Foo", true)
-	run("valid result with a right-most range", ns, 8, 11, "bar", true)
-	run("valid result with a range in the middle", ns, 4, 7, "süß", true)
-	run("valid result with full string range", ns, 0, 11, "Foo süß bar", true)
+	runNormalized := func(
+		name string,
+		ns NormalizedString,
+		start, end int,
+		expStr string,
+		expFlag bool,
+	) {
+		nsRange := NewNSNormalizedRange(start, end)
+		run(fmt.Sprintf("NSNormalizedRange | %s", name),
+			ns, &nsRange, expStr, expFlag)
+	}
 
-	run("blank result with an empty string",
+	runBoth := func(
+		name string,
+		ns NormalizedString,
+		start, end int,
+		expStr string,
+		expFlag bool,
+	) {
+		runOriginal(name, ns, start, end, expStr, expFlag)
+		runNormalized(name, ns, start, end, expStr, expFlag)
+	}
+
+	ns := NewNormalizedString("")
+	runBoth("empty string, empty range", ns, 0, 0, "", false)
+	runBoth("empty string, start > end", ns, 1, 0, "", false)
+	runBoth("empty string, start < 0", ns, -1, 0, "", false)
+	runBoth("empty string, end > 0", ns, 0, 1, "", false)
+
+	ns = NewNormalizedString("Bar")
+	runBoth("no transformations, empty range", ns, 0, 0, "", false)
+	runBoth("no transformations, start > end", ns, 1, 0, "", false)
+	runBoth("no transformations, start < 0", ns, -1, 0, "", false)
+	runBoth("no transformations, end > len", ns, 0, 4, "", false)
+	runBoth("no transformations, leftmost range", ns, 0, 2, "Ba", true)
+	runBoth("no transformations, rightmost", ns, 1, 3, "ar", true)
+	runBoth("no transformations, middle range", ns, 1, 2, "a", true)
+	runBoth("no transformations, full string range", ns, 0, 3, "Bar", true)
+
+	runNormalized("can get newly inserted characters",
 		NormalizedString{
-			original:   "foo",
+			original:   "",
+			normalized: "Bar",
+			alignments: []AlignmentRange{{0, 0}, {0, 0}, {0, 0}},
+		},
+		1, 2, "a", true,
+	)
+
+	runOriginal("cannot get deleted characters",
+		NormalizedString{
+			original:   "Bar",
 			normalized: "",
 			alignments: []AlignmentRange{},
 		},
-		0, 0, "", false)
+		1, 2, "", false,
+	)
+
+	runOriginal("range including some deleted characters",
+		NormalizedString{
+			original:   "Bar Qux",
+			normalized: "Baux",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {5, 6}, {6, 7}},
+		},
+		1, 6, "au", true,
+	)
+
+	runOriginal("range including some added characters",
+		NormalizedString{
+			original:   "abcd",
+			normalized: "abXYcd",
+			// FIXME: should be {0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4}
+			alignments: []AlignmentRange{
+				{0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {3, 4},
+			},
+		},
+		1, 3, "Yc", true, // FIXME: wrong! It must be "abXYx"
+	)
 }
 
 func TestNormalizedStringGetRangeOriginal(t *testing.T) {
@@ -452,8 +517,7 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 		},
 	}
 
-	run("blank result with start < end", ns, 3, 2, "", false)
-	run("blank result with start < end", ns, 3, 2, "", false)
+	run("blank result with start > end", ns, 3, 2, "", false)
 	run("blank result with start = end", ns, 3, 3, "", false)
 	run("blank result with start < 0", ns, -1, 3, "", false)
 	run("blank result with start > runes length", ns, 1, 12, "", false)
