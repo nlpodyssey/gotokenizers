@@ -5,6 +5,7 @@
 package normalized_string
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/saientist/gotokenizers/testing"
@@ -16,7 +17,7 @@ func TestNewNormalizedString(t *testing.T) {
 			NormalizedString{
 				original:   "",
 				normalized: "",
-				alignments: []NormalizedStringAlignment{},
+				alignments: []AlignmentRange{},
 			},
 		)
 	})
@@ -26,9 +27,7 @@ func TestNewNormalizedString(t *testing.T) {
 			NormalizedString{
 				original:   "Abc",
 				normalized: "Abc",
-				alignments: []NormalizedStringAlignment{
-					{0, 1}, {1, 2}, {2, 3},
-				},
+				alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
 			},
 		)
 	})
@@ -38,9 +37,7 @@ func TestNewNormalizedString(t *testing.T) {
 			NormalizedString{
 				original:   "Süß",
 				normalized: "Süß",
-				alignments: []NormalizedStringAlignment{
-					{0, 1}, {1, 2}, {2, 3},
-				},
+				alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
 			},
 		)
 	})
@@ -51,12 +48,12 @@ func TestNormalizedStringEqual(t *testing.T) {
 		a := NormalizedString{
 			original:   "a",
 			normalized: "ab",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 1}},
+			alignments: []AlignmentRange{{0, 1}, {1, 1}},
 		}
 		b := NormalizedString{
 			original:   "b",
 			normalized: "ab",
-			alignments: []NormalizedStringAlignment{{0, 0}, {0, 1}},
+			alignments: []AlignmentRange{{0, 0}, {0, 1}},
 		}
 		if !a.Equal(b) {
 			t.Fail()
@@ -67,12 +64,12 @@ func TestNormalizedStringEqual(t *testing.T) {
 		a := NormalizedString{
 			original:   "a",
 			normalized: "ab",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 1}},
+			alignments: []AlignmentRange{{0, 1}, {1, 1}},
 		}
 		b := NormalizedString{
 			original:   "a",
 			normalized: "az",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 1}},
+			alignments: []AlignmentRange{{0, 1}, {1, 1}},
 		}
 		if a.Equal(b) {
 			t.Fail()
@@ -85,7 +82,7 @@ func TestNormalizedStringLen(t *testing.T) {
 		ns := NormalizedString{
 			original:   "ab",
 			normalized: "",
-			alignments: []NormalizedStringAlignment{},
+			alignments: []AlignmentRange{},
 		}
 		AssertIntEqual(t, "Len()", ns.Len(), 0)
 	})
@@ -94,7 +91,7 @@ func TestNormalizedStringLen(t *testing.T) {
 		ns := NormalizedString{
 			original:   "a",
 			normalized: "ab",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 1}},
+			alignments: []AlignmentRange{{0, 1}, {1, 1}},
 		}
 		AssertIntEqual(t, "Len()", ns.Len(), 2)
 	})
@@ -104,7 +101,7 @@ func TestNormalizedStringLen(t *testing.T) {
 			ns := NormalizedString{
 				original:   "S",
 				normalized: "Süß",
-				alignments: []NormalizedStringAlignment{{0, 1}, {1, 1}, {1, 1}},
+				alignments: []AlignmentRange{{0, 1}, {1, 1}, {1, 1}},
 			}
 			AssertIntEqual(t, "Len()", ns.Len(), 3)
 		})
@@ -115,7 +112,7 @@ func TestNormalizedStringLenOriginal(t *testing.T) {
 		ns := NormalizedString{
 			original:   "",
 			normalized: "a",
-			alignments: []NormalizedStringAlignment{{0, 0}},
+			alignments: []AlignmentRange{{0, 0}},
 		}
 		AssertIntEqual(t, "LenOriginal()", ns.LenOriginal(), 0)
 	})
@@ -124,7 +121,7 @@ func TestNormalizedStringLenOriginal(t *testing.T) {
 		ns := NormalizedString{
 			original:   "abc",
 			normalized: "",
-			alignments: []NormalizedStringAlignment{},
+			alignments: []AlignmentRange{},
 		}
 		AssertIntEqual(t, "LenOriginal()", ns.LenOriginal(), 3)
 	})
@@ -134,7 +131,7 @@ func TestNormalizedStringLenOriginal(t *testing.T) {
 			ns := NormalizedString{
 				original:   "Süß",
 				normalized: "",
-				alignments: []NormalizedStringAlignment{},
+				alignments: []AlignmentRange{},
 			}
 			AssertIntEqual(t, "LenOriginal()", ns.LenOriginal(), 3)
 		})
@@ -145,7 +142,7 @@ func TestNormalizedStringIsEmpty(t *testing.T) {
 		ns := NormalizedString{
 			original:   "abc",
 			normalized: "",
-			alignments: []NormalizedStringAlignment{},
+			alignments: []AlignmentRange{},
 		}
 		if !ns.IsEmpty() {
 			t.Fail()
@@ -156,7 +153,7 @@ func TestNormalizedStringIsEmpty(t *testing.T) {
 		ns := NormalizedString{
 			original:   "",
 			normalized: "a",
-			alignments: []NormalizedStringAlignment{{0, 0}},
+			alignments: []AlignmentRange{{0, 0}},
 		}
 		if ns.IsEmpty() {
 			t.Fail()
@@ -168,7 +165,7 @@ func TestNormalizedStringGet(t *testing.T) {
 	ns := NormalizedString{
 		original:   "a",
 		normalized: "ab",
-		alignments: []NormalizedStringAlignment{{0, 1}, {1, 1}},
+		alignments: []AlignmentRange{{0, 1}, {1, 1}},
 	}
 	AssertStringEqual(t, "Get()", ns.Get(), "ab")
 }
@@ -177,14 +174,218 @@ func TestNormalizedStringGetOriginal(t *testing.T) {
 	ns := NormalizedString{
 		original:   "a",
 		normalized: "ab",
-		alignments: []NormalizedStringAlignment{{0, 1}, {1, 1}},
+		alignments: []AlignmentRange{{0, 1}, {1, 1}},
 	}
 	AssertStringEqual(t, "GetOriginal()", ns.GetOriginal(), "a")
 }
 
-func TestNormalizedStringGetRange(t *testing.T) {
+func TestNormalizedStringConvertOffsetCommonCases(t *testing.T) {
 	run := func(
 		name string,
+		ns NormalizedString,
+		rangeStart, rangeEnd int,
+		expectedStart, expectedEnd int,
+		expectedFlag bool,
+	) {
+		t.Run(fmt.Sprintf("NSOriginalRange | %s", name), func(t *testing.T) {
+			r := NewNSOriginalRange(rangeStart, rangeEnd)
+			start, end, flag := ns.ConvertOffset(&r)
+			AssertIntEqual(t, "start", start, expectedStart)
+			AssertIntEqual(t, "end", end, expectedEnd)
+			AssertBoolEqual(t, "flag", flag, expectedFlag)
+		})
+
+		t.Run(fmt.Sprintf("NSNormalizedRange | %s", name), func(t *testing.T) {
+			r := NewNSNormalizedRange(rangeStart, rangeEnd)
+			start, end, flag := ns.ConvertOffset(&r)
+			AssertIntEqual(t, "start", start, expectedStart)
+			AssertIntEqual(t, "end", end, expectedEnd)
+			AssertBoolEqual(t, "flag", flag, expectedFlag)
+		})
+	}
+
+	run("empty string, start < 0", NewNormalizedString(""), -1, 0, 0, 0, false)
+	run("empty string, end < start", NewNormalizedString(""), 1, 0, 0, 0, false)
+	run("empty string, end > 0", NewNormalizedString(""), 0, 1, 0, 0, false)
+	run("start < 0", NewNormalizedString("Bar"), -1, 0, 0, 0, false)
+	run("end < start", NewNormalizedString("Bar"), 1, 0, 0, 0, false)
+	run("end > len", NewNormalizedString("Bar"), 0, 4, 0, 0, false)
+
+	run("empty string, empty range", NewNormalizedString(""), 0, 0, 0, 0, true)
+	run("one rune", NewNormalizedString("Bar"), 1, 2, 1, 2, true)
+	run("more runes", NewNormalizedString("Bar Baz"), 2, 5, 2, 5, true)
+	run("runes at beginning", NewNormalizedString("Bar"), 0, 2, 0, 2, true)
+	run("runes at end", NewNormalizedString("Bar"), 1, 3, 1, 3, true)
+	run("full string range", NewNormalizedString("Bar"), 0, 3, 0, 3, true)
+}
+
+func TestNormalizedStringConvertOffsetFromOriginalRange(t *testing.T) {
+	run := func(
+		name string,
+		ns NormalizedString,
+		rangeStart, rangeEnd int,
+		expectedStart, expectedEnd int,
+		expectedFlag bool,
+	) {
+		t.Run(name, func(t *testing.T) {
+			r := NewNSOriginalRange(rangeStart, rangeEnd)
+			start, end, flag := ns.ConvertOffset(&r)
+			AssertIntEqual(t, "start", start, expectedStart)
+			AssertIntEqual(t, "end", end, expectedEnd)
+			AssertBoolEqual(t, "flag", flag, expectedFlag)
+		})
+	}
+
+	run("chars removed at the beginning",
+		NormalizedString{
+			original:   "Bar",
+			normalized: "ar",
+			alignments: []AlignmentRange{{1, 2}, {2, 3}},
+		},
+		0, 2, 0, 1, true)
+
+	run("chars removed at the end",
+		NormalizedString{
+			original:   "Bar",
+			normalized: "Ba",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}},
+		},
+		2, 3, 1, 2, true)
+
+	run("chars removed in the middle",
+		NormalizedString{
+			original:   "Bar Qux",
+			normalized: "Baux",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {5, 6}, {6, 7}},
+		},
+		1, 6, 1, 3, true)
+
+	run("chars added at the beginning",
+		NormalizedString{
+			original:   "Bar",
+			normalized: "xyBar",
+			alignments: []AlignmentRange{
+				{0, 0}, {0, 0}, {0, 1}, {1, 2}, {2, 3},
+			},
+		},
+		0, 2, 2, 4, true)
+
+	run("chars added at the end",
+		NormalizedString{
+			original:   "Bar",
+			normalized: "BarXy",
+			alignments: []AlignmentRange{
+				{0, 1}, {1, 2}, {2, 3}, {3, 3}, {3, 3},
+			},
+		},
+		1, 3, 1, 5, true) // FIXME: it should be be 1, 3
+
+	run("chars added in the middle",
+		NormalizedString{
+			original:   "abcd",
+			normalized: "abXYcd",
+			// FIXME: should be {0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4}
+			alignments: []AlignmentRange{
+				{0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {3, 4},
+			},
+		},
+		1, 3, 3, 5, true) // FIXME: should be 2, 5
+
+	run("range of removed chars only",
+		NormalizedString{
+			original:   "Bar Qux",
+			normalized: "Baux",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {5, 6}, {6, 7}},
+		},
+		2, 5, 1, 2, true) // FIXME: should be (0, 0) or (2, 2) ...or even false?
+}
+
+func TestNormalizedStringConvertOffsetFromNormalizedlRange(t *testing.T) {
+	run := func(
+		name string,
+		ns NormalizedString,
+		rangeStart, rangeEnd int,
+		expectedStart, expectedEnd int,
+		expectedFlag bool,
+	) {
+		t.Run(name, func(t *testing.T) {
+			r := NewNSNormalizedRange(rangeStart, rangeEnd)
+			start, end, flag := ns.ConvertOffset(&r)
+			AssertIntEqual(t, "start", start, expectedStart)
+			AssertIntEqual(t, "end", end, expectedEnd)
+			AssertBoolEqual(t, "flag", flag, expectedFlag)
+		})
+	}
+
+	run("chars removed at the beginning",
+		NormalizedString{
+			original:   "Bar",
+			normalized: "ar",
+			alignments: []AlignmentRange{{1, 2}, {2, 3}},
+		},
+		0, 2, 1, 3, true)
+
+	run("chars removed at the end",
+		NormalizedString{
+			original:   "Bar",
+			normalized: "Ba",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}},
+		},
+		0, 2, 0, 2, true)
+
+	run("chars removed in the middle",
+		NormalizedString{
+			original:   "Bar Qux",
+			normalized: "Baux",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {5, 6}, {6, 7}},
+		},
+		1, 3, 1, 6, true)
+
+	run("chars added at the beginning",
+		NormalizedString{
+			original:   "Bar",
+			normalized: "xyBar",
+			alignments: []AlignmentRange{
+				{0, 0}, {0, 0}, {0, 1}, {1, 2}, {2, 3},
+			},
+		},
+		0, 3, 0, 1, true)
+
+	run("chars added at the end",
+		NormalizedString{
+			original:   "Bar",
+			normalized: "BarXy",
+			alignments: []AlignmentRange{
+				{0, 1}, {1, 2}, {2, 3}, {3, 3}, {3, 3},
+			},
+		},
+		2, 4, 2, 3, true)
+
+	run("chars added in the middle",
+		NormalizedString{
+			original:   "abcd",
+			normalized: "abXYcd",
+			// FIXME: should be {0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4}
+			alignments: []AlignmentRange{
+				{0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {3, 4},
+			},
+		},
+		1, 5, 1, 3, true)
+
+	run("range of new chars only",
+		NormalizedString{
+			original:   "abcd",
+			normalized: "abXYcd",
+			// FIXME: should be {0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4}
+			alignments: []AlignmentRange{
+				{0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {3, 4},
+			},
+		},
+		2, 4, 1, 2, true) // FIXME: should be (0, 0) or (2, 2) ...or even false?
+}
+
+func TestNormalizedStringGetRange(t *testing.T) {
+	run := func(name string,
 		ns NormalizedString,
 		start, end int,
 		expStr string,
@@ -201,7 +402,7 @@ func TestNormalizedStringGetRange(t *testing.T) {
 	ns := NormalizedString{
 		original:   "",
 		normalized: "Foo süß bar",
-		alignments: []NormalizedStringAlignment{
+		alignments: []AlignmentRange{
 			{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},
 			{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},
 		},
@@ -216,13 +417,13 @@ func TestNormalizedStringGetRange(t *testing.T) {
 	run("valid result with a range in the middle", ns, 4, 7, "süß", true)
 	run("valid result with full string range", ns, 0, 11, "Foo süß bar", true)
 
-	ns = NormalizedString{
-		original:   "foo",
-		normalized: "",
-		alignments: []NormalizedStringAlignment{},
-	}
-
-	run("blank result with an empty string", ns, 0, 0, "", false)
+	run("blank result with an empty string",
+		NormalizedString{
+			original:   "foo",
+			normalized: "",
+			alignments: []AlignmentRange{},
+		},
+		0, 0, "", false)
 }
 
 func TestNormalizedStringGetRangeOriginal(t *testing.T) {
@@ -245,7 +446,7 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 	ns := NormalizedString{
 		original:   "süß",
 		normalized: "Foo süß bar",
-		alignments: []NormalizedStringAlignment{
+		alignments: []AlignmentRange{
 			{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 1}, {1, 2},
 			{2, 3}, {3, 3}, {3, 3}, {3, 3}, {3, 3},
 		},
@@ -268,7 +469,7 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 	ns = NormalizedString{
 		original:   "süß",
 		normalized: "süß",
-		alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 3}},
+		alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
 	}
 
 	run("unmodified string - valid result with a left-most range",
@@ -283,7 +484,7 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 	ns = NormalizedString{
 		original:   "süß",
 		normalized: "sß",
-		alignments: []NormalizedStringAlignment{{0, 2}, {2, 3}},
+		alignments: []AlignmentRange{{0, 2}, {2, 3}},
 	}
 
 	run("string with deletion - valid result with a left-most range",
@@ -293,21 +494,21 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 	run("string with deletion - valid result with full string range",
 		ns, 0, 2, "süß", true)
 
-	ns = NormalizedString{
-		original:   "foo",
-		normalized: "",
-		alignments: []NormalizedStringAlignment{},
-	}
+	run("blank result with an empty normalized string",
+		NormalizedString{
+			original:   "foo",
+			normalized: "",
+			alignments: []AlignmentRange{},
+		},
+		0, 0, "", false)
 
-	run("blank result with an empty normalized string", ns, 0, 0, "", false)
-
-	ns = NormalizedString{
-		original:   "",
-		normalized: "foo",
-		alignments: []NormalizedStringAlignment{{0, 0}, {0, 0}, {0, 0}},
-	}
-
-	run("blank result with an empty original string", ns, 0, 3, "", false)
+	run("blank result with an empty original string",
+		NormalizedString{
+			original:   "",
+			normalized: "foo",
+			alignments: []AlignmentRange{{0, 0}, {0, 0}, {0, 0}},
+		},
+		0, 3, "", false)
 }
 
 func TestNormalizedStringTransform(t *testing.T) {
@@ -329,7 +530,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "",
 			normalized: "",
-			alignments: []NormalizedStringAlignment{},
+			alignments: []AlignmentRange{},
 		})
 
 	run("non-empty string, empty changes", NewNormalizedString("Bar"),
@@ -337,7 +538,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "Bar",
 			normalized: "",
-			alignments: []NormalizedStringAlignment{},
+			alignments: []AlignmentRange{},
 		})
 
 	run("non-empty string, empty changes, offset", NewNormalizedString("Bar"),
@@ -345,24 +546,24 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "Bar",
 			normalized: "",
-			alignments: []NormalizedStringAlignment{},
+			alignments: []AlignmentRange{},
 		})
 
-	run("1:1 mapping (all Changes = 0)", NewNormalizedString("Bär"),
+	run("1:1 mapping (all changes = 0)", NewNormalizedString("Bär"),
 		[]RuneChanges{{'S', 0}, {'ü', 0}, {'ß', 0}}, 0,
 		NormalizedString{
 			original:   "Bär",
 			normalized: "Süß",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 3}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
 		})
 
-	run("1:1 mapping (all Changes == 0), with offset",
+	run("1:1 mapping (all changes == 0), with offset",
 		NewNormalizedString("Bär"),
 		[]RuneChanges{{'ü', 0}, {'ß', 0}}, 1,
 		NormalizedString{
 			original:   "Bär",
 			normalized: "üß",
-			alignments: []NormalizedStringAlignment{{0, 2}, {2, 3}},
+			alignments: []AlignmentRange{{0, 2}, {2, 3}},
 		})
 
 	run("adding a rune and deleting the rest (only one Change = 1)",
@@ -371,7 +572,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "Bar",
 			normalized: "x",
-			alignments: []NormalizedStringAlignment{{0, 0}},
+			alignments: []AlignmentRange{{0, 0}},
 		})
 
 	run("adding a rune at the beginning", NewNormalizedString("x"),
@@ -379,7 +580,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "x",
 			normalized: "ax",
-			alignments: []NormalizedStringAlignment{{0, 0}, {0, 1}},
+			alignments: []AlignmentRange{{0, 0}, {0, 1}},
 		})
 
 	run("adding more runes at the beginning", NewNormalizedString("x"),
@@ -387,7 +588,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "x",
 			normalized: "abx",
-			alignments: []NormalizedStringAlignment{{0, 0}, {0, 0}, {0, 1}},
+			alignments: []AlignmentRange{{0, 0}, {0, 0}, {0, 1}},
 		})
 
 	run("adding a rune at the end", NewNormalizedString("x"),
@@ -395,8 +596,8 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "x",
 			normalized: "xa",
-			alignments: []NormalizedStringAlignment{
-				// FIXME: shouldn't be {0, 1}, {1, 1}?
+			alignments: []AlignmentRange{
+				// FIXME: should be {0, 1}, {1, 1}?
 				{0, 1}, {0, 1},
 			},
 		})
@@ -406,18 +607,18 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "x",
 			normalized: "xab",
-			alignments: []NormalizedStringAlignment{
+			alignments: []AlignmentRange{
 				// FIXME: shouldn't be {0, 1}, {1, 1}, {1, 1}?
 				{0, 1}, {0, 1}, {0, 1},
 			},
 		})
 
-	run("adding runes at begin and end", NewNormalizedString("x"),
+	run("adding runes at beginning and end", NewNormalizedString("x"),
 		[]RuneChanges{{'a', 1}, {'x', 0}, {'b', 1}}, 0,
 		NormalizedString{
 			original:   "x",
 			normalized: "axb",
-			alignments: []NormalizedStringAlignment{
+			alignments: []AlignmentRange{
 				// FIXME: shouldn't be {0, 0}, {0, 1}, {1, 1}?
 				{0, 0}, {0, 1}, {0, 1},
 			},
@@ -428,7 +629,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "ab",
 			normalized: "axb",
-			alignments: []NormalizedStringAlignment{
+			alignments: []AlignmentRange{
 				// FIXME: shouldn't be {0, 1}, {1, 1}, {1, 2}?
 				{0, 1}, {0, 1}, {1, 2},
 			},
@@ -439,42 +640,42 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "ab",
 			normalized: "axyb",
-			alignments: []NormalizedStringAlignment{
+			alignments: []AlignmentRange{
 				// FIXME: shouldn't be {0, 1}, {1, 1}, {1, 1}, {1, 2}?
 				{0, 1}, {0, 1}, {0, 1}, {1, 2},
 			},
 		})
 
-	run("Change -1 at the beginning", NewNormalizedString("Bar"),
+	run("change -1 at the beginning", NewNormalizedString("Bar"),
 		[]RuneChanges{{'Q', -1}, {'r', 0}}, 0,
 		NormalizedString{
 			original:   "Bar",
 			normalized: "Qr",
-			alignments: []NormalizedStringAlignment{{0, 2}, {2, 3}},
+			alignments: []AlignmentRange{{0, 2}, {2, 3}},
 		})
 
-	run("Change -1 at the end", NewNormalizedString("Bar"),
+	run("change -1 at the end", NewNormalizedString("Bar"),
 		[]RuneChanges{{'B', 0}, {'x', -1}}, 0,
 		NormalizedString{
 			original:   "Bar",
 			normalized: "Bx",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 3}},
+			alignments: []AlignmentRange{{0, 1}, {1, 3}},
 		})
 
-	run("Change -1 in the middle", NewNormalizedString("abcd"),
+	run("change -1 in the middle", NewNormalizedString("abcd"),
 		[]RuneChanges{{'a', 0}, {'x', -1}, {'d', 0}}, 0,
 		NormalizedString{
 			original:   "abcd",
 			normalized: "axd",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 3}, {3, 4}},
+			alignments: []AlignmentRange{{0, 1}, {1, 3}, {3, 4}},
 		})
 
-	run("Change -2 in the middle", NewNormalizedString("abcde"),
+	run("change -2 in the middle", NewNormalizedString("abcde"),
 		[]RuneChanges{{'a', 0}, {'x', -2}, {'e', 0}}, 0,
 		NormalizedString{
 			original:   "abcde",
 			normalized: "axe",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 4}, {4, 5}},
+			alignments: []AlignmentRange{{0, 1}, {1, 4}, {4, 5}},
 		})
 }
 
@@ -496,7 +697,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "",
 			normalized: "",
-			alignments: []NormalizedStringAlignment{},
+			alignments: []AlignmentRange{},
 		})
 
 	run("filter all characters true", NewNormalizedString("Bar"),
@@ -504,7 +705,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "Bar",
 			normalized: "Bar",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 3}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
 		})
 
 	run("filter all characters false", NewNormalizedString("Bar"),
@@ -512,7 +713,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "Bar",
 			normalized: "",
-			alignments: []NormalizedStringAlignment{},
+			alignments: []AlignmentRange{},
 		})
 
 	run("filter one character at the beginning", NewNormalizedString("abcd"),
@@ -520,7 +721,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "abcd",
 			normalized: "bcd",
-			alignments: []NormalizedStringAlignment{{0, 2}, {2, 3}, {3, 4}},
+			alignments: []AlignmentRange{{0, 2}, {2, 3}, {3, 4}},
 		})
 
 	run("filter more characters at the beginning", NewNormalizedString("abcde"),
@@ -528,7 +729,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "abcde",
 			normalized: "cde",
-			alignments: []NormalizedStringAlignment{{0, 3}, {3, 4}, {4, 5}},
+			alignments: []AlignmentRange{{0, 3}, {3, 4}, {4, 5}},
 		})
 
 	run("filter one character at the end", NewNormalizedString("abcd"),
@@ -536,7 +737,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "abcd",
 			normalized: "abc",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 4}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 4}},
 		})
 
 	run("filter more characters at the end", NewNormalizedString("abcde"),
@@ -544,7 +745,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "abcde",
 			normalized: "abc",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 5}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 5}},
 		})
 
 	run("filter one character in the middle", NewNormalizedString("axb"),
@@ -552,7 +753,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "axb",
 			normalized: "ab",
-			alignments: []NormalizedStringAlignment{{0, 2}, {2, 3}},
+			alignments: []AlignmentRange{{0, 2}, {2, 3}},
 		})
 
 	run("filter more characters in the middle", NewNormalizedString("axyb"),
@@ -560,7 +761,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "axyb",
 			normalized: "ab",
-			alignments: []NormalizedStringAlignment{{0, 3}, {3, 4}},
+			alignments: []AlignmentRange{{0, 3}, {3, 4}},
 		})
 
 	run("filter non-ASCII runes", NewNormalizedString("süß!"),
@@ -568,7 +769,7 @@ func TestNormalizedStringFilter(t *testing.T) {
 		NormalizedString{
 			original:   "süß!",
 			normalized: "s!",
-			alignments: []NormalizedStringAlignment{{0, 3}, {3, 4}},
+			alignments: []AlignmentRange{{0, 3}, {3, 4}},
 		})
 }
 
@@ -589,35 +790,35 @@ func TestNormalizedStringPrepend(t *testing.T) {
 		NormalizedString{
 			original:   "",
 			normalized: "",
-			alignments: []NormalizedStringAlignment{},
+			alignments: []AlignmentRange{},
 		})
 
 	run("prepend empty string ", NewNormalizedString("ab"), "",
 		NormalizedString{
 			original:   "ab",
 			normalized: "ab",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}},
 		})
 
 	run("prepend to empty string ", NewNormalizedString(""), "ab",
 		NormalizedString{
 			original:   "",
 			normalized: "ab",
-			alignments: []NormalizedStringAlignment{{0, 0}, {0, 0}},
+			alignments: []AlignmentRange{{0, 0}, {0, 0}},
 		})
 
 	run("prepend one rune", NewNormalizedString("ab"), "x",
 		NormalizedString{
 			original:   "ab",
 			normalized: "xab",
-			alignments: []NormalizedStringAlignment{{0, 0}, {0, 1}, {1, 2}},
+			alignments: []AlignmentRange{{0, 0}, {0, 1}, {1, 2}},
 		})
 
 	run("prepend more runes", NewNormalizedString("ab"), "xy",
 		NormalizedString{
 			original:   "ab",
 			normalized: "xyab",
-			alignments: []NormalizedStringAlignment{
+			alignments: []AlignmentRange{
 				{0, 0}, {0, 0}, {0, 1}, {1, 2},
 			},
 		})
@@ -626,7 +827,7 @@ func TestNormalizedStringPrepend(t *testing.T) {
 		NormalizedString{
 			original:   "äö",
 			normalized: "süßäö",
-			alignments: []NormalizedStringAlignment{
+			alignments: []AlignmentRange{
 				{0, 0}, {0, 0}, {0, 0}, {0, 1}, {1, 2},
 			},
 		})
@@ -649,35 +850,35 @@ func TestNormalizedStringAppend(t *testing.T) {
 		NormalizedString{
 			original:   "",
 			normalized: "",
-			alignments: []NormalizedStringAlignment{},
+			alignments: []AlignmentRange{},
 		})
 
 	run("append empty string ", NewNormalizedString("ab"), "",
 		NormalizedString{
 			original:   "ab",
 			normalized: "ab",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}},
 		})
 
 	run("append to empty string ", NewNormalizedString(""), "ab",
 		NormalizedString{
 			original:   "",
 			normalized: "ab",
-			alignments: []NormalizedStringAlignment{{0, 0}, {0, 0}},
+			alignments: []AlignmentRange{{0, 0}, {0, 0}},
 		})
 
 	run("append one rune", NewNormalizedString("ab"), "x",
 		NormalizedString{
 			original:   "ab",
 			normalized: "abx",
-			alignments: []NormalizedStringAlignment{{0, 1}, {1, 2}, {2, 2}},
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 2}},
 		})
 
 	run("append more runes", NewNormalizedString("ab"), "xy",
 		NormalizedString{
 			original:   "ab",
 			normalized: "abxy",
-			alignments: []NormalizedStringAlignment{
+			alignments: []AlignmentRange{
 				{0, 1}, {1, 2}, {2, 2}, {2, 2},
 			},
 		})
@@ -686,40 +887,105 @@ func TestNormalizedStringAppend(t *testing.T) {
 		NormalizedString{
 			original:   "äö",
 			normalized: "äösüß",
-			alignments: []NormalizedStringAlignment{
+			alignments: []AlignmentRange{
 				{0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 2},
 			},
 		})
 }
 
+func TestNormalizedStringMap(t *testing.T) {
+	ns := NewNormalizedString("abc")
+
+	ns.Map(func(r rune) rune { return r + 3 })
+
+	assertNormalizedStringEqual(t, ns, NormalizedString{
+		original:   "abc",
+		normalized: "def",
+		alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
+	})
+}
+
+func TestNormalizedStringForEach(t *testing.T) {
+	ns := NewNormalizedString("abc")
+
+	visitedRunes := make([]rune, 0, 3)
+	ns.ForEach(func(r rune) { visitedRunes = append(visitedRunes, r) })
+
+	AssertRuneSliceEqual(t, "visited runes", visitedRunes, []rune{'a', 'b', 'c'})
+}
+
+func TestNormalizedStringLowercase(t *testing.T) {
+	run := func(s string, expected NormalizedString) {
+		t.Run(fmt.Sprintf("%#v", s), func(t *testing.T) {
+			ns := NewNormalizedString(s)
+			ns.Lowercase()
+			assertNormalizedStringEqual(t, ns, expected)
+		})
+	}
+
+	run("", NormalizedString{
+		original:   "",
+		normalized: "",
+		alignments: []AlignmentRange{},
+	})
+
+	run("AË", NormalizedString{
+		original:   "AË",
+		normalized: "aë",
+		alignments: []AlignmentRange{{0, 1}, {1, 2}},
+	})
+}
+
+func TestNormalizedStringUppercase(t *testing.T) {
+	run := func(s string, expected NormalizedString) {
+		t.Run(fmt.Sprintf("%#v", s), func(t *testing.T) {
+			ns := NewNormalizedString(s)
+			ns.Uppercase()
+			assertNormalizedStringEqual(t, ns, expected)
+		})
+	}
+
+	run("", NormalizedString{
+		original:   "",
+		normalized: "",
+		alignments: []AlignmentRange{},
+	})
+
+	run("aë", NormalizedString{
+		original:   "aë",
+		normalized: "AË",
+		alignments: []AlignmentRange{{0, 1}, {1, 2}},
+	})
+}
+
 func TestNormalizedStringAlignmentEqual(t *testing.T) {
 	t.Run("true if `pos` and `changes` are the same", func(t *testing.T) {
-		a := NormalizedStringAlignment{pos: 1, changes: 2}
-		b := NormalizedStringAlignment{pos: 1, changes: 2}
+		a := AlignmentRange{start: 1, end: 2}
+		b := AlignmentRange{start: 1, end: 2}
 		if !a.Equal(b) {
 			t.Fail()
 		}
 	})
 
 	t.Run("false if `pos` differ", func(t *testing.T) {
-		a := NormalizedStringAlignment{pos: 1, changes: 2}
-		b := NormalizedStringAlignment{pos: 3, changes: 2}
+		a := AlignmentRange{start: 1, end: 2}
+		b := AlignmentRange{start: 3, end: 2}
 		if a.Equal(b) {
 			t.Fail()
 		}
 	})
 
 	t.Run("false if `changes` differ", func(t *testing.T) {
-		a := NormalizedStringAlignment{pos: 1, changes: 2}
-		b := NormalizedStringAlignment{pos: 1, changes: 3}
+		a := AlignmentRange{start: 1, end: 2}
+		b := AlignmentRange{start: 1, end: 3}
 		if a.Equal(b) {
 			t.Fail()
 		}
 	})
 
 	t.Run("false if `pos` and `changes` are different", func(t *testing.T) {
-		a := NormalizedStringAlignment{pos: 1, changes: 2}
-		b := NormalizedStringAlignment{pos: 3, changes: 4}
+		a := AlignmentRange{start: 1, end: 2}
+		b := AlignmentRange{start: 3, end: 4}
 		if a.Equal(b) {
 			t.Fail()
 		}
@@ -737,7 +1003,7 @@ func assertNormalizedStringEqual(
 
 func assertAlignmentsEqual(
 	t *testing.T,
-	actual, expected []NormalizedStringAlignment,
+	actual, expected []AlignmentRange,
 ) {
 	if len(expected) != len(actual) {
 		t.Errorf(

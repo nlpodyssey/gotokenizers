@@ -9,23 +9,33 @@ import (
 	"unicode"
 )
 
-// A normalized string takes care of keeping both versions of a `string`, and
-// provides necessary alignments to retrieve ranges of both strings.
+// A `NormalizedString` takes care of processing an "original" string to modify
+// it and obtain a "normalized" string. It keeps both version of the string,
+// alignments information between both and provides an interface to retrieve
+// ranges of each string, using offsets from any of them.
+//
+// It is possible to retrieve a part of the original string, by indexing it
+// with offsets from the normalized one, and the other way around too.
+// It is also possible to convert offsets from one referential to the other one
+// easily.
 type NormalizedString struct {
-	original   string
+	// The original version of the string, before any modification
+	original string
+
+	// The normalized version of the string, after all modifications
 	normalized string
 
-	// Mapping from the normalized string to the original one
-	alignments []NormalizedStringAlignment
+	// Mapping from normalized string to original one: (start, end) for each
+	// character (rune) of the normalized string
+	alignments []AlignmentRange
 }
 
 // A single alignment information for `NormalizedString`
-type NormalizedStringAlignment struct {
-	// The position in the modified string
-	pos int
-
-	// The number of insertions or deletions
-	changes int
+type AlignmentRange struct {
+	// Start rune position, inclusive
+	start int
+	// End rune position, exclusive
+	end int
 }
 
 func NewNormalizedString(s string) NormalizedString {
@@ -64,6 +74,12 @@ func (ns *NormalizedString) GetOriginal() string {
 	return ns.original
 }
 
+// Convert the given offsets range from one referential to the other one:
+// original to normalized, or normalized to original.
+func (ns *NormalizedString) ConvertOffset(nsRange NSRange) (int, int, bool) {
+	return nsRange.convertOffset(ns)
+}
+
 // Returns a range of the normalized string (indexing on runes, not bytes)
 func (ns *NormalizedString) GetRange(start, end int) (string, bool) {
 	return getRangeOf(ns.normalized, start, end)
@@ -86,7 +102,7 @@ func (ns *NormalizedString) GetOriginalOffsets(start, end int) (int, int) {
 	if end <= start || start < 0 || end > len(ns.alignments) {
 		return -1, -1
 	}
-	return ns.alignments[start].pos, ns.alignments[end-1].changes
+	return ns.alignments[start].start, ns.alignments[end-1].end
 }
 
 // See `NormalizedString.Transform`.
@@ -113,7 +129,7 @@ func (ns *NormalizedString) Transform(dest []RuneChanges, initialOffset int) {
 	remainingOffset := initialOffset
 
 	var strBuilder strings.Builder
-	alignments := make([]NormalizedStringAlignment, 0, len(ns.alignments))
+	alignments := make([]AlignmentRange, 0, len(ns.alignments))
 
 	for index, runeSizePair := range dest {
 		c := runeSizePair.Rune
@@ -140,15 +156,15 @@ func (ns *NormalizedString) Transform(dest []RuneChanges, initialOffset int) {
 			idx = index - uof
 		}
 
-		alignmentPair := NormalizedStringAlignment{-1, -1}
+		alignmentPair := AlignmentRange{-1, -1}
 
 		if changes > 0 {
 			// This is a newly inserted character, so we use the alignment
 			// from the previous one
 			offset += 1
 			if idx < 1 {
-				alignmentPair.pos = 0
-				alignmentPair.changes = 0
+				alignmentPair.start = 0
+				alignmentPair.end = 0
 			} else {
 				alignmentPair = ns.alignments[idx-1]
 			}
@@ -168,17 +184,17 @@ func (ns *NormalizedString) Transform(dest []RuneChanges, initialOffset int) {
 
 			for alIndex := idx + 1; alIndex <= lastIndex; alIndex++ {
 				al := ns.alignments[alIndex]
-				if al.pos < alignmentPair.pos {
-					alignmentPair.pos = al.pos
+				if al.start < alignmentPair.start {
+					alignmentPair.start = al.start
 				}
-				if al.changes < alignmentPair.pos {
-					alignmentPair.pos = al.changes
+				if al.end < alignmentPair.start {
+					alignmentPair.start = al.end
 				}
-				if al.pos > alignmentPair.changes {
-					alignmentPair.changes = al.pos
+				if al.start > alignmentPair.end {
+					alignmentPair.end = al.start
 				}
-				if al.changes > alignmentPair.changes {
-					alignmentPair.changes = al.changes
+				if al.end > alignmentPair.end {
+					alignmentPair.end = al.end
 				}
 			}
 		}
@@ -186,7 +202,7 @@ func (ns *NormalizedString) Transform(dest []RuneChanges, initialOffset int) {
 		// Then we keep only the char for string reconstruction
 		strBuilder.WriteRune(c)
 
-		if alignmentPair.pos == -1 {
+		if alignmentPair.start == -1 {
 			// TODO: is this really possible??
 			panic("Bad alignement in NormalizedString.Transform")
 		}
@@ -247,7 +263,7 @@ func (ns *NormalizedString) Filter(filter func(rune) bool) {
 func (ns *NormalizedString) Prepend(s string) {
 	ns.normalized = s + ns.normalized
 	runes := []rune(s)
-	alignments := make([]NormalizedStringAlignment, len(runes))
+	alignments := make([]AlignmentRange, len(runes))
 	// By default, all the new alignments have already {pos: 0, changes: 0}
 	ns.alignments = append(alignments, ns.alignments...)
 }
@@ -255,13 +271,13 @@ func (ns *NormalizedString) Prepend(s string) {
 func (ns *NormalizedString) Append(s string) {
 	ns.normalized += s
 
-	lastOffset := NormalizedStringAlignment{} // {pos: 0, changes: 0}
+	lastOffset := AlignmentRange{} // {pos: 0, changes: 0}
 	alignmentsLen := len(ns.alignments)
 	if alignmentsLen > 0 {
 		lastAlignment := ns.alignments[alignmentsLen-1]
-		lastOffset = NormalizedStringAlignment{
-			pos:     lastAlignment.changes,
-			changes: lastAlignment.changes,
+		lastOffset = AlignmentRange{
+			start: lastAlignment.end,
+			end:   lastAlignment.end,
 		}
 	}
 
@@ -369,7 +385,7 @@ func (ns *NormalizedString) SplitOff(at int) NormalizedString {
 	originalAt := 0
 	alignmentsLen := len(ns.alignments)
 	if alignmentsLen > 0 {
-		originalAt = ns.alignments[alignmentsLen-1].changes
+		originalAt = ns.alignments[alignmentsLen-1].end
 	}
 
 	originalRunes := []rune(ns.original)
@@ -391,26 +407,26 @@ func (ns *NormalizedString) MergeWith(other NormalizedString) {
 
 	nsLen := ns.Len()
 	for _, alignment := range other.alignments {
-		ns.alignments = append(ns.alignments, NormalizedStringAlignment{
-			pos:     alignment.pos + nsLen,
-			changes: alignment.changes + nsLen,
+		ns.alignments = append(ns.alignments, AlignmentRange{
+			start: alignment.start + nsLen,
+			end:   alignment.end + nsLen,
 		})
 	}
 }
 
-func (nsa *NormalizedStringAlignment) Equal(
-	other NormalizedStringAlignment,
+func (nsa *AlignmentRange) Equal(
+	other AlignmentRange,
 ) bool {
-	return nsa.pos == other.pos && nsa.changes == other.changes
+	return nsa.start == other.start && nsa.end == other.end
 }
 
-func newAlignments(s string) []NormalizedStringAlignment {
-	alignments := make([]NormalizedStringAlignment, len([]rune(s)))
+func newAlignments(s string) []AlignmentRange {
+	alignments := make([]AlignmentRange, len([]rune(s)))
 
 	for index := range alignments {
-		alignments[index] = NormalizedStringAlignment{
-			pos:     index,
-			changes: index + 1,
+		alignments[index] = AlignmentRange{
+			start: index,
+			end:   index + 1,
 		}
 	}
 
