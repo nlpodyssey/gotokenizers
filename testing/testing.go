@@ -43,3 +43,12 @@ func AssertRuneSliceEqual(t *testing.T, what string, actual, expected []rune) {
 		}
 	}
 }
+
+func AssertPanic(t *testing.T, what string, callback func()) {
+	defer func() {
+		if recover() == nil {
+			t.Errorf("%s was expected to panic, but recover() is nil", what)
+		}
+	}()
+	callback()
+}
