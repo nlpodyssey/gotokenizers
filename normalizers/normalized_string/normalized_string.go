@@ -305,43 +305,41 @@ func (ns *NormalizedString) Uppercase() {
 // Split off the normalized string, returning a new NormalizedString that
 // contains the range [at, len). The original NormalizedString itself will
 // then contain the range [0, at).
-// The provided `at` indexes on `rune`, not bytes.
+// The provided `at` is an index on runes, not bytes.
 func (ns *NormalizedString) SplitOff(at int) NormalizedString {
 	runes := []rune(ns.normalized)
-	runesLen := len(runes)
 
-	if at > runesLen {
+	if at > len(runes) {
 		return NewNormalizedString("")
 	}
+
+	newAlignments := ns.alignments[at:]
+	ns.alignments = ns.alignments[:at]
 
 	// Split normalized
 
 	byteIndex := len(string(runes[:at]))
 
-	normalized := ns.normalized[byteIndex:]
+	newNormalized := ns.normalized[byteIndex:]
 	ns.normalized = ns.normalized[:byteIndex]
-
-	alignments := ns.alignments[at:]
-	ns.alignments = ns.alignments[:at]
 
 	// Split original
 
 	originalAt := 0
-	alignmentsLen := len(ns.alignments)
-	if alignmentsLen > 0 {
+	if alignmentsLen := len(ns.alignments); alignmentsLen > 0 {
 		originalAt = ns.alignments[alignmentsLen-1].end
 	}
 
 	originalRunes := []rune(ns.original)
 	originalByteIndex := len(string(originalRunes[:originalAt]))
 
-	original := ns.original[originalByteIndex:]
+	newOriginal := ns.original[originalByteIndex:]
 	ns.original = ns.original[:originalByteIndex]
 
 	return NormalizedString{
-		original:   original,
-		normalized: normalized,
-		alignments: alignments,
+		original:   newOriginal,
+		normalized: newNormalized,
+		alignments: newAlignments,
 	}
 }
 
