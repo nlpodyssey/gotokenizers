@@ -764,6 +764,13 @@ func TestNormalizedStringTransform(t *testing.T) {
 			normalized: "axe",
 			alignments: []AlignmentRange{{0, 1}, {1, 2}, {4, 5}},
 		})
+
+	t.Run("it panics with Changes > 1", func(t *testing.T) {
+		ns := NewNormalizedString("Bar")
+		AssertPanic(t, "using a Change = 2", func() {
+			ns.Transform([]RuneChanges{{'a', 2}}, 0)
+		})
+	})
 }
 
 func TestNormalizedStringFilter(t *testing.T) {
