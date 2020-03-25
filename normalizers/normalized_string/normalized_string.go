@@ -345,9 +345,9 @@ func (ns *NormalizedString) SplitOff(at int) NormalizedString {
 
 func (ns *NormalizedString) MergeWith(other NormalizedString) {
 	ns.original += other.original
+	nsLen := ns.Len()
 	ns.normalized += other.normalized
 
-	nsLen := ns.Len()
 	for _, alignment := range other.alignments {
 		ns.alignments = append(ns.alignments, AlignmentRange{
 			start: alignment.start + nsLen,

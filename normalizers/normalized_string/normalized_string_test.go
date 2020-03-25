@@ -1053,6 +1053,54 @@ func TestNormalizedStringUppercase(t *testing.T) {
 	})
 }
 
+func TestNormalizedStringSplitOff(t *testing.T) {
+	run := func(
+		name string,
+		ns NormalizedString,
+		at int,
+		expModified, expNewNs NormalizedString,
+	) {
+		t.Run(name, func(t *testing.T) {
+			actualNewNs := ns.SplitOff(at)
+			assertNormalizedStringEqual(t, ns, expModified)
+			assertNormalizedStringEqual(t, actualNewNs, expNewNs)
+		})
+	}
+
+	run("empty string, at 0", NewNormalizedString(""), 0,
+		NewNormalizedString(""), NewNormalizedString(""))
+	run("empty string, at 1", NewNormalizedString(""), 1,
+		NewNormalizedString(""), NewNormalizedString(""))
+
+	run("no transformations, split at 0", NewNormalizedString("Bar"), 0,
+		NewNormalizedString(""), NewNormalizedString("Bar"))
+	run("no transformations, split at len", NewNormalizedString("Bar"), 3,
+		NewNormalizedString("Bar"), NewNormalizedString(""))
+
+	// FIXME: fix SplitOff creating new invalid mappings and add more tests
+
+	{
+		ns := NewNormalizedString("Foo")
+		AssertPanic(t, "using a negative index", func() {
+			ns.SplitOff(-1)
+		})
+	}
+}
+
+func TestNormalizedStringMergeWith(t *testing.T) {
+	run := func(name string, ns, other, expected NormalizedString) {
+		t.Run(name, func(t *testing.T) {
+			ns.MergeWith(other)
+			assertNormalizedStringEqual(t, ns, expected)
+		})
+	}
+
+	run("empty strings", NewNormalizedString(""), NewNormalizedString(""),
+		NewNormalizedString(""))
+
+	// FIXME: fix MergeWith creating new invalid mappings and add more tests
+}
+
 func TestNormalizedStringAlignmentEqual(t *testing.T) {
 	t.Run("true if `pos` and `changes` are the same", func(t *testing.T) {
 		a := AlignmentRange{start: 1, end: 2}
