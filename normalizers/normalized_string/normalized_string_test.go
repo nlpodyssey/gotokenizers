@@ -1108,6 +1108,123 @@ func TestNormalizedStringMergeWith(t *testing.T) {
 	// FIXME: fix MergeWith creating new invalid mappings and add more tests
 }
 
+func TestNormalizedStringStrip(t *testing.T) {
+	run := func(name string, ns, expected NormalizedString) {
+		t.Run(name, func(t *testing.T) {
+			ns.Strip()
+			assertNormalizedStringEqual(t, ns, expected)
+		})
+	}
+
+	run("empty string", NewNormalizedString(""), NewNormalizedString(""))
+	run("string without leading nor trailing spaces",
+		NewNormalizedString("foo bar"), NewNormalizedString("foo bar"))
+	run("string with leading spaces",
+		NewNormalizedString(" \n\rbar"),
+		NormalizedString{
+			original:   " \n\rbar",
+			normalized: "bar",
+			alignments: []AlignmentRange{{3, 4}, {4, 5}, {5, 6}},
+		})
+	run("string with trailing spaces",
+		NewNormalizedString("bar \n\r"),
+		NormalizedString{
+			original:   "bar \n\r",
+			normalized: "bar",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
+		})
+	run("string with leading and trailing spaces",
+		NewNormalizedString(" \n\rbar \n\r"),
+		NormalizedString{
+			original:   " \n\rbar \n\r",
+			normalized: "bar",
+			alignments: []AlignmentRange{{3, 4}, {4, 5}, {5, 6}},
+		})
+	run("string with spaces only",
+		NewNormalizedString(" \n\r"),
+		NormalizedString{
+			original:   " \n\r",
+			normalized: "",
+			alignments: []AlignmentRange{},
+		})
+}
+
+func TestNormalizedStringStripLeft(t *testing.T) {
+	run := func(name string, ns, expected NormalizedString) {
+		t.Run(name, func(t *testing.T) {
+			ns.StripLeft()
+			assertNormalizedStringEqual(t, ns, expected)
+		})
+	}
+
+	run("empty string", NewNormalizedString(""), NewNormalizedString(""))
+	run("string without leading nor trailing spaces",
+		NewNormalizedString("foo bar"), NewNormalizedString("foo bar"))
+	run("string with leading spaces",
+		NewNormalizedString(" \n\rbar"),
+		NormalizedString{
+			original:   " \n\rbar",
+			normalized: "bar",
+			alignments: []AlignmentRange{{3, 4}, {4, 5}, {5, 6}},
+		})
+	run("string with trailing spaces",
+		NewNormalizedString("bar \n\r"), NewNormalizedString("bar \n\r"))
+	run("string with leading and trailing spaces",
+		NewNormalizedString(" \n\rbar \n\r"),
+		NormalizedString{
+			original:   " \n\rbar \n\r",
+			normalized: "bar \n\r",
+			alignments: []AlignmentRange{
+				{3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 9},
+			},
+		})
+	run("string with spaces only",
+		NewNormalizedString(" \n\r"),
+		NormalizedString{
+			original:   " \n\r",
+			normalized: "",
+			alignments: []AlignmentRange{},
+		})
+}
+
+func TestNormalizedStringStripRight(t *testing.T) {
+	run := func(name string, ns, expected NormalizedString) {
+		t.Run(name, func(t *testing.T) {
+			ns.StripRight()
+			assertNormalizedStringEqual(t, ns, expected)
+		})
+	}
+
+	run("empty string", NewNormalizedString(""), NewNormalizedString(""))
+	run("string without leading nor trailing spaces",
+		NewNormalizedString("foo bar"), NewNormalizedString("foo bar"))
+	run("string with leading spaces",
+		NewNormalizedString(" \n\rbar"), NewNormalizedString(" \n\rbar"))
+	run("string with trailing spaces",
+		NewNormalizedString("bar \n\r"),
+		NormalizedString{
+			original:   "bar \n\r",
+			normalized: "bar",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
+		})
+	run("string with leading and trailing spaces",
+		NewNormalizedString(" \n\rbar \n\r"),
+		NormalizedString{
+			original:   " \n\rbar \n\r",
+			normalized: " \n\rbar",
+			alignments: []AlignmentRange{
+				{0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6},
+			},
+		})
+	run("string with spaces only",
+		NewNormalizedString(" \n\r"),
+		NormalizedString{
+			original:   " \n\r",
+			normalized: "",
+			alignments: []AlignmentRange{},
+		})
+}
+
 func TestAlignmentRangeEqual(t *testing.T) {
 	t.Run("true if `pos` and `changes` are the same", func(t *testing.T) {
 		a := AlignmentRange{start: 1, end: 2}

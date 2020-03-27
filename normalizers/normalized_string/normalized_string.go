@@ -356,6 +356,44 @@ func (ns *NormalizedString) MergeWith(other NormalizedString) {
 	}
 }
 
+// Removes leading and trailing spaces from the normalized string.
+func (ns *NormalizedString) Strip() {
+	ns.strip(true, true)
+}
+
+// Removes leading spaces from the normalized string.
+func (ns *NormalizedString) StripLeft() {
+	ns.strip(true, false)
+}
+
+// Removes trailing spaces from the normalized string.
+func (ns *NormalizedString) StripRight() {
+	ns.strip(false, true)
+}
+
+func (ns *NormalizedString) strip(left, right bool) {
+	runes := []rune(ns.normalized)
+	lenRunes := len(runes)
+
+	leadingSpaces := 0
+	if left {
+		leadingSpaces = countLeadingSpaces(runes)
+	}
+
+	trailingSpaces := 0
+	if right && leadingSpaces < lenRunes {
+		trailingSpaces = countTrailingSpaces(runes)
+	}
+
+	if leadingSpaces == 0 && trailingSpaces == 0 {
+		return
+	}
+
+	lastIndex := lenRunes - trailingSpaces
+	ns.normalized = string(runes[leadingSpaces:lastIndex])
+	ns.alignments = ns.alignments[leadingSpaces:lastIndex]
+}
+
 func (nsa *AlignmentRange) Equal(
 	other AlignmentRange,
 ) bool {
@@ -386,4 +424,31 @@ func getRangeOf(s string, start, end int) (string, bool) {
 	}
 
 	return string(runes[start:end]), true
+}
+
+func countLeadingSpaces(runes []rune) int {
+	for i, r := range runes {
+		if !unicode.In(r, unicode.White_Space) {
+			return i
+		}
+	}
+	return len(runes)
+}
+
+func countTrailingSpaces(runes []rune) int {
+	runesLen := len(runes)
+	if runesLen == 0 {
+		return 0
+	}
+
+	lastIndex := runesLen - 1
+	_ = runes[lastIndex]
+
+	for i := lastIndex; i >= 0; i-- {
+		if !unicode.In(runes[i], unicode.White_Space) {
+			return lastIndex - i
+		}
+	}
+
+	return len(runes)
 }
