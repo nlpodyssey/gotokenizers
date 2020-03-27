@@ -1108,7 +1108,7 @@ func TestNormalizedStringMergeWith(t *testing.T) {
 	// FIXME: fix MergeWith creating new invalid mappings and add more tests
 }
 
-func TestNormalizedStringAlignmentEqual(t *testing.T) {
+func TestAlignmentRangeEqual(t *testing.T) {
 	t.Run("true if `pos` and `changes` are the same", func(t *testing.T) {
 		a := AlignmentRange{start: 1, end: 2}
 		b := AlignmentRange{start: 1, end: 2}
