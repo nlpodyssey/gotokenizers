@@ -23,14 +23,14 @@ Only on a second phase, once we have a first complete library port, we expect
 to focus on cleaning, refactoring, testing, and maybe even re-engineering
 some components. Eventually, we will evaluate further expansions, and a
 possible integration or combination with the
-[spago](https://github.com/saientist/spago) library. However, as you can guess,
+[spago](https://github.com/nlpodyssey/spago) library. However, as you can guess,
 it's too soon to tell!
 
 ## License
 
 GoTokenizers is licensed under the
-[BSD 2-Clause "Simplified" License](https://github.com/saientist/gotokenizers/blob/master/LICENSE). For information about the authors, please refer to
-the file [AUTHORS.md](https://github.com/saientist/gotokenizers/blob/master/AUTHORS.md).
+[BSD 2-Clause "Simplified" License](https://github.com/nlpodyssey/gotokenizers/blob/master/LICENSE). For information about the authors, please refer to
+the file [AUTHORS.md](https://github.com/nlpodyssey/gotokenizers/blob/master/AUTHORS.md).
 
 This project is strongly based on
 [Hugging Face Tokenizers](https://github.com/huggingface/tokenizers),

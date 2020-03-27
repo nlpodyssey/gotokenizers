@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/saientist/gotokenizers/testing"
+	. "github.com/nlpodyssey/gotokenizers/testing"
 )
 
 func TestNewNormalizedString(t *testing.T) {

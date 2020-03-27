@@ -4,7 +4,7 @@
 
 package normalizers
 
-import "github.com/saientist/gotokenizers/normalizers/normalized_string"
+import "github.com/nlpodyssey/gotokenizers/normalizers/normalized_string"
 
 // Takes care of pre-processing strings.
 type Normalizer interface {

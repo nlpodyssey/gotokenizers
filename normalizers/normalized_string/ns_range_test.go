@@ -7,7 +7,7 @@ package normalized_string
 import (
 	"testing"
 
-	. "github.com/saientist/gotokenizers/testing"
+	. "github.com/nlpodyssey/gotokenizers/testing"
 )
 
 func TestNewNSOriginalRange(t *testing.T) {
