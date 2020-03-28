@@ -56,12 +56,17 @@ func (r *NSOriginalRange) normalizedRange(ns *NormalizedString) (int, int, bool)
 	start, end := 0, 0
 
 	for i, alignment := range ns.alignments {
+		if alignment.start == alignment.end {
+			continue
+		}
 		if r.end < alignment.end {
 			break
 		}
 		end = i + 1
-		if alignment.start <= r.start {
+		if alignment.start == r.start {
 			start = i
+		} else if alignment.start < r.start {
+			start = i + 1
 		}
 	}
 

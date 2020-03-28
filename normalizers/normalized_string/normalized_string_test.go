@@ -236,7 +236,7 @@ func TestNormalizedStringConvertOffsetFromOriginalRange(t *testing.T) {
 		})
 	}
 
-	run("chars removed at the beginning",
+	run("one char removed at the beginning, asking for two chars",
 		NormalizedString{
 			original:   "Bar",
 			normalized: "ar",
@@ -244,21 +244,45 @@ func TestNormalizedStringConvertOffsetFromOriginalRange(t *testing.T) {
 		},
 		0, 2, 0, 1, true)
 
-	run("chars removed at the end",
+	run("asking for one char removed at the beginning",
+		NormalizedString{
+			original:   "Bar",
+			normalized: "ar",
+			alignments: []AlignmentRange{{1, 2}, {2, 3}},
+		},
+		0, 1, 0, 0, true)
+
+	run("one char removed at the end, asking for two chars",
 		NormalizedString{
 			original:   "Bar",
 			normalized: "Ba",
 			alignments: []AlignmentRange{{0, 1}, {1, 2}},
 		},
-		2, 3, 1, 2, true)
+		1, 3, 1, 2, true)
 
-	run("chars removed in the middle",
+	run("one char removed at the end, asking for two chars",
+		NormalizedString{
+			original:   "Bar",
+			normalized: "Ba",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}},
+		},
+		2, 3, 2, 2, true)
+
+	run("range involving some chars removed in the middle",
 		NormalizedString{
 			original:   "Bar Qux",
 			normalized: "Baux",
 			alignments: []AlignmentRange{{0, 1}, {1, 2}, {5, 6}, {6, 7}},
 		},
 		1, 6, 1, 3, true)
+
+	run("range involving only chars removed in the middle",
+		NormalizedString{
+			original:   "Bar Qux",
+			normalized: "Baux",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {5, 6}, {6, 7}},
+		},
+		2, 5, 2, 2, true)
 
 	run("chars added at the beginning",
 		NormalizedString{
@@ -278,7 +302,7 @@ func TestNormalizedStringConvertOffsetFromOriginalRange(t *testing.T) {
 				{0, 1}, {1, 2}, {2, 3}, {3, 3}, {3, 3},
 			},
 		},
-		1, 3, 1, 5, true) // FIXME: it should be be 1, 3
+		1, 3, 1, 3, true)
 
 	run("chars added in the middle",
 		NormalizedString{
@@ -290,14 +314,6 @@ func TestNormalizedStringConvertOffsetFromOriginalRange(t *testing.T) {
 			},
 		},
 		1, 3, 3, 5, true) // FIXME: should be 2, 5
-
-	run("range of removed chars only",
-		NormalizedString{
-			original:   "Bar Qux",
-			normalized: "Baux",
-			alignments: []AlignmentRange{{0, 1}, {1, 2}, {5, 6}, {6, 7}},
-		},
-		2, 5, 1, 2, true) // FIXME: should be (0, 0) or (2, 2) ...or even false?
 }
 
 func TestNormalizedStringConvertOffsetFromNormalizedlRange(t *testing.T) {
