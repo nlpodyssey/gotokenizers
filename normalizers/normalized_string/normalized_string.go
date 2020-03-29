@@ -309,38 +309,17 @@ func (ns *NormalizedString) Uppercase() {
 func (ns *NormalizedString) SplitOff(at int) NormalizedString {
 	runes := []rune(ns.normalized)
 
-	if at > len(runes) {
-		return NewNormalizedString("")
+	newNs := NormalizedString{
+		// Preserve the full original string to have meaningful alignments
+		original:   ns.original,
+		normalized: string(runes[at:]),
+		alignments: ns.alignments[at:],
 	}
 
-	newAlignments := ns.alignments[at:]
+	ns.normalized = string(runes[:at])
 	ns.alignments = ns.alignments[:at]
 
-	// Split normalized
-
-	byteIndex := len(string(runes[:at]))
-
-	newNormalized := ns.normalized[byteIndex:]
-	ns.normalized = ns.normalized[:byteIndex]
-
-	// Split original
-
-	originalAt := 0
-	if alignmentsLen := len(ns.alignments); alignmentsLen > 0 {
-		originalAt = ns.alignments[alignmentsLen-1].end
-	}
-
-	originalRunes := []rune(ns.original)
-	originalByteIndex := len(string(originalRunes[:originalAt]))
-
-	newOriginal := ns.original[originalByteIndex:]
-	ns.original = ns.original[:originalByteIndex]
-
-	return NormalizedString{
-		original:   newOriginal,
-		normalized: newNormalized,
-		alignments: newAlignments,
-	}
+	return newNs
 }
 
 func (ns *NormalizedString) MergeWith(other NormalizedString) {

@@ -1072,22 +1072,81 @@ func TestNormalizedStringSplitOff(t *testing.T) {
 
 	run("empty string, at 0", NewNormalizedString(""), 0,
 		NewNormalizedString(""), NewNormalizedString(""))
-	run("empty string, at 1", NewNormalizedString(""), 1,
-		NewNormalizedString(""), NewNormalizedString(""))
 
 	run("no transformations, split at 0", NewNormalizedString("Bar"), 0,
-		NewNormalizedString(""), NewNormalizedString("Bar"))
+		NormalizedString{
+			original:   "Bar",
+			normalized: "",
+			alignments: []AlignmentRange{},
+		},
+		NormalizedString{
+			original:   "Bar",
+			normalized: "Bar",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
+		},
+	)
+
 	run("no transformations, split at len", NewNormalizedString("Bar"), 3,
-		NewNormalizedString("Bar"), NewNormalizedString(""))
+		NormalizedString{
+			original:   "Bar",
+			normalized: "Bar",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 3}},
+		},
+		NormalizedString{
+			original:   "Bar",
+			normalized: "",
+			alignments: []AlignmentRange{},
+		},
+	)
 
-	// FIXME: fix SplitOff creating new invalid mappings and add more tests
+	run("no transformations, split in the middle", NewNormalizedString("abcd"),
+		2,
+		NormalizedString{
+			original:   "abcd",
+			normalized: "ab",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}},
+		},
+		NormalizedString{
+			original:   "abcd",
+			normalized: "cd",
+			alignments: []AlignmentRange{{2, 3}, {3, 4}},
+		},
+	)
 
-	{
+	run("split a string with transformations",
+		NormalizedString{
+			original:   "abcd",
+			normalized: "abXYcd",
+			alignments: []AlignmentRange{
+				{0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4},
+			},
+		},
+		3,
+		NormalizedString{
+			original:   "abcd",
+			normalized: "abX",
+			alignments: []AlignmentRange{{0, 1}, {1, 2}, {2, 2}},
+		},
+		NormalizedString{
+			original:   "abcd",
+			normalized: "Ycd",
+			alignments: []AlignmentRange{{2, 2}, {2, 3}, {3, 4}},
+		},
+	)
+
+	t.Run("using an index > len causes panic", func(t *testing.T) {
+		ns := NewNormalizedString("Foo")
+		AssertPanic(t, "using an index > len", func() {
+			ns.SplitOff(4)
+		})
+	})
+
+	t.Run("using a negative index causes panic", func(t *testing.T) {
 		ns := NewNormalizedString("Foo")
 		AssertPanic(t, "using a negative index", func() {
 			ns.SplitOff(-1)
 		})
-	}
+	})
 }
 
 func TestNormalizedStringMergeWith(t *testing.T) {
