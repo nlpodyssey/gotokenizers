@@ -17,10 +17,8 @@ type NSRange interface {
 	convertOffset(ns *NormalizedString) (int, int, bool)
 }
 
-type baseNsRange struct {
-	start int
-	end   int
-}
+// Internal common struct, just to prevent code duplication
+type baseNsRange struct{ start, end int }
 
 func (r *baseNsRange) Start() int         { return r.start }
 func (r *baseNsRange) End() int           { return r.end }
@@ -29,7 +27,7 @@ func (r *baseNsRange) SetStart(start int) { r.start = start }
 func (r *baseNsRange) SetEnd(end int)     { r.end = end }
 func (r *baseNsRange) Set(start, end int) { r.start, r.end = start, end }
 
-// A range using indices relative to the `original` string
+// A range using indices related to the `original` string
 type NSOriginalRange struct{ baseNsRange }
 
 var _ NSRange = &NSOriginalRange{}
@@ -77,7 +75,7 @@ func (r *NSOriginalRange) convertOffset(ns *NormalizedString) (int, int, bool) {
 	return r.normalizedRange(ns)
 }
 
-// A range using indices relative to the `normalized` string
+// A range using indices related to the `normalized` string
 type NSNormalizedRange struct{ baseNsRange }
 
 var _ NSRange = &NSNormalizedRange{}
@@ -85,6 +83,7 @@ var _ NSRange = &NSNormalizedRange{}
 func NewNSNormalizedRange(start, end int) NSNormalizedRange {
 	return NSNormalizedRange{baseNsRange{start: start, end: end}}
 }
+
 func (r *NSNormalizedRange) originalRange(ns *NormalizedString) (int, int, bool) {
 	if r.start > r.end || r.start < 0 || r.end > len(ns.alignments) {
 		return 0, 0, false
