@@ -308,12 +308,11 @@ func TestNormalizedStringConvertOffsetFromOriginalRange(t *testing.T) {
 		NormalizedString{
 			original:   "abcd",
 			normalized: "abXYcd",
-			// FIXME: should be {0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4}
 			alignments: []AlignmentRange{
-				{0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {3, 4},
+				{0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4},
 			},
 		},
-		1, 3, 3, 5, true) // FIXME: should be 2, 5
+		1, 3, 1, 5, true)
 }
 
 func TestNormalizedStringConvertOffsetFromNormalizedlRange(t *testing.T) {
@@ -381,9 +380,8 @@ func TestNormalizedStringConvertOffsetFromNormalizedlRange(t *testing.T) {
 		NormalizedString{
 			original:   "abcd",
 			normalized: "abXYcd",
-			// FIXME: should be {0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4}
 			alignments: []AlignmentRange{
-				{0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {3, 4},
+				{0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4},
 			},
 		},
 		1, 5, 1, 3, true)
@@ -392,12 +390,11 @@ func TestNormalizedStringConvertOffsetFromNormalizedlRange(t *testing.T) {
 		NormalizedString{
 			original:   "abcd",
 			normalized: "abXYcd",
-			// FIXME: should be {0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4}
 			alignments: []AlignmentRange{
-				{0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {3, 4},
+				{0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4},
 			},
 		},
-		2, 4, 1, 2, true) // FIXME: should be (0, 0) or (2, 2) ...or even false?
+		2, 4, 2, 2, true)
 }
 
 func TestNormalizedStringGetRange(t *testing.T) {
@@ -498,12 +495,11 @@ func TestNormalizedStringGetRange(t *testing.T) {
 		NormalizedString{
 			original:   "abcd",
 			normalized: "abXYcd",
-			// FIXME: should be {0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4}
 			alignments: []AlignmentRange{
-				{0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {3, 4},
+				{0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4},
 			},
 		},
-		1, 3, "Yc", true, // FIXME: wrong! It must be "abXYx"
+		1, 3, "bXYc", true,
 	)
 }
 
@@ -605,9 +601,8 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 		NormalizedString{
 			original:   "abcd",
 			normalized: "abXYcd",
-			// FIXME: should be {0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4}
 			alignments: []AlignmentRange{
-				{0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {3, 4},
+				{0, 1}, {1, 2}, {2, 2}, {2, 2}, {2, 3}, {3, 4},
 			},
 		},
 		1, 5, "bc", true,
@@ -699,10 +694,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "x",
 			normalized: "xa",
-			alignments: []AlignmentRange{
-				// FIXME: should be {0, 1}, {1, 1}?
-				{0, 1}, {0, 1},
-			},
+			alignments: []AlignmentRange{{0, 1}, {1, 1}},
 		})
 
 	run("adding more runes at the end", NewNormalizedString("x"),
@@ -710,10 +702,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "x",
 			normalized: "xab",
-			alignments: []AlignmentRange{
-				// FIXME: shouldn't be {0, 1}, {1, 1}, {1, 1}?
-				{0, 1}, {0, 1}, {0, 1},
-			},
+			alignments: []AlignmentRange{{0, 1}, {1, 1}, {1, 1}},
 		})
 
 	run("adding runes at beginning and end", NewNormalizedString("x"),
@@ -721,10 +710,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "x",
 			normalized: "axb",
-			alignments: []AlignmentRange{
-				// FIXME: shouldn't be {0, 0}, {0, 1}, {1, 1}?
-				{0, 0}, {0, 1}, {0, 1},
-			},
+			alignments: []AlignmentRange{{0, 0}, {0, 1}, {1, 1}},
 		})
 
 	run("adding a rune in the middle", NewNormalizedString("ab"),
@@ -732,10 +718,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "ab",
 			normalized: "axb",
-			alignments: []AlignmentRange{
-				// FIXME: shouldn't be {0, 1}, {1, 1}, {1, 2}?
-				{0, 1}, {0, 1}, {1, 2},
-			},
+			alignments: []AlignmentRange{{0, 1}, {1, 1}, {1, 2}},
 		})
 
 	run("adding multiple runes in the middle", NewNormalizedString("ab"),
@@ -743,10 +726,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 		NormalizedString{
 			original:   "ab",
 			normalized: "axyb",
-			alignments: []AlignmentRange{
-				// FIXME: shouldn't be {0, 1}, {1, 1}, {1, 1}, {1, 2}?
-				{0, 1}, {0, 1}, {0, 1}, {1, 2},
-			},
+			alignments: []AlignmentRange{{0, 1}, {1, 1}, {1, 1}, {1, 2}},
 		})
 
 	run("change -1 at the beginning", NewNormalizedString("Bar"),

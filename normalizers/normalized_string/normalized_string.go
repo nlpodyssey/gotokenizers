@@ -135,11 +135,11 @@ func (ns *NormalizedString) Transform(dest []RuneChanges, initialOffset int) {
 			// No changes required here
 			alignments[index] = ns.alignments[oldIndex]
 		} else if changes == 1 {
-			// This is a newly inserted character, so we use the alignment
-			// from the previous one
+			// This is a newly inserted character
 			offset += 1
 			if oldIndex > 0 {
-				alignments[index] = ns.alignments[oldIndex-1]
+				prevEnd := ns.alignments[oldIndex-1].end
+				alignments[index] = AlignmentRange{start: prevEnd, end: prevEnd}
 			} // otherwise, it is already (0, 0)
 
 		} else if changes < 0 { // changes < 0
