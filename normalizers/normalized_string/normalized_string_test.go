@@ -189,7 +189,7 @@ func TestNormalizedStringConvertOffsetCommonCases(t *testing.T) {
 	) {
 		t.Run(fmt.Sprintf("NSOriginalRange | %s", name), func(t *testing.T) {
 			r := NewNSOriginalRange(rangeStart, rangeEnd)
-			start, end, flag := ns.ConvertOffset(&r)
+			start, end, flag := ns.ConvertOffset(r)
 			AssertIntEqual(t, "start", start, expectedStart)
 			AssertIntEqual(t, "end", end, expectedEnd)
 			AssertBoolEqual(t, "flag", flag, expectedFlag)
@@ -197,7 +197,7 @@ func TestNormalizedStringConvertOffsetCommonCases(t *testing.T) {
 
 		t.Run(fmt.Sprintf("NSNormalizedRange | %s", name), func(t *testing.T) {
 			r := NewNSNormalizedRange(rangeStart, rangeEnd)
-			start, end, flag := ns.ConvertOffset(&r)
+			start, end, flag := ns.ConvertOffset(r)
 			AssertIntEqual(t, "start", start, expectedStart)
 			AssertIntEqual(t, "end", end, expectedEnd)
 			AssertBoolEqual(t, "flag", flag, expectedFlag)
@@ -229,7 +229,7 @@ func TestNormalizedStringConvertOffsetFromOriginalRange(t *testing.T) {
 	) {
 		t.Run(name, func(t *testing.T) {
 			r := NewNSOriginalRange(rangeStart, rangeEnd)
-			start, end, flag := ns.ConvertOffset(&r)
+			start, end, flag := ns.ConvertOffset(r)
 			AssertIntEqual(t, "start", start, expectedStart)
 			AssertIntEqual(t, "end", end, expectedEnd)
 			AssertBoolEqual(t, "flag", flag, expectedFlag)
@@ -325,7 +325,7 @@ func TestNormalizedStringConvertOffsetFromNormalizedlRange(t *testing.T) {
 	) {
 		t.Run(name, func(t *testing.T) {
 			r := NewNSNormalizedRange(rangeStart, rangeEnd)
-			start, end, flag := ns.ConvertOffset(&r)
+			start, end, flag := ns.ConvertOffset(r)
 			AssertIntEqual(t, "start", start, expectedStart)
 			AssertIntEqual(t, "end", end, expectedEnd)
 			AssertBoolEqual(t, "flag", flag, expectedFlag)
@@ -422,7 +422,7 @@ func TestNormalizedStringGetRange(t *testing.T) {
 	) {
 		nsRange := NewNSOriginalRange(start, end)
 		run(fmt.Sprintf("NSOriginalRange | %s", name),
-			ns, &nsRange, expStr, expFlag)
+			ns, nsRange, expStr, expFlag)
 	}
 
 	runNormalized := func(
@@ -434,7 +434,7 @@ func TestNormalizedStringGetRange(t *testing.T) {
 	) {
 		nsRange := NewNSNormalizedRange(start, end)
 		run(fmt.Sprintf("NSNormalizedRange | %s", name),
-			ns, &nsRange, expStr, expFlag)
+			ns, nsRange, expStr, expFlag)
 	}
 
 	runBoth := func(
@@ -528,7 +528,7 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 	) {
 		nsRange := NewNSOriginalRange(start, end)
 		run(fmt.Sprintf("NSOriginalRange | %s", name),
-			ns, &nsRange, expStr, expFlag)
+			ns, nsRange, expStr, expFlag)
 	}
 
 	runNormalized := func(
@@ -540,7 +540,7 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 	) {
 		nsRange := NewNSNormalizedRange(start, end)
 		run(fmt.Sprintf("NSNormalizedRange | %s", name),
-			ns, &nsRange, expStr, expFlag)
+			ns, nsRange, expStr, expFlag)
 	}
 
 	runBoth := func(

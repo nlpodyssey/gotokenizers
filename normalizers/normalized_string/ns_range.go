@@ -32,8 +32,8 @@ type NSOriginalRange struct{ baseNsRange }
 
 var _ NSRange = &NSOriginalRange{}
 
-func NewNSOriginalRange(start, end int) NSOriginalRange {
-	return NSOriginalRange{baseNsRange{start: start, end: end}}
+func NewNSOriginalRange(start, end int) *NSOriginalRange {
+	return &NSOriginalRange{baseNsRange{start: start, end: end}}
 }
 
 func (r *NSOriginalRange) originalRange(ns *NormalizedString) (int, int, bool) {
@@ -80,8 +80,8 @@ type NSNormalizedRange struct{ baseNsRange }
 
 var _ NSRange = &NSNormalizedRange{}
 
-func NewNSNormalizedRange(start, end int) NSNormalizedRange {
-	return NSNormalizedRange{baseNsRange{start: start, end: end}}
+func NewNSNormalizedRange(start, end int) *NSNormalizedRange {
+	return &NSNormalizedRange{baseNsRange{start: start, end: end}}
 }
 
 func (r *NSNormalizedRange) originalRange(ns *NormalizedString) (int, int, bool) {
