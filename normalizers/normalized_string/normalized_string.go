@@ -323,14 +323,15 @@ func (ns *NormalizedString) SplitOff(at int) NormalizedString {
 }
 
 func (ns *NormalizedString) MergeWith(other NormalizedString) {
+	alignmentsOffset := ns.LenOriginal()
+
 	ns.original += other.original
-	nsLen := ns.Len()
 	ns.normalized += other.normalized
 
 	for _, alignment := range other.alignments {
 		ns.alignments = append(ns.alignments, AlignmentRange{
-			start: alignment.start + nsLen,
-			end:   alignment.end + nsLen,
+			start: alignment.start + alignmentsOffset,
+			end:   alignment.end + alignmentsOffset,
 		})
 	}
 }

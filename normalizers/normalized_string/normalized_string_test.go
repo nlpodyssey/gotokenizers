@@ -1157,10 +1157,34 @@ func TestNormalizedStringMergeWith(t *testing.T) {
 		})
 	}
 
-	run("empty strings", NewNormalizedString(""), NewNormalizedString(""),
-		NewNormalizedString(""))
+	run("merging both empty strings", NewNormalizedString(""),
+		NewNormalizedString(""), NewNormalizedString(""))
 
-	// FIXME: fix MergeWith creating new invalid mappings and add more tests
+	run("merging into an empty string", NewNormalizedString(""),
+		NewNormalizedString("Bar"), NewNormalizedString("Bar"))
+
+	run("merging an empty string", NewNormalizedString("Bar"),
+		NewNormalizedString(""), NewNormalizedString("Bar"))
+
+	run("merging strings without transoformations", NewNormalizedString("ab"),
+		NewNormalizedString("cd"), NewNormalizedString("abcd"))
+
+	run("merging strings with transoformations",
+		NormalizedString{
+			original:   "abc",
+			normalized: "aX",
+			alignments: []AlignmentRange{{0, 1}, {1, 1}},
+		},
+		NormalizedString{
+			original:   "def",
+			normalized: "Yf",
+			alignments: []AlignmentRange{{2, 2}, {2, 3}},
+		},
+		NormalizedString{
+			original:   "abcdef",
+			normalized: "aXYf",
+			alignments: []AlignmentRange{{0, 1}, {1, 1}, {5, 5}, {5, 6}},
+		})
 }
 
 func TestNormalizedStringStrip(t *testing.T) {
