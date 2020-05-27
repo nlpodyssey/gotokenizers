@@ -29,8 +29,7 @@ it's too soon to tell!
 ## License
 
 GoTokenizers is licensed under the
-[BSD 2-Clause "Simplified" License](https://github.com/nlpodyssey/gotokenizers/blob/master/LICENSE). For information about the authors, please refer to
-the file [AUTHORS.md](https://github.com/nlpodyssey/gotokenizers/blob/master/AUTHORS.md).
+[BSD 2-Clause "Simplified" License](https://github.com/nlpodyssey/gotokenizers/blob/master/LICENSE).
 
 This project is strongly based on
 [Hugging Face Tokenizers](https://github.com/huggingface/tokenizers),
