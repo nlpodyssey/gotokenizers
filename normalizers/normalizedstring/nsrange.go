@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package normalized_string
+package normalizedstring
 
 // NSRange is implemented by values which represent a range usable by the
 // NormalizedString to index its content.
