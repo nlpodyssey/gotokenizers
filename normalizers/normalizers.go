@@ -6,7 +6,8 @@ package normalizers
 
 import "github.com/nlpodyssey/gotokenizers/normalizers/normalized_string"
 
-// Takes care of pre-processing strings.
+// Normalizer is implemented by any value that has a Normalize method,
+// which takes care of pre-processing strings.
 type Normalizer interface {
-	Normalize(normalized *normalized_string.NormalizedString) error
+	Normalize(ns *normalized_string.NormalizedString) error
 }

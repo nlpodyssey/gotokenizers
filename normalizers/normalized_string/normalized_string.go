@@ -9,28 +9,29 @@ import (
 	"unicode"
 )
 
-// A `NormalizedString` takes care of processing an "original" string to modify
-// it and obtain a "normalized" string. It keeps both version of the string,
-// alignments information between both and provides an interface to retrieve
-// ranges of each string, using offsets from any of them.
+// NormalizedString takes care of processing an "original" string to modify it
+// and obtain a "normalized" string.
+//
+// It keeps both versions of the string, alignments information between them,
+// and provides an interface to retrieve ranges of each string, using offsets
+// from any of them.
 //
 // It is possible to retrieve a part of the original string, by indexing it
 // with offsets from the normalized one, and the other way around too.
-// It is also possible to convert offsets from one referential to the other one
-// easily.
+// It is also possible to convert offsets from one referential string to the
+// other one easily.
 type NormalizedString struct {
 	// The original version of the string, before any modification
 	original string
-
 	// The normalized version of the string, after all modifications
 	normalized string
-
 	// Mapping from normalized string to original one: (start, end) for each
-	// character (rune) of the normalized string
+	// rune of the normalized string
 	alignments []AlignmentRange
 }
 
-// A single alignment information for `NormalizedString`
+// AlignmentRange represents a (start, end) range used for the alignment
+// information of a NormalizedString.
 type AlignmentRange struct {
 	// Start rune position, inclusive
 	start int
@@ -38,50 +39,80 @@ type AlignmentRange struct {
 	end int
 }
 
-func NewNormalizedString(s string) NormalizedString {
-	return NormalizedString{
+// NewNormalizedString builds and returns a new NormalizedString.
+//
+// It sets both the original and the normalized strings with the value of
+// the given string, and initializes the alignments with a 1:1 mapping.
+func NewNormalizedString(s string) *NormalizedString {
+	return &NormalizedString{
 		original:   s,
 		normalized: s,
 		alignments: newAlignments(s),
 	}
 }
 
-func (ns *NormalizedString) Equal(other NormalizedString) bool {
-	return ns.normalized == other.normalized
+// newAlignments returns a 1:1 alignment for the given string, treating it
+// as the same value for both "normalized" and "original" versions.
+func newAlignments(s string) []AlignmentRange {
+	alignments := make([]AlignmentRange, len([]rune(s)))
+	for index := range alignments {
+		alignments[index] = AlignmentRange{
+			start: index,
+			end:   index + 1,
+		}
+	}
+	return alignments
 }
 
-// Returns the length of the normalized string (counting runes ,not bytes)
-func (ns *NormalizedString) Len() int {
-	return len([]rune(ns.normalized))
-}
-
-// Returns the length of the original string (counting runes, not bytes)
-func (ns *NormalizedString) LenOriginal() int {
-	return len([]rune(ns.original))
-}
-
-func (ns *NormalizedString) IsEmpty() bool {
-	return len(ns.normalized) == 0
-}
-
-// Returns the normalized string.
+// Get returns the "normalized" version of the NormalizedString.
 func (ns *NormalizedString) Get() string {
 	return ns.normalized
 }
 
-// Returns the original string.
+// Get returns the "original" version of the NormalizedString.
 func (ns *NormalizedString) GetOriginal() string {
 	return ns.original
 }
 
-// Convert the given offsets range from one referential to the other one:
-// original to normalized, or normalized to original.
-func (ns *NormalizedString) ConvertOffset(nsRange NSRange) (int, int, bool) {
+// Equal reports whether the "normalized" string of the receiver is equal
+// to the "normalized" string of the given parameter.
+//
+// The "original" string and the alignments are ignored for this comparison.
+func (ns *NormalizedString) Equal(other *NormalizedString) bool {
+	return ns.normalized == other.normalized
+}
+
+// Len returns the length of the "normalized" string
+// (counting runes, not bytes).
+func (ns *NormalizedString) Len() int {
+	return len([]rune(ns.normalized))
+}
+
+// Len returns the length of the "original" string
+// (counting runes, not bytes).
+func (ns *NormalizedString) LenOriginal() int {
+	return len([]rune(ns.original))
+}
+
+// IsEmpty reports whether the "normalized" string is empty.
+func (ns *NormalizedString) IsEmpty() bool {
+	return len(ns.normalized) == 0
+}
+
+// ConvertOffset converts the given offsets range from one referential string
+// to the other one: "original" to "normalized", or "normalized" to "original".
+//
+// If the range is out of bounds, then it returns (-1, -1, false).
+func (ns *NormalizedString) ConvertOffset(nsRange NSRange) (start, end int, ok bool) {
 	return nsRange.convertOffset(ns)
 }
 
-// Returns a range of the normalized string.
-func (ns *NormalizedString) GetRange(nsRange NSRange) (string, bool) {
+// GetRange returns a section of the "normalized" string according to the
+// given range (remapped, if necessary).
+//
+// Indexing is on runes, not bytes.
+// If the range is out of bounds, then it returns ("", false).
+func (ns *NormalizedString) GetRange(nsRange NSRange) (value string, ok bool) {
 	start, end, ok := nsRange.normalizedRange(ns)
 	if !ok {
 		return "", false
@@ -89,8 +120,12 @@ func (ns *NormalizedString) GetRange(nsRange NSRange) (string, bool) {
 	return getRangeOf(ns.normalized, start, end)
 }
 
-// Returns a range of the original string.
-func (ns *NormalizedString) GetRangeOriginal(nsRange NSRange) (string, bool) {
+// GetRangeOriginal returns a section of the "original" string according to the
+// given range (remapped, if necessary).
+//
+// Indexing is on runes, not bytes.
+// If the range is out of bounds, then it returns ("", false).
+func (ns *NormalizedString) GetRangeOriginal(nsRange NSRange) (value string, ok bool) {
 	start, end, ok := nsRange.originalRange(ns)
 	if !ok {
 		return "", false
@@ -98,25 +133,34 @@ func (ns *NormalizedString) GetRangeOriginal(nsRange NSRange) (string, bool) {
 	return getRangeOf(ns.original, start, end)
 }
 
-// See `NormalizedString.Transform`.
+// RuneChanges is a single rune-based transformation that can be applied
+// by "NormalizedString.Transform".
 type RuneChanges struct {
-	// A rune of the normalized string
+	// Rune is a single rune of the new transformed "normalized" string.
 	Rune rune
 
-	// `1` = this is a new rune
-	// `-N` = the rune is right before N removed runes
-	// `0` = this rune represents the old one (even if changed)
-	// Values greater than `1` are not allowed: if multiple chars are added,
-	// each of them must have `Changes` set to `1`.
+	// Changes is a number representing how the Rune must be handled when
+	// it is inserted in the new "normalized" string.
+	//
+	// - "1" = this is a new rune
+	// - "-N" = the rune is right before N removed runes
+	// - "0" = this rune represents the old one (even if changed)
+	//
+	// Values greater than "1" are not allowed. To add multiple runes, each of
+	// them must be represented by a separate RuneChanges value, with Changes
+	// set to "1".
 	Changes int
 }
 
-// Applies transformations to the current normalized version, updating the
-// current alignments with the new ones.
+// Transform applies transformations to the current "normalized" version,
+// updating the current alignments with the new ones.
 //
-// Since it is possible that the normalized string doesn't include some of the
-// runes at the beginning of the original one, we need an `initialOffset` which
-// represents the number of removed runes at the very beginning.
+// It expects a slice of RuneChanges, which are then applied in sequence to
+// transform the "normalized" value.
+// Since it is possible that the new result does not include some
+// of the characters at the beginning of the original value, we need an
+// "initialOffset" which represents the number of runes removed from the very
+// beginning of the string.
 func (ns *NormalizedString) Transform(dest []RuneChanges, initialOffset int) {
 	var strBuilder strings.Builder
 
@@ -158,6 +202,10 @@ func (ns *NormalizedString) Transform(dest []RuneChanges, initialOffset int) {
 	ns.alignments = alignments
 }
 
+// Filter applies filtering over the "normalized" string runes.
+//
+// The given filter callback is called for each rune of the "normalized"
+// string. Only the runes for which the callback returns true are kept.
 func (ns *NormalizedString) Filter(filter func(rune) bool) {
 	runes := []rune(ns.normalized)
 	runesLen := len(runes)
@@ -205,12 +253,14 @@ func (ns *NormalizedString) Filter(filter func(rune) bool) {
 	ns.Transform(filtered, removed)
 }
 
+// Prepend prepends the given string to the "normalized" value.
 func (ns *NormalizedString) Prepend(s string) {
 	ns.normalized = s + ns.normalized
 	alignments := make([]AlignmentRange, len([]rune(s))) // all (0, 0)
 	ns.alignments = append(alignments, ns.alignments...)
 }
 
+// Append prepends the given string to the "normalized" value.
 func (ns *NormalizedString) Append(s string) {
 	ns.normalized += s
 
@@ -231,11 +281,14 @@ func (ns *NormalizedString) Append(s string) {
 	}
 }
 
-// Maps the runes of the normalized string.
+// Map maps the runes of the "normalized" string.
+//
+// Each rune can be replaced with another rune (or the same one).
 func (ns *NormalizedString) Map(f func(rune) rune) {
 	ns.normalized = strings.Map(f, ns.normalized)
 }
 
+// ForEach calls the given function for each rune of the "normalized" string.
 // FIXME: this might be inefficient: prefer direct iteration
 //        on `range ns.Get()` and eventually remove this method
 func (ns *NormalizedString) ForEach(f func(rune)) {
@@ -244,8 +297,10 @@ func (ns *NormalizedString) ForEach(f func(rune)) {
 	}
 }
 
-// FIXME: see Unicode special casing notes on `NormalizedString.Uppercase()`
-func (ns *NormalizedString) Lowercase() {
+// ToLower remaps all Unicode letters of the "normalized" string to their
+// lower case.
+// FIXME: see Unicode special casing notes on `NormalizedString.ToUpper()`
+func (ns *NormalizedString) ToLower() {
 	newChars := make([]RuneChanges, 0, ns.Len())
 	for _, r := range ns.normalized {
 		newChars = append(
@@ -256,6 +311,8 @@ func (ns *NormalizedString) Lowercase() {
 	ns.Transform(newChars, 0)
 }
 
+// ToUpper remaps all Unicode letters of the "normalized" string to their
+// upper case.
 // FIXME: Go `unicode` package does not consider Unicode special casing
 //        (see https://www.unicode.org/Public/UCD/latest/ucd/SpecialCasing.txt)
 //        As a result, every single rune is always transformed to a single
@@ -291,7 +348,7 @@ func (ns *NormalizedString) Lowercase() {
 //            // => ß 1
 //        }
 //        ```
-func (ns *NormalizedString) Uppercase() {
+func (ns *NormalizedString) ToUpper() {
 	newChars := make([]RuneChanges, 0, ns.Len())
 	for _, r := range ns.normalized {
 		newChars = append(
@@ -302,14 +359,16 @@ func (ns *NormalizedString) Uppercase() {
 	ns.Transform(newChars, 0)
 }
 
-// Split off the normalized string, returning a new NormalizedString that
-// contains the range [at, len). The original NormalizedString itself will
-// then contain the range [0, at).
+// SplitOff splits the receiver NormalizedString in two parts. The "normalized"
+// version of the receiver is reduced to the interval [0, at), and a new
+// NormalizedString is returned with the "normalized" string set to the
+// original range [at, len).
+//
 // The provided `at` is an index on runes, not bytes.
-func (ns *NormalizedString) SplitOff(at int) NormalizedString {
+func (ns *NormalizedString) SplitOff(at int) *NormalizedString {
 	runes := []rune(ns.normalized)
 
-	newNs := NormalizedString{
+	newNs := &NormalizedString{
 		// Preserve the full original string to have meaningful alignments
 		original:   ns.original,
 		normalized: string(runes[at:]),
@@ -322,7 +381,9 @@ func (ns *NormalizedString) SplitOff(at int) NormalizedString {
 	return newNs
 }
 
-func (ns *NormalizedString) MergeWith(other NormalizedString) {
+// MergeWith appends the "original" and "normalized strings of the other
+// NormalizedString to the values of the receiver.
+func (ns *NormalizedString) MergeWith(other *NormalizedString) {
 	alignmentsOffset := ns.LenOriginal()
 
 	ns.original += other.original
@@ -336,22 +397,23 @@ func (ns *NormalizedString) MergeWith(other NormalizedString) {
 	}
 }
 
-// Removes leading and trailing spaces from the normalized string.
-func (ns *NormalizedString) Strip() {
-	ns.strip(true, true)
+// Trim removes leading and trailing spaces from the "normalized" string.
+func (ns *NormalizedString) Trim() {
+	ns.trim(true, true)
 }
 
-// Removes leading spaces from the normalized string.
-func (ns *NormalizedString) StripLeft() {
-	ns.strip(true, false)
+// TrimLeft removes leading spaces from the "normalized" string.
+func (ns *NormalizedString) TrimLeft() {
+	ns.trim(true, false)
 }
 
-// Removes trailing spaces from the normalized string.
-func (ns *NormalizedString) StripRight() {
-	ns.strip(false, true)
+// TrimLeft removes trailing spaces from the "normalized" string.
+func (ns *NormalizedString) TrimRight() {
+	ns.trim(false, true)
 }
 
-func (ns *NormalizedString) strip(left, right bool) {
+// Trim removes leading and/or trailing spaces from the "normalized" string.
+func (ns *NormalizedString) trim(left, right bool) {
 	runes := []rune(ns.normalized)
 	lenRunes := len(runes)
 
@@ -374,25 +436,17 @@ func (ns *NormalizedString) strip(left, right bool) {
 	ns.alignments = ns.alignments[leadingSpaces:lastIndex]
 }
 
-func (nsa *AlignmentRange) Equal(
-	other AlignmentRange,
-) bool {
+// Equal reports whether the bounds of the receiver AlignmentRange are equal
+// to the bounds of the other AlignmentRange.
+func (nsa *AlignmentRange) Equal(other AlignmentRange) bool {
 	return nsa.start == other.start && nsa.end == other.end
 }
 
-func newAlignments(s string) []AlignmentRange {
-	alignments := make([]AlignmentRange, len([]rune(s)))
-
-	for index := range alignments {
-		alignments[index] = AlignmentRange{
-			start: index,
-			end:   index + 1,
-		}
-	}
-
-	return alignments
-}
-
+// getRangeOf returns a section of the given string according to the given
+// bounds.
+//
+// Indexing is on runes, not bytes.
+// If the range is out of bounds, then it returns ("", false).
 func getRangeOf(s string, start, end int) (string, bool) {
 	if end <= start || start < 0 {
 		return "", false
@@ -406,6 +460,8 @@ func getRangeOf(s string, start, end int) (string, bool) {
 	return string(runes[start:end]), true
 }
 
+// countLeadingSpaces returns the number of leading spaces in the given slice
+// of runes, if any.
 func countLeadingSpaces(runes []rune) int {
 	for i, r := range runes {
 		if !unicode.In(r, unicode.White_Space) {
@@ -415,6 +471,8 @@ func countLeadingSpaces(runes []rune) int {
 	return len(runes)
 }
 
+// countTrailingSpaces returns the number of trailing spaces in the given slice
+// of runes, if any.
 func countTrailingSpaces(runes []rune) int {
 	runesLen := len(runes)
 	if runesLen == 0 {
