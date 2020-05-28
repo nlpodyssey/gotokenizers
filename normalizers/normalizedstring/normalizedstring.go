@@ -399,21 +399,22 @@ func (ns *NormalizedString) MergeWith(other *NormalizedString) {
 
 // Trim removes leading and trailing spaces from the "normalized" string.
 func (ns *NormalizedString) Trim() {
-	ns.trim(true, true)
+	ns.TrimLeftRight(true, true)
 }
 
 // TrimLeft removes leading spaces from the "normalized" string.
 func (ns *NormalizedString) TrimLeft() {
-	ns.trim(true, false)
+	ns.TrimLeftRight(true, false)
 }
 
 // TrimLeft removes trailing spaces from the "normalized" string.
 func (ns *NormalizedString) TrimRight() {
-	ns.trim(false, true)
+	ns.TrimLeftRight(false, true)
 }
 
-// Trim removes leading and/or trailing spaces from the "normalized" string.
-func (ns *NormalizedString) trim(left, right bool) {
+// TrimLeftRight removes leading (left) and/or trailing (right) spaces from
+// the "normalized" string.
+func (ns *NormalizedString) TrimLeftRight(left, right bool) {
 	runes := []rune(ns.normalized)
 	lenRunes := len(runes)
 
