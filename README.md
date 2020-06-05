@@ -2,6 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/nlpodyssey/gotokenizers)](https://goreportcard.com/report/github.com/nlpodyssey/gotokenizers)
 [![Maintainability](https://api.codeclimate.com/v1/badges/a8aefebab14fc7739912/maintainability)](https://codeclimate.com/github/nlpodyssey/gotokenizers/maintainability)
+[![BCH compliance](https://bettercodehub.com/edge/badge/nlpodyssey/gotokenizers?branch=master)](https://bettercodehub.com/)
 
 GoTokenizers is a Go module implementing some of the most used
 state-of-the-art natural language tokenizers.
