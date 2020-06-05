@@ -1,5 +1,7 @@
 # GoTokenizers
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/nlpodyssey/gotokenizers)](https://goreportcard.com/report/github.com/nlpodyssey/gotokenizers)
+
 GoTokenizers is a Go module implementing some of the most used
 state-of-the-art natural language tokenizers.
 
