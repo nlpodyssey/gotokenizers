@@ -5,8 +5,8 @@
 package bertnormalizer
 
 import (
-	. "github.com/nlpodyssey/gotokenizers/normalizers"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/normalizers"
+	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
 	"unicode"
 )
 
@@ -25,7 +25,7 @@ type BertNormalizer struct {
 	lowerCaseEnabled bool
 }
 
-var _ Normalizer = &BertNormalizer{}
+var _ normalizers.Normalizer = &BertNormalizer{}
 
 // NewBertNormalizer returns a new BertNormalizer.
 func NewBertNormalizer(
@@ -46,7 +46,7 @@ func DefaultBertNormalizer() *BertNormalizer {
 }
 
 // Normalize transform the NormalizedString in place.
-func (sn *BertNormalizer) Normalize(ns *NormalizedString) error {
+func (sn *BertNormalizer) Normalize(ns *normalizedstring.NormalizedString) error {
 	if sn.textCleaning {
 		sn.cleanText(ns)
 	}
@@ -64,7 +64,7 @@ func (sn *BertNormalizer) Normalize(ns *NormalizedString) error {
 
 // cleanText replaces whitespace-like characters with simple whitespaces, and
 // removes control characters.
-func (sn *BertNormalizer) cleanText(ns *NormalizedString) {
+func (sn *BertNormalizer) cleanText(ns *normalizedstring.NormalizedString) {
 	// Since '\t', '\n', and '\r' are also control characters, it's important
 	// to first map them to simple whitespaces, and only after that apply the
 	// filtering.
@@ -118,18 +118,18 @@ var chineseCharacters = &unicode.RangeTable{
 
 // handleChineseChars puts spaces around Chinese characters, so that they can
 // be split. All non-Chinese characters are left unchanged.
-func (sn *BertNormalizer) handleChineseChars(ns *NormalizedString) {
-	runeChanges := make([]RuneChanges, 0, ns.Len())
+func (sn *BertNormalizer) handleChineseChars(ns *normalizedstring.NormalizedString) {
+	runeChanges := make([]normalizedstring.RuneChanges, 0, ns.Len())
 	for _, r := range ns.Get() {
 		if unicode.In(r, chineseCharacters) {
 			runeChanges = append(
 				runeChanges,
-				RuneChanges{Rune: ' ', Changes: 1},
-				RuneChanges{Rune: r, Changes: 0},
-				RuneChanges{Rune: ' ', Changes: 1},
+				normalizedstring.RuneChanges{Rune: ' ', Changes: 1},
+				normalizedstring.RuneChanges{Rune: r, Changes: 0},
+				normalizedstring.RuneChanges{Rune: ' ', Changes: 1},
 			)
 		} else {
-			runeChanges = append(runeChanges, RuneChanges{Rune: r, Changes: 0})
+			runeChanges = append(runeChanges, normalizedstring.RuneChanges{Rune: r, Changes: 0})
 		}
 	}
 	ns.Transform(runeChanges, 0)
@@ -137,7 +137,7 @@ func (sn *BertNormalizer) handleChineseChars(ns *NormalizedString) {
 
 // stripAccents removes accent characters (Mn: Mark, non-spacing) from the
 // normalized string.
-func (sn *BertNormalizer) stripAccents(ns *NormalizedString) {
+func (sn *BertNormalizer) stripAccents(ns *normalizedstring.NormalizedString) {
 	// TODO: ns.Nfd()
 	ns.Filter(isNotMarkNonSpacing)
 }

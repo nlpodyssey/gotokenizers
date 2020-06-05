@@ -6,24 +6,32 @@ package testing
 
 import "testing"
 
+// AssertStringEqual causes a failure if the actual string value is
+// different from the expected one.
 func AssertStringEqual(t *testing.T, what, actual, expected string) {
 	if actual != expected {
 		t.Errorf("Expected %v to be %#v, but got %#v", what, expected, actual)
 	}
 }
 
+// AssertIntEqual causes a failure if the actual int value is
+// different from the expected one.
 func AssertIntEqual(t *testing.T, what string, actual, expected int) {
 	if actual != expected {
 		t.Errorf("Expected %v to be %v, but got %v", what, expected, actual)
 	}
 }
 
+// AssertBoolEqual causes a failure if the actual bool value is
+// different from the expected one.
 func AssertBoolEqual(t *testing.T, what string, actual, expected bool) {
 	if actual != expected {
 		t.Errorf("Expected %v to be %v, but got %v", what, expected, actual)
 	}
 }
 
+// AssertRuneSliceEqual causes a failure if the actual []rune value is
+// different from the expected one.
 func AssertRuneSliceEqual(t *testing.T, what string, actual, expected []rune) {
 	if len(actual) != len(expected) {
 		t.Errorf(
@@ -44,6 +52,8 @@ func AssertRuneSliceEqual(t *testing.T, what string, actual, expected []rune) {
 	}
 }
 
+// AssertPanic causes a failure if the callback invocation does not cause
+// a panic.
 func AssertPanic(t *testing.T, what string, callback func()) {
 	defer func() {
 		if recover() == nil {

@@ -69,7 +69,7 @@ func (ns *NormalizedString) Get() string {
 	return ns.normalized
 }
 
-// Get returns the "original" version of the NormalizedString.
+// GetOriginal returns the "original" version of the NormalizedString.
 func (ns *NormalizedString) GetOriginal() string {
 	return ns.original
 }
@@ -88,7 +88,7 @@ func (ns *NormalizedString) Len() int {
 	return len([]rune(ns.normalized))
 }
 
-// Len returns the length of the "original" string
+// LenOriginal returns the length of the "original" string
 // (counting runes, not bytes).
 func (ns *NormalizedString) LenOriginal() int {
 	return len([]rune(ns.original))
@@ -180,7 +180,7 @@ func (ns *NormalizedString) Transform(dest []RuneChanges, initialOffset int) {
 			alignments[index] = ns.alignments[oldIndex]
 		} else if changes == 1 {
 			// This is a newly inserted character
-			offset += 1
+			offset++
 			if oldIndex > 0 {
 				prevEnd := ns.alignments[oldIndex-1].end
 				alignments[index] = AlignmentRange{start: prevEnd, end: prevEnd}
@@ -237,7 +237,7 @@ func (ns *NormalizedString) Filter(filter func(rune) bool) {
 				})
 			}
 		} else {
-			removed += 1
+			removed++
 		}
 	}
 
@@ -407,7 +407,7 @@ func (ns *NormalizedString) TrimLeft() {
 	ns.TrimLeftRight(true, false)
 }
 
-// TrimLeft removes trailing spaces from the "normalized" string.
+// TrimRight removes trailing spaces from the "normalized" string.
 func (ns *NormalizedString) TrimRight() {
 	ns.TrimLeftRight(false, true)
 }

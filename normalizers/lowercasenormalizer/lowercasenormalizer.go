@@ -5,15 +5,15 @@
 package lowercasenormalizer
 
 import (
-	. "github.com/nlpodyssey/gotokenizers/normalizers"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/normalizers"
+	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
 )
 
 // LowerCaseNormalizer allows string normalization remapping all Unicode
 // letters to their lower case.
 type LowerCaseNormalizer struct{}
 
-var _ Normalizer = &LowerCaseNormalizer{}
+var _ normalizers.Normalizer = &LowerCaseNormalizer{}
 
 // NewLowerCaseNormalizer returns a new LowerCaseNormalizer.
 func NewLowerCaseNormalizer() *LowerCaseNormalizer {
@@ -21,7 +21,7 @@ func NewLowerCaseNormalizer() *LowerCaseNormalizer {
 }
 
 // Normalize transform the NormalizedString to lowercase in place.
-func (sn *LowerCaseNormalizer) Normalize(ns *NormalizedString) error {
+func (sn *LowerCaseNormalizer) Normalize(ns *normalizedstring.NormalizedString) error {
 	ns.ToLower()
 	return nil
 }

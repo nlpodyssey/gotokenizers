@@ -5,15 +5,15 @@
 package stripnormalizer
 
 import (
-	. "github.com/nlpodyssey/gotokenizers/normalizers"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/normalizers"
+	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
 )
 
 // StripNormalizer allows string normalization removing leading spaces,
 // trailing spaces, or both.
 type StripNormalizer struct{ left, right bool }
 
-var _ Normalizer = &StripNormalizer{}
+var _ normalizers.Normalizer = &StripNormalizer{}
 
 // NewStripNormalizer returns a new StripNormalizer, initialized for stripping
 // leading spaces (left) and/or trailing spaces (right).
@@ -22,7 +22,7 @@ func NewStripNormalizer(left, right bool) *StripNormalizer {
 }
 
 // Normalize strips the NormalizedString in place.
-func (sn *StripNormalizer) Normalize(ns *NormalizedString) error {
+func (sn *StripNormalizer) Normalize(ns *normalizedstring.NormalizedString) error {
 	ns.TrimLeftRight(sn.left, sn.right)
 	return nil
 }

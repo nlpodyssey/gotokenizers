@@ -105,7 +105,7 @@ func (r *NSOriginalRange) convertOffset(ns *NormalizedString) (start, end int, o
 	return r.normalizedRange(ns)
 }
 
-// NSOriginalRange identifies a (start, end) range of indices on the
+// NSNormalizedRange identifies a (start, end) range of indices on the
 // "normalized" value of a NormalizedString.
 type NSNormalizedRange struct{ baseNsRange }
 

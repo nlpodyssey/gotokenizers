@@ -5,19 +5,19 @@
 package sequencenormalizer
 
 import (
-	. "github.com/nlpodyssey/gotokenizers/normalizers"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/normalizers"
+	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
 )
 
 // SequenceNormalizer allows concatenating multiple other Normalizers as a
 // Sequence.
-type SequenceNormalizer struct{ normalizers []Normalizer }
+type SequenceNormalizer struct{ normalizers []normalizers.Normalizer }
 
-var _ Normalizer = &SequenceNormalizer{}
+var _ normalizers.Normalizer = &SequenceNormalizer{}
 
 // NewSequenceNormalizer returns a new SequenceNormalizer, initializing it
 // with the ordered sequence of Normalizers.
-func NewSequenceNormalizer(normalizers []Normalizer) *SequenceNormalizer {
+func NewSequenceNormalizer(normalizers []normalizers.Normalizer) *SequenceNormalizer {
 	return &SequenceNormalizer{normalizers: normalizers}
 }
 
@@ -26,7 +26,7 @@ func NewSequenceNormalizer(normalizers []Normalizer) *SequenceNormalizer {
 //
 // If one Normalizer returns an error, the same error is returned and
 // the subsequent Normalizers (if any) are ignored.
-func (sn *SequenceNormalizer) Normalize(ns *NormalizedString) error {
+func (sn *SequenceNormalizer) Normalize(ns *normalizedstring.NormalizedString) error {
 	for _, normalizer := range sn.normalizers {
 		err := normalizer.Normalize(ns)
 		if err != nil {
