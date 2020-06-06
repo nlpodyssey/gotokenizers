@@ -26,7 +26,7 @@ func NewWhiteSpacePreTokenizer() *WhiteSpacePreTokenizer {
 
 // PreTokenize splits the NormalizedString into word and non-word groups
 // separated by whitespace-like characters.
-func (wt *WhiteSpacePreTokenizer) PreTokenize(
+func (w *WhiteSpacePreTokenizer) PreTokenize(
 	ns *normalizedstring.NormalizedString,
 ) ([]pretokenizers.PreToken, error) {
 	str := ns.Get()

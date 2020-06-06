@@ -22,7 +22,7 @@ func NewWhiteSpaceSplitPreTokenizer() *WhiteSpaceSplitPreTokenizer {
 }
 
 // PreTokenize splits the NormalizedString by whitespace-like characters
-func (wt *WhiteSpaceSplitPreTokenizer) PreTokenize(
+func (w *WhiteSpaceSplitPreTokenizer) PreTokenize(
 	ns *normalizedstring.NormalizedString,
 ) ([]pretokenizers.PreToken, error) {
 	tokens := make([]pretokenizers.PreToken, 0)
