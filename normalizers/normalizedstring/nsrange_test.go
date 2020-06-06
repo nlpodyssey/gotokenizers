@@ -6,8 +6,6 @@ package normalizedstring
 
 import (
 	"testing"
-
-	. "github.com/nlpodyssey/gotokenizers/testing"
 )
 
 func TestNewNSOriginalRange(t *testing.T) {
@@ -20,19 +18,27 @@ func TestNewNSOriginalRange(t *testing.T) {
 
 func TestNSOriginalRangeStart(t *testing.T) {
 	r := NewNSOriginalRange(1, 2)
-	AssertIntEqual(t, "Start()", r.Start(), 1)
+	if r.Start() != 1 {
+		t.Errorf("expected Start() 1, actual %v", r.Start())
+	}
 }
 
 func TestNSOriginalRangeEnd(t *testing.T) {
 	r := NewNSOriginalRange(1, 2)
-	AssertIntEqual(t, "End()", r.End(), 2)
+	if r.End() != 2 {
+		t.Errorf("expected End() 1, actual %v", r.End())
+	}
 }
 
 func TestNSOriginalRangeGet(t *testing.T) {
 	r := NewNSOriginalRange(1, 2)
 	start, end := r.Get()
-	AssertIntEqual(t, "Get() start", start, 1)
-	AssertIntEqual(t, "Get() end", end, 2)
+	if start != 1 {
+		t.Errorf("expected Get() start 1, actual %v", start)
+	}
+	if end != 2 {
+		t.Errorf("expected Get() end 2, actual %v", end)
+	}
 }
 
 func TestNSOriginalSetStart(t *testing.T) {
@@ -72,19 +78,27 @@ func TestNewNSNormalizedRange(t *testing.T) {
 
 func TestNSNormalizedRangeStart(t *testing.T) {
 	r := NewNSNormalizedRange(1, 2)
-	AssertIntEqual(t, "Start()", r.Start(), 1)
+	if r.Start() != 1 {
+		t.Errorf("expected Start() 1, actual %v", r.Start())
+	}
 }
 
 func TestNSNormalizedRangeEnd(t *testing.T) {
 	r := NewNSNormalizedRange(1, 2)
-	AssertIntEqual(t, "End()", r.End(), 2)
+	if r.End() != 2 {
+		t.Errorf("expected End() 1, actual %v", r.End())
+	}
 }
 
 func TestNSNormalizedRangeGet(t *testing.T) {
 	r := NewNSNormalizedRange(1, 2)
 	start, end := r.Get()
-	AssertIntEqual(t, "Get() start", start, 1)
-	AssertIntEqual(t, "Get() end", end, 2)
+	if start != 1 {
+		t.Errorf("expected Get() start 1, actual %v", start)
+	}
+	if end != 2 {
+		t.Errorf("expected Get() end 2, actual %v", end)
+	}
 }
 
 func TestNSNormalizedSetStart(t *testing.T) {

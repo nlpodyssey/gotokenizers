@@ -6,9 +6,8 @@ package normalizedstring
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
-
-	. "github.com/nlpodyssey/gotokenizers/testing"
 )
 
 func TestNewNormalizedString(t *testing.T) {
@@ -84,7 +83,9 @@ func TestNormalizedStringLen(t *testing.T) {
 			normalized: "",
 			alignments: []AlignmentRange{},
 		}
-		AssertIntEqual(t, "Len()", ns.Len(), 0)
+		if ns.Len() != 0 {
+			t.Errorf("expected Len() 0, actual %v", ns.Len())
+		}
 	})
 
 	t.Run("with a simple normalized string", func(t *testing.T) {
@@ -93,7 +94,9 @@ func TestNormalizedStringLen(t *testing.T) {
 			normalized: "ab",
 			alignments: []AlignmentRange{{0, 1}, {1, 1}},
 		}
-		AssertIntEqual(t, "Len()", ns.Len(), 2)
+		if ns.Len() != 2 {
+			t.Errorf("expected Len() 2, actual %v", ns.Len())
+		}
 	})
 
 	t.Run("with a normalized string containing non-ASCII characters",
@@ -103,7 +106,9 @@ func TestNormalizedStringLen(t *testing.T) {
 				normalized: "Süß",
 				alignments: []AlignmentRange{{0, 1}, {1, 1}, {1, 1}},
 			}
-			AssertIntEqual(t, "Len()", ns.Len(), 3)
+			if ns.Len() != 3 {
+				t.Errorf("expected Len() 3, actual %v", ns.Len())
+			}
 		})
 }
 
@@ -114,7 +119,9 @@ func TestNormalizedStringLenOriginal(t *testing.T) {
 			normalized: "a",
 			alignments: []AlignmentRange{{0, 0}},
 		}
-		AssertIntEqual(t, "LenOriginal()", ns.LenOriginal(), 0)
+		if ns.LenOriginal() != 0 {
+			t.Errorf("expected LenOriginal() 0, actual %v", ns.LenOriginal())
+		}
 	})
 
 	t.Run("with a simple original string", func(t *testing.T) {
@@ -123,7 +130,9 @@ func TestNormalizedStringLenOriginal(t *testing.T) {
 			normalized: "",
 			alignments: []AlignmentRange{},
 		}
-		AssertIntEqual(t, "LenOriginal()", ns.LenOriginal(), 3)
+		if ns.LenOriginal() != 3 {
+			t.Errorf("expected LenOriginal() 3, actual %v", ns.LenOriginal())
+		}
 	})
 
 	t.Run("with an original string containing non-ASCII characters",
@@ -133,7 +142,9 @@ func TestNormalizedStringLenOriginal(t *testing.T) {
 				normalized: "",
 				alignments: []AlignmentRange{},
 			}
-			AssertIntEqual(t, "LenOriginal()", ns.LenOriginal(), 3)
+			if ns.LenOriginal() != 3 {
+				t.Errorf("expected LenOriginal() 3, actual %v", ns.LenOriginal())
+			}
 		})
 }
 
@@ -167,7 +178,9 @@ func TestNormalizedStringGet(t *testing.T) {
 		normalized: "ab",
 		alignments: []AlignmentRange{{0, 1}, {1, 1}},
 	}
-	AssertStringEqual(t, "Get()", ns.Get(), "ab")
+	if ns.Get() != "ab" {
+		t.Errorf("expected Get() 'ab', actual %v", ns.Get())
+	}
 }
 
 func TestNormalizedStringGetOriginal(t *testing.T) {
@@ -176,7 +189,9 @@ func TestNormalizedStringGetOriginal(t *testing.T) {
 		normalized: "ab",
 		alignments: []AlignmentRange{{0, 1}, {1, 1}},
 	}
-	AssertStringEqual(t, "GetOriginal()", ns.GetOriginal(), "a")
+	if ns.GetOriginal() != "a" {
+		t.Errorf("expected GetOriginal() 'a', actual %v", ns.GetOriginal())
+	}
 }
 
 func TestNormalizedStringConvertOffsetCommonCases(t *testing.T) {
@@ -190,17 +205,29 @@ func TestNormalizedStringConvertOffsetCommonCases(t *testing.T) {
 		t.Run(fmt.Sprintf("NSOriginalRange | %s", name), func(t *testing.T) {
 			r := NewNSOriginalRange(rangeStart, rangeEnd)
 			start, end, flag := ns.ConvertOffset(r)
-			AssertIntEqual(t, "start", start, expectedStart)
-			AssertIntEqual(t, "end", end, expectedEnd)
-			AssertBoolEqual(t, "flag", flag, expectedFlag)
+			if start != expectedStart {
+				t.Errorf("expected start %v, actual %v", expectedStart, start)
+			}
+			if end != expectedEnd {
+				t.Errorf("expected end %v, actual %v", expectedEnd, end)
+			}
+			if flag != expectedFlag {
+				t.Errorf("expected flag %v, actual %v", expectedFlag, flag)
+			}
 		})
 
 		t.Run(fmt.Sprintf("NSNormalizedRange | %s", name), func(t *testing.T) {
 			r := NewNSNormalizedRange(rangeStart, rangeEnd)
 			start, end, flag := ns.ConvertOffset(r)
-			AssertIntEqual(t, "start", start, expectedStart)
-			AssertIntEqual(t, "end", end, expectedEnd)
-			AssertBoolEqual(t, "flag", flag, expectedFlag)
+			if start != expectedStart {
+				t.Errorf("expected start %v, actual %v", expectedStart, start)
+			}
+			if end != expectedEnd {
+				t.Errorf("expected end %v, actual %v", expectedEnd, end)
+			}
+			if flag != expectedFlag {
+				t.Errorf("expected flag %v, actual %v", expectedFlag, flag)
+			}
 		})
 	}
 
@@ -230,9 +257,15 @@ func TestNormalizedStringConvertOffsetFromOriginalRange(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			r := NewNSOriginalRange(rangeStart, rangeEnd)
 			start, end, flag := ns.ConvertOffset(r)
-			AssertIntEqual(t, "start", start, expectedStart)
-			AssertIntEqual(t, "end", end, expectedEnd)
-			AssertBoolEqual(t, "flag", flag, expectedFlag)
+			if start != expectedStart {
+				t.Errorf("expected start %v, actual %v", expectedStart, start)
+			}
+			if end != expectedEnd {
+				t.Errorf("expected end %v, actual %v", expectedEnd, end)
+			}
+			if flag != expectedFlag {
+				t.Errorf("expected flag %v, actual %v", expectedFlag, flag)
+			}
 		})
 	}
 
@@ -326,9 +359,15 @@ func TestNormalizedStringConvertOffsetFromNormalizedRange(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			r := NewNSNormalizedRange(rangeStart, rangeEnd)
 			start, end, flag := ns.ConvertOffset(r)
-			AssertIntEqual(t, "start", start, expectedStart)
-			AssertIntEqual(t, "end", end, expectedEnd)
-			AssertBoolEqual(t, "flag", flag, expectedFlag)
+			if start != expectedStart {
+				t.Errorf("expected start %v, actual %v", expectedStart, start)
+			}
+			if end != expectedEnd {
+				t.Errorf("expected end %v, actual %v", expectedEnd, end)
+			}
+			if flag != expectedFlag {
+				t.Errorf("expected flag %v, actual %v", expectedFlag, flag)
+			}
 		})
 	}
 
@@ -763,7 +802,7 @@ func TestNormalizedStringTransform(t *testing.T) {
 
 	t.Run("it panics with Changes > 1", func(t *testing.T) {
 		ns := NewNormalizedString("Bar")
-		AssertPanic(t, "using a Change = 2", func() {
+		assertPanic(t, "using a Change = 2", func() {
 			ns.Transform([]RuneChanges{{'a', 2}}, 0)
 		})
 	})
@@ -1009,7 +1048,10 @@ func TestNormalizedStringForEach(t *testing.T) {
 	visitedRunes := make([]rune, 0, 3)
 	ns.ForEach(func(r rune) { visitedRunes = append(visitedRunes, r) })
 
-	AssertRuneSliceEqual(t, "visited runes", visitedRunes, []rune{'a', 'b', 'c'})
+	expected := []rune{'a', 'b', 'c'}
+	if !reflect.DeepEqual(visitedRunes, expected) {
+		t.Errorf("expected %v, actual %v", expected, visitedRunes)
+	}
 }
 
 func TestNormalizedStringLowercase(t *testing.T) {
@@ -1136,14 +1178,14 @@ func TestNormalizedStringSplitOff(t *testing.T) {
 
 	t.Run("using an index > len causes panic", func(t *testing.T) {
 		ns := NewNormalizedString("Foo")
-		AssertPanic(t, "using an index > len", func() {
+		assertPanic(t, "using an index > len", func() {
 			ns.SplitOff(4)
 		})
 	})
 
 	t.Run("using a negative index causes panic", func(t *testing.T) {
 		ns := NewNormalizedString("Foo")
-		AssertPanic(t, "using a negative index", func() {
+		assertPanic(t, "using a negative index", func() {
 			ns.SplitOff(-1)
 		})
 	})
@@ -1342,8 +1384,12 @@ func assertNormalizedStringEqual(
 	t *testing.T,
 	actual, expected *NormalizedString,
 ) {
-	AssertStringEqual(t, "original", actual.original, expected.original)
-	AssertStringEqual(t, "normalized", actual.normalized, expected.normalized)
+	if expected.original != actual.original {
+		t.Errorf("expected original %#v, actual %#v", expected.original, actual.original)
+	}
+	if expected.normalized != actual.normalized {
+		t.Errorf("expected normalized %#v, actual %#v", expected.normalized, actual.normalized)
+	}
 	assertAlignmentsEqual(t, actual.alignments, expected.alignments)
 }
 
@@ -1365,4 +1411,13 @@ func assertAlignmentsEqual(
 				expected, actual, index, expected[index], actual[index])
 		}
 	}
+}
+
+func assertPanic(t *testing.T, what string, callback func()) {
+	defer func() {
+		if recover() == nil {
+			t.Errorf("%s was expected to panic, but recover() is nil", what)
+		}
+	}()
+	callback()
 }
