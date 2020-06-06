@@ -13,6 +13,8 @@ import (
 )
 
 func TestWhiteSpaceSplitPreTokenizer(t *testing.T) {
+	t.Parallel()
+
 	wt := NewWhiteSpaceSplitPreTokenizer()
 
 	tests := []struct {
@@ -53,6 +55,8 @@ func TestWhiteSpaceSplitPreTokenizer(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(fmt.Sprintf("%#v", test.str), func(t *testing.T) {
+			t.Parallel()
+
 			ns := NewNormalizedString(test.str)
 			tokens, err := wt.PreTokenize(ns)
 			if err != nil {

@@ -10,6 +10,8 @@ import (
 )
 
 func TestStripNormalizerLeftOnly(t *testing.T) {
+	t.Parallel()
+
 	sn := NewStripNormalizer(true, false)
 	ns := NewNormalizedString(" \n\tfoo\t\n ")
 	err := sn.Normalize(ns)
@@ -23,6 +25,8 @@ func TestStripNormalizerLeftOnly(t *testing.T) {
 }
 
 func TestStripNormalizerRightOnly(t *testing.T) {
+	t.Parallel()
+
 	sn := NewStripNormalizer(false, true)
 	ns := NewNormalizedString(" \n\tfoo\t\n ")
 	err := sn.Normalize(ns)
@@ -36,6 +40,8 @@ func TestStripNormalizerRightOnly(t *testing.T) {
 }
 
 func TestStripNormalizerLeftAndRight(t *testing.T) {
+	t.Parallel()
+
 	sn := NewStripNormalizer(true, true)
 	ns := NewNormalizedString(" \n\tfoo\t\n ")
 	err := sn.Normalize(ns)
@@ -49,6 +55,8 @@ func TestStripNormalizerLeftAndRight(t *testing.T) {
 }
 
 func TestStripNormalizerNoLeftAndNoRight(t *testing.T) {
+	t.Parallel()
+
 	sn := NewStripNormalizer(false, false)
 	ns := NewNormalizedString(" \n\tfoo\t\n ")
 	err := sn.Normalize(ns)

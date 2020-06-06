@@ -10,6 +10,8 @@ import (
 )
 
 func TestDefaultBertNormalizer(t *testing.T) {
+	t.Parallel()
+
 	sn := DefaultBertNormalizer()
 	ns := NewNormalizedString("(\n\t) (\a\b) (咖啡) (o\u0302) (BAR)")
 	err := sn.Normalize(ns)
@@ -22,6 +24,8 @@ func TestDefaultBertNormalizer(t *testing.T) {
 	}
 }
 func TestBertNormalizerWithAllFlagsEnabled(t *testing.T) {
+	t.Parallel()
+
 	sn := NewBertNormalizer(true, true, true, true)
 	ns := NewNormalizedString("(\n\t) (\a\b) (咖啡) (o\u0302) (BAR)")
 	err := sn.Normalize(ns)
@@ -35,6 +39,8 @@ func TestBertNormalizerWithAllFlagsEnabled(t *testing.T) {
 }
 
 func TestBertNormalizerWithAllFlagsDisabled(t *testing.T) {
+	t.Parallel()
+
 	sn := NewBertNormalizer(false, false, false, false)
 	ns := NewNormalizedString("(\n\t) (\a\b) (咖啡) (o\u0302) (BAR)")
 	err := sn.Normalize(ns)
@@ -48,6 +54,8 @@ func TestBertNormalizerWithAllFlagsDisabled(t *testing.T) {
 }
 
 func TestBertNormalizerWithTextCleaningOnly(t *testing.T) {
+	t.Parallel()
+
 	sn := NewBertNormalizer(true, false, false, false)
 	ns := NewNormalizedString("(\n\t) (\a\b) (咖啡) (o\u0302) (BAR)")
 	err := sn.Normalize(ns)
@@ -61,6 +69,8 @@ func TestBertNormalizerWithTextCleaningOnly(t *testing.T) {
 }
 
 func TestBertNormalizerWithChineseCharsHandlingOnly(t *testing.T) {
+	t.Parallel()
+
 	sn := NewBertNormalizer(false, true, false, false)
 	ns := NewNormalizedString("(\n\t) (\a\b) (咖啡) (o\u0302) (BAR)")
 	err := sn.Normalize(ns)
@@ -74,6 +84,8 @@ func TestBertNormalizerWithChineseCharsHandlingOnly(t *testing.T) {
 }
 
 func TestBertNormalizerWithAccentsStrippingOnly(t *testing.T) {
+	t.Parallel()
+
 	sn := NewBertNormalizer(false, false, true, false)
 	ns := NewNormalizedString("(\n\t) (\a\b) (咖啡) (o\u0302) (BAR)")
 	err := sn.Normalize(ns)
@@ -87,6 +99,8 @@ func TestBertNormalizerWithAccentsStrippingOnly(t *testing.T) {
 }
 
 func TestBertNormalizerWithLowerCaseOnly(t *testing.T) {
+	t.Parallel()
+
 	sn := NewBertNormalizer(false, false, false, true)
 	ns := NewNormalizedString("(\n\t) (\a\b) (咖啡) (o\u0302) (BAR)")
 	err := sn.Normalize(ns)

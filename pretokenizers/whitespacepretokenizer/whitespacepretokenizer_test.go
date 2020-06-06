@@ -13,6 +13,8 @@ import (
 )
 
 func TestWhiteSpacePreTokenizer(t *testing.T) {
+	t.Parallel()
+
 	wt := NewWhiteSpacePreTokenizer()
 
 	tests := []struct {

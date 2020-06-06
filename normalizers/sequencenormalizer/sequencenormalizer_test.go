@@ -13,6 +13,8 @@ import (
 )
 
 func TestSequenceNormalizerWithTwoNormalizers(t *testing.T) {
+	t.Parallel()
+
 	sn := NewSequenceNormalizer([]Normalizer{
 		NewLowerCaseNormalizer(),
 		NewStripNormalizer(true, true),
@@ -29,6 +31,8 @@ func TestSequenceNormalizerWithTwoNormalizers(t *testing.T) {
 }
 
 func TestSequenceNormalizerWithOneNormalizer(t *testing.T) {
+	t.Parallel()
+
 	sn := NewSequenceNormalizer([]Normalizer{
 		NewStripNormalizer(true, true),
 	})
@@ -44,6 +48,8 @@ func TestSequenceNormalizerWithOneNormalizer(t *testing.T) {
 }
 
 func TestSequenceNormalizerWithEmptySequence(t *testing.T) {
+	t.Parallel()
+
 	sn := NewSequenceNormalizer([]Normalizer{})
 	ns := NewNormalizedString("  foo  ")
 	err := sn.Normalize(ns)

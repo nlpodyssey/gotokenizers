@@ -10,6 +10,8 @@ import (
 )
 
 func TestLowerCaseNormalizer(t *testing.T) {
+	t.Parallel()
+
 	sn := NewLowerCaseNormalizer()
 	ns := NewNormalizedString("Foo Bar SÜẞ")
 	err := sn.Normalize(ns)
