@@ -23,32 +23,32 @@ func TestWhiteSpacePreTokenizer(t *testing.T) {
 		{str: " ", expected: []PreToken{}},
 		{str: " \n\t", expected: []PreToken{}},
 		{str: "x", expected: []PreToken{
-			{String: "x", ByteStart: 0, ByteEnd: 1},
+			{String: "x", Start: 0, End: 1},
 		}},
 		{str: "foo", expected: []PreToken{
-			{String: "foo", ByteStart: 0, ByteEnd: 3},
+			{String: "foo", Start: 0, End: 3},
 		}},
 		{str: "foo bar", expected: []PreToken{
-			{String: "foo", ByteStart: 0, ByteEnd: 3},
-			{String: "bar", ByteStart: 4, ByteEnd: 7},
+			{String: "foo", Start: 0, End: 3},
+			{String: "bar", Start: 4, End: 7},
 		}},
 		{str: "foo \nbar", expected: []PreToken{
-			{String: "foo", ByteStart: 0, ByteEnd: 3},
-			{String: "bar", ByteStart: 5, ByteEnd: 8},
+			{String: "foo", Start: 0, End: 3},
+			{String: "bar", Start: 5, End: 8},
 		}},
 		{str: " foo bar ", expected: []PreToken{
-			{String: "foo", ByteStart: 1, ByteEnd: 4},
-			{String: "bar", ByteStart: 5, ByteEnd: 8},
+			{String: "foo", Start: 1, End: 4},
+			{String: "bar", Start: 5, End: 8},
 		}},
 		{str: "!", expected: []PreToken{
-			{String: "!", ByteStart: 0, ByteEnd: 1},
+			{String: "!", Start: 0, End: 1},
 		}},
 		{str: "!?.", expected: []PreToken{
-			{String: "!?.", ByteStart: 0, ByteEnd: 3},
+			{String: "!?.", Start: 0, End: 3},
 		}},
 		{str: "Süß!?", expected: []PreToken{
-			{String: "Süß", ByteStart: 0, ByteEnd: 5},
-			{String: "!?", ByteStart: 5, ByteEnd: 7},
+			{String: "Süß", Start: 0, End: 3},
+			{String: "!?", Start: 3, End: 5},
 		}},
 	}
 

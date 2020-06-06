@@ -21,8 +21,8 @@ type PreTokenizer interface {
 type PreToken struct {
 	// The pre-tokenized substring
 	String string
-	// Start byte position on the original string, inclusive
-	ByteStart int
-	// End byte position on the original string, exclusive
-	ByteEnd int
+	// Start rune position on the original string, inclusive
+	Start int
+	// End rune position on the original string, exclusive
+	End int
 }

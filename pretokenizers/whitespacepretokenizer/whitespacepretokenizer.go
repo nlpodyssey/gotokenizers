@@ -33,12 +33,22 @@ func (wt *WhiteSpacePreTokenizer) PreTokenize(
 	matches := tokensPattern.FindAllStringIndex(str, -1)
 	tokens := make([]pretokenizers.PreToken, len(matches))
 
+	lastByteIndex := 0
+	lastRuneIndex := 0
 	for index, match := range matches {
+		tokenString := str[match[0]:match[1]]
+		// Matches' indices are based on bytes, but PreToken refer to runes
+		startRuneIndex := lastRuneIndex + len([]rune(str[lastByteIndex:match[0]]))
+		endRuneIndex := startRuneIndex + len([]rune(tokenString))
+
 		tokens[index] = pretokenizers.PreToken{
-			String:    str[match[0]:match[1]],
-			ByteStart: match[0],
-			ByteEnd:   match[1],
+			String: tokenString,
+			Start:  startRuneIndex,
+			End:    endRuneIndex,
 		}
+
+		lastByteIndex = match[1]
+		lastRuneIndex = endRuneIndex
 	}
 
 	return tokens, nil
