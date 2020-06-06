@@ -48,8 +48,9 @@ func TestWhiteSpaceSplitPreTokenizer(t *testing.T) {
 		{str: "!?.", expected: []PreToken{
 			{String: "!?.", Start: 0, End: 3},
 		}},
-		{str: "Süß!?", expected: []PreToken{
-			{String: "Süß!?", Start: 0, End: 5},
+		{str: "Süß Café!?", expected: []PreToken{
+			{String: "Süß", Start: 0, End: 3},
+			{String: "Café!?", Start: 4, End: 10},
 		}},
 	}
 

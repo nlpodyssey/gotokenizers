@@ -28,7 +28,8 @@ func (w *WhiteSpaceSplitPreTokenizer) PreTokenize(
 	tokens := make([]pretokenizers.PreToken, 0)
 	word := make([]rune, 0)
 
-	for index, r := range ns.Get() {
+	index := 0
+	for _, r := range ns.Get() {
 		if unicode.In(r, unicode.White_Space) {
 			if len(word) > 0 {
 				tokens = append(tokens, pretokenizers.PreToken{
@@ -38,9 +39,10 @@ func (w *WhiteSpaceSplitPreTokenizer) PreTokenize(
 				})
 				word = word[:0]
 			}
-			continue
+		} else {
+			word = append(word, r)
 		}
-		word = append(word, r)
+		index++
 	}
 
 	if len(word) > 0 {
