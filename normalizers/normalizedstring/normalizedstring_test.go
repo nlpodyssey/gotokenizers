@@ -14,8 +14,6 @@ func TestNewNormalizedString(t *testing.T) {
 	t.Parallel()
 
 	t.Run("with an empty string", func(t *testing.T) {
-		t.Parallel()
-
 		assertNormalizedStringEqual(t, NewNormalizedString(""),
 			&NormalizedString{
 				original:   "",
@@ -26,8 +24,6 @@ func TestNewNormalizedString(t *testing.T) {
 	})
 
 	t.Run("with a simple string", func(t *testing.T) {
-		t.Parallel()
-
 		assertNormalizedStringEqual(t, NewNormalizedString("Abc"),
 			&NormalizedString{
 				original:   "Abc",
@@ -38,8 +34,6 @@ func TestNewNormalizedString(t *testing.T) {
 	})
 
 	t.Run("with a string containing non-ASCII characters", func(t *testing.T) {
-		t.Parallel()
-
 		assertNormalizedStringEqual(t, NewNormalizedString("Süß"),
 			&NormalizedString{
 				original:   "Süß",
@@ -54,8 +48,6 @@ func TestNormalizedStringEqual(t *testing.T) {
 	t.Parallel()
 
 	t.Run("true if `normalized` is the same", func(t *testing.T) {
-		t.Parallel()
-
 		a := &NormalizedString{
 			original:   "a",
 			normalized: "ab",
@@ -72,8 +64,6 @@ func TestNormalizedStringEqual(t *testing.T) {
 	})
 
 	t.Run("false if `normalized` differ", func(t *testing.T) {
-		t.Parallel()
-
 		a := &NormalizedString{
 			original:   "a",
 			normalized: "ab",
@@ -94,8 +84,6 @@ func TestNormalizedStringLen(t *testing.T) {
 	t.Parallel()
 
 	t.Run("with an empty normalized string", func(t *testing.T) {
-		t.Parallel()
-
 		ns := &NormalizedString{
 			original:   "ab",
 			normalized: "",
@@ -107,8 +95,6 @@ func TestNormalizedStringLen(t *testing.T) {
 	})
 
 	t.Run("with a simple normalized string", func(t *testing.T) {
-		t.Parallel()
-
 		ns := &NormalizedString{
 			original:   "a",
 			normalized: "ab",
@@ -121,8 +107,6 @@ func TestNormalizedStringLen(t *testing.T) {
 
 	t.Run("with a normalized string containing non-ASCII characters",
 		func(t *testing.T) {
-			t.Parallel()
-
 			ns := &NormalizedString{
 				original:   "S",
 				normalized: "Süß",
@@ -138,8 +122,6 @@ func TestNormalizedStringLenOriginal(t *testing.T) {
 	t.Parallel()
 
 	t.Run("with an empty original string", func(t *testing.T) {
-		t.Parallel()
-
 		ns := &NormalizedString{
 			original:   "",
 			normalized: "a",
@@ -151,8 +133,6 @@ func TestNormalizedStringLenOriginal(t *testing.T) {
 	})
 
 	t.Run("with a simple original string", func(t *testing.T) {
-		t.Parallel()
-
 		ns := &NormalizedString{
 			original:   "abc",
 			normalized: "",
@@ -165,8 +145,6 @@ func TestNormalizedStringLenOriginal(t *testing.T) {
 
 	t.Run("with an original string containing non-ASCII characters",
 		func(t *testing.T) {
-			t.Parallel()
-
 			ns := &NormalizedString{
 				original:   "Süß",
 				normalized: "",
@@ -182,8 +160,6 @@ func TestNormalizedStringIsEmpty(t *testing.T) {
 	t.Parallel()
 
 	t.Run("true if `normalized` is empty", func(t *testing.T) {
-		t.Parallel()
-
 		ns := &NormalizedString{
 			original:   "abc",
 			normalized: "",
@@ -195,8 +171,6 @@ func TestNormalizedStringIsEmpty(t *testing.T) {
 	})
 
 	t.Run("false if `normalized` is not empty", func(t *testing.T) {
-		t.Parallel()
-
 		ns := &NormalizedString{
 			original:   "",
 			normalized: "a",
@@ -245,8 +219,6 @@ func TestNormalizedStringConvertOffsetCommonCases(t *testing.T) {
 		expectedFlag bool,
 	) {
 		t.Run(fmt.Sprintf("NSOriginalRange | %s", name), func(t *testing.T) {
-			t.Parallel()
-
 			r := NewNSOriginalRange(rangeStart, rangeEnd)
 			start, end, flag := ns.ConvertOffset(r)
 			if start != expectedStart {
@@ -261,8 +233,6 @@ func TestNormalizedStringConvertOffsetCommonCases(t *testing.T) {
 		})
 
 		t.Run(fmt.Sprintf("NSNormalizedRange | %s", name), func(t *testing.T) {
-			t.Parallel()
-
 			r := NewNSNormalizedRange(rangeStart, rangeEnd)
 			start, end, flag := ns.ConvertOffset(r)
 			if start != expectedStart {
@@ -303,8 +273,6 @@ func TestNormalizedStringConvertOffsetFromOriginalRange(t *testing.T) {
 		expectedFlag bool,
 	) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			r := NewNSOriginalRange(rangeStart, rangeEnd)
 			start, end, flag := ns.ConvertOffset(r)
 			if start != expectedStart {
@@ -409,8 +377,6 @@ func TestNormalizedStringConvertOffsetFromNormalizedRange(t *testing.T) {
 		expectedFlag bool,
 	) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			r := NewNSNormalizedRange(rangeStart, rangeEnd)
 			start, end, flag := ns.ConvertOffset(r)
 			if start != expectedStart {
@@ -501,8 +467,6 @@ func TestNormalizedStringGetRange(t *testing.T) {
 		expFlag bool,
 	) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			if s, f := ns.GetRange(nsRange); s != expStr || f != expFlag {
 				t.Errorf("Expected (%#v, %v), but got (%#v, %v)",
 					expStr, expFlag, s, f)
@@ -611,8 +575,6 @@ func TestNormalizedStringGetRangeOriginal(t *testing.T) {
 		expFlag bool,
 	) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			if s, f := ns.GetRangeOriginal(nsRange); s != expStr || f != expFlag {
 				t.Errorf("Expected (%#v, %v), but got (%#v, %v)",
 					expStr, expFlag, s, f)
@@ -721,8 +683,6 @@ func TestNormalizedStringTransform(t *testing.T) {
 		expected *NormalizedString,
 	) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			ns.Transform(dest, initialOffset)
 			assertNormalizedStringEqual(t, ns, expected)
 		})
@@ -867,8 +827,6 @@ func TestNormalizedStringTransform(t *testing.T) {
 		})
 
 	t.Run("it panics with Changes > 1", func(t *testing.T) {
-		t.Parallel()
-
 		ns := NewNormalizedString("Bar")
 		assertPanic(t, "using a Change = 2", func() {
 			ns.Transform([]RuneChanges{{'a', 2}}, 0)
@@ -886,8 +844,6 @@ func TestNormalizedStringFilter(t *testing.T) {
 		expected *NormalizedString,
 	) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			ns.Filter(filter)
 			assertNormalizedStringEqual(t, ns, expected)
 		})
@@ -992,8 +948,6 @@ func TestNormalizedStringPrepend(t *testing.T) {
 		expected *NormalizedString,
 	) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			ns.Prepend(s)
 			assertNormalizedStringEqual(t, ns, expected)
 		})
@@ -1056,8 +1010,6 @@ func TestNormalizedStringAppend(t *testing.T) {
 		expected *NormalizedString,
 	) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			ns.Append(s)
 			assertNormalizedStringEqual(t, ns, expected)
 		})
@@ -1143,8 +1095,6 @@ func TestNormalizedStringLowercase(t *testing.T) {
 
 	run := func(s string, expected *NormalizedString) {
 		t.Run(fmt.Sprintf("%#v", s), func(t *testing.T) {
-			t.Parallel()
-
 			ns := NewNormalizedString(s)
 			ns.ToLower()
 			assertNormalizedStringEqual(t, ns, expected)
@@ -1169,8 +1119,6 @@ func TestNormalizedStringUppercase(t *testing.T) {
 
 	run := func(s string, expected *NormalizedString) {
 		t.Run(fmt.Sprintf("%#v", s), func(t *testing.T) {
-			t.Parallel()
-
 			ns := NewNormalizedString(s)
 			ns.ToUpper()
 			assertNormalizedStringEqual(t, ns, expected)
@@ -1200,8 +1148,6 @@ func TestNormalizedStringSplitOff(t *testing.T) {
 		expModified, expNewNs *NormalizedString,
 	) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			actualNewNs := ns.SplitOff(at)
 			assertNormalizedStringEqual(t, ns, expModified)
 			assertNormalizedStringEqual(t, actualNewNs, expNewNs)
@@ -1273,8 +1219,6 @@ func TestNormalizedStringSplitOff(t *testing.T) {
 	)
 
 	t.Run("using an index > len causes panic", func(t *testing.T) {
-		t.Parallel()
-
 		ns := NewNormalizedString("Foo")
 		assertPanic(t, "using an index > len", func() {
 			ns.SplitOff(4)
@@ -1282,8 +1226,6 @@ func TestNormalizedStringSplitOff(t *testing.T) {
 	})
 
 	t.Run("using a negative index causes panic", func(t *testing.T) {
-		t.Parallel()
-
 		ns := NewNormalizedString("Foo")
 		assertPanic(t, "using a negative index", func() {
 			ns.SplitOff(-1)
@@ -1296,8 +1238,6 @@ func TestNormalizedStringMergeWith(t *testing.T) {
 
 	run := func(name string, ns, other, expected *NormalizedString) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			ns.MergeWith(other)
 			assertNormalizedStringEqual(t, ns, expected)
 		})
@@ -1338,8 +1278,6 @@ func TestNormalizedStringStrip(t *testing.T) {
 
 	run := func(name string, ns, expected *NormalizedString) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			ns.Trim()
 			assertNormalizedStringEqual(t, ns, expected)
 		})
@@ -1383,8 +1321,6 @@ func TestNormalizedStringStripLeft(t *testing.T) {
 
 	run := func(name string, ns, expected *NormalizedString) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			ns.TrimLeft()
 			assertNormalizedStringEqual(t, ns, expected)
 		})
@@ -1425,8 +1361,6 @@ func TestNormalizedStringStripRight(t *testing.T) {
 
 	run := func(name string, ns, expected *NormalizedString) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			ns.TrimRight()
 			assertNormalizedStringEqual(t, ns, expected)
 		})
@@ -1466,8 +1400,6 @@ func TestAlignmentRangeEqual(t *testing.T) {
 	t.Parallel()
 
 	t.Run("true if `pos` and `changes` are the same", func(t *testing.T) {
-		t.Parallel()
-
 		a := AlignmentRange{start: 1, end: 2}
 		b := AlignmentRange{start: 1, end: 2}
 		if !a.Equal(b) {
@@ -1476,8 +1408,6 @@ func TestAlignmentRangeEqual(t *testing.T) {
 	})
 
 	t.Run("false if `pos` differ", func(t *testing.T) {
-		t.Parallel()
-
 		a := AlignmentRange{start: 1, end: 2}
 		b := AlignmentRange{start: 3, end: 2}
 		if a.Equal(b) {
@@ -1486,8 +1416,6 @@ func TestAlignmentRangeEqual(t *testing.T) {
 	})
 
 	t.Run("false if `changes` differ", func(t *testing.T) {
-		t.Parallel()
-
 		a := AlignmentRange{start: 1, end: 2}
 		b := AlignmentRange{start: 1, end: 3}
 		if a.Equal(b) {
@@ -1496,8 +1424,6 @@ func TestAlignmentRangeEqual(t *testing.T) {
 	})
 
 	t.Run("false if `pos` and `changes` are different", func(t *testing.T) {
-		t.Parallel()
-
 		a := AlignmentRange{start: 1, end: 2}
 		b := AlignmentRange{start: 3, end: 4}
 		if a.Equal(b) {
