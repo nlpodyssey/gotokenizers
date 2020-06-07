@@ -14,7 +14,7 @@ import (
 // replacing all the whitespace-like characters with the provided
 // meta-character (rune) and splitting the string by this character.
 //
-// A prefix whitespace (' ') can be optionally prepended to the input string,
+// A whitespace prefix (' ') can be optionally prepended to the input string,
 // unless the first rune of the string is already a unicode whitespace.
 type MetaSpacePreTokenizer struct {
 	metaCharacter      rune
