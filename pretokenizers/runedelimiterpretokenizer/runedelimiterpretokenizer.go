@@ -30,9 +30,8 @@ func (rd *RuneDelimiterPreTokenizer) PreTokenize(
 	tokens := make([]pretokenizers.PreToken, 0)
 	word := make([]rune, 0)
 
-	str := string(ns.Get())
 	index := 0
-	for _, r := range str {
+	for _, r := range ns.Get() {
 		if r == rd.delimiter {
 			if len(word) > 0 {
 				tokens = append(tokens, pretokenizers.PreToken{
