@@ -5,6 +5,7 @@
 package sequencenormalizer
 
 import (
+	"fmt"
 	. "github.com/nlpodyssey/gotokenizers/normalizers"
 	. "github.com/nlpodyssey/gotokenizers/normalizers/lowercasenormalizer"
 	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
@@ -59,5 +60,28 @@ func TestSequenceNormalizerWithEmptySequence(t *testing.T) {
 	expected := "  foo  "
 	if actual := ns.Get(); actual != expected {
 		t.Errorf("expected %#v, actual %#v", expected, actual)
+	}
+}
+
+type ErrorNormalizer struct{}
+
+var _ Normalizer = &ErrorNormalizer{}
+
+func (sn *ErrorNormalizer) Normalize(_ *NormalizedString) error {
+	return fmt.Errorf("sample error")
+}
+
+func TestSequenceNormalizerReturnsTheFirstErrorEncountered(t *testing.T) {
+	t.Parallel()
+
+	sn := NewSequenceNormalizer([]Normalizer{
+		NewLowerCaseNormalizer(),
+		&ErrorNormalizer{},
+		NewStripNormalizer(true, true),
+	})
+	ns := NewNormalizedString("Foo")
+	err := sn.Normalize(ns)
+	if err == nil {
+		t.Errorf("expected error, actual nil")
 	}
 }
