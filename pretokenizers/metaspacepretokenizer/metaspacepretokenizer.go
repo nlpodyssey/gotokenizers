@@ -35,8 +35,8 @@ func NewMetaSpacePreTokenizer(
 	}
 }
 
-// Default meta-character (rune) used to initialize a
-// DefaultMetaSpacePreTokenizer.
+// DefaultMetaCharacter is the default meta-character (rune) used to
+// initialize a DefaultMetaSpacePreTokenizer.
 //
 // This value is a lower one eighth block U+2581.
 const DefaultMetaCharacter = '▁'
