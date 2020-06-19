@@ -1451,6 +1451,22 @@ func TestGetRangeOf(t *testing.T) {
 	run("valid range", "foo", 1, 2, "o", true)
 }
 
+func TestCountTrailingSpaces(t *testing.T) {
+	run := func(str string, expected int) {
+		t.Run(fmt.Sprintf("%#v => %d", str, expected), func(t *testing.T) {
+			actual := countTrailingSpaces([]rune(str))
+			if actual != expected {
+				t.Errorf("expected %d, actual %d", expected, actual)
+			}
+		})
+	}
+
+	run("", 0)
+	run("foo", 0)
+	run("foo ", 1)
+	run("foo \n\t", 3)
+}
+
 func assertNormalizedStringEqual(
 	t *testing.T,
 	actual, expected *NormalizedString,
