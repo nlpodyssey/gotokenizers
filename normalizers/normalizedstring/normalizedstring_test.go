@@ -1432,6 +1432,25 @@ func TestAlignmentRangeEqual(t *testing.T) {
 	})
 }
 
+func TestGetRangeOf(t *testing.T) {
+	run := func(testName, str string, start, end int, expStr string, expOk bool) {
+		t.Run(testName, func(t *testing.T) {
+			s, ok := getRangeOf(str, start, end)
+			if s != expStr || ok != expOk {
+				t.Errorf("expected (%#v, %v), actual (%#v, %v)",
+					expStr, expOk, s, ok)
+			}
+		})
+	}
+
+	run("empty string", "", 0, 0, "", false)
+	run("end < start", "foo", 2, 1, "", false)
+	run("end = start", "foo", 1, 1, "", false)
+	run("start < 0", "foo", -1, 1, "", false)
+	run("end > len", "foo", 0, 4, "", false)
+	run("valid range", "foo", 1, 2, "o", true)
+}
+
 func assertNormalizedStringEqual(
 	t *testing.T,
 	actual, expected *NormalizedString,
