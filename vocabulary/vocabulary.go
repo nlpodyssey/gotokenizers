@@ -4,6 +4,11 @@
 
 package vocabulary
 
+import (
+	"encoding/json"
+	"io/ioutil"
+)
+
 // Vocabulary stores ID-term bidirectional associations.
 type Vocabulary struct {
 	termToID map[string]int
@@ -16,6 +21,27 @@ func NewVocabulary() *Vocabulary {
 		termToID: make(map[string]int),
 		idToTerm: make(map[int]string),
 	}
+}
+
+// FromJSONFile reads a vocabulary from JSON file.
+func FromJSONFile(filename string) (*Vocabulary, error) {
+	rawData, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	var termToID map[string]int
+	err = json.Unmarshal(rawData, &termToID)
+	if err != nil {
+		return nil, err
+	}
+
+	idToTerm := make(map[int]string, len(termToID))
+	for term, id := range termToID {
+		idToTerm[id] = term
+	}
+
+	return &Vocabulary{termToID: termToID, idToTerm: idToTerm}, nil
 }
 
 // AddTerm adds a new term to the vocabulary.
