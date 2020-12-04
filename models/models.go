@@ -5,10 +5,9 @@
 package models
 
 type Token struct {
-	ID        int
-	Value     string
-	Offsets   TokenOffsets
-	WordIndex int
+	ID      int
+	Value   string
+	Offsets TokenOffsets
 }
 
 type TokenOffsets struct {
