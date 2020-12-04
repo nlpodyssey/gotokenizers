@@ -26,12 +26,22 @@ func NewDefaultCache() *WordCache {
 }
 
 func (c *WordCache) SetValues(keys []string, values []*Word) {
+	// TODO: to be implemented...
+}
+
+func (c *WordCache) Set(key string, values *Word) {
+	// TODO: to be implemented...
+}
+
+func (c *WordCache) Get(key string) *Word {
+	// TODO: to be implemented...
+	return nil
 }
 
 func (c *WordCache) GetValues(keys []string) []*Word {
 	words := make([]*Word, len(keys))
-	for i := range keys {
-		words[i] = nil
+	for i, key := range keys {
+		words[i] = c.Get(key)
 	}
 	return words
 }
