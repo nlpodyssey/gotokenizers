@@ -22,10 +22,10 @@ func (h *WordMergeHeap) Len() int {
 func (h *WordMergeHeap) Less(i, j int) bool {
 	// By manually implementing this, we make the heap a min-heap,
 	// ordered first on the rank, and on the pos otherwise.
-	if (*h)[i].Rank == (*h)[j].Rank {
-		return (*h)[i].Pos > (*h)[j].Pos
+	if (*h)[i].Rank != (*h)[j].Rank {
+		return (*h)[i].Rank < (*h)[j].Rank
 	}
-	return (*h)[i].Rank > (*h)[j].Rank
+	return (*h)[i].Pos < (*h)[j].Pos
 }
 
 func (h *WordMergeHeap) Swap(i, j int) {
