@@ -14,7 +14,7 @@ type Symbol struct {
 	// Unique identifier, which implicitly refers to a sequence of characters.
 	// For example, it might be the ID of a word in a vocabulary.
 	ID int
-	// The length of the implicit sequence of characters.
+	// The length in bytes of the implicit sequence of characters.
 	Length int
 }
 
@@ -56,6 +56,12 @@ func NewWord() *Word {
 	return &w
 }
 
+// NewWord returns a new empty Word with the given capacity.
+func NewWordWithCapacity(capacity int) *Word {
+	w := make(Word, 0, capacity)
+	return &w
+}
+
 func (w *Word) Len() int {
 	return len(*w)
 }
@@ -65,11 +71,11 @@ func (w *Word) getSymbolID(index int) int {
 }
 
 // Add appends a new symbol to the Word.
-func (w *Word) Add(symbolID int) {
+func (w *Word) Add(symbolID, byteLen int) {
 	sym := &WordSymbol{
 		Symbol: Symbol{
 			ID:     symbolID,
-			Length: 1,
+			Length: byteLen,
 		},
 		Prev: w.Len() - 1,
 		Next: -1,
