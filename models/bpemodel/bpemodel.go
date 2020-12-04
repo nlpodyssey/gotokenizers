@@ -7,7 +7,6 @@ package bpemodel
 import (
 	"fmt"
 	"github.com/nlpodyssey/gotokenizers/models"
-	"github.com/nlpodyssey/gotokenizers/pretokenizers"
 	"github.com/nlpodyssey/gotokenizers/vocabulary"
 )
 
@@ -40,6 +39,8 @@ type BpeModel struct {
 	// An optional suffix to characterize and end-of-word subword.
 	// Set to empty string to disable.
 	endOfWordSuffix string
+	// Whether to fuse multiple unknown tokens
+	unknownFusionEnabled bool
 }
 
 // NewBpeModel returns a new BpeModel initialized with the given options.
@@ -51,6 +52,7 @@ func NewBpeModel(
 	unknownToken string,
 	continuingSubwordPrefix string,
 	endOfWordSuffix string,
+	unknownFusionEnabled bool,
 ) *BpeModel {
 	return &BpeModel{
 		vocab:                   vocab,
@@ -60,6 +62,7 @@ func NewBpeModel(
 		unknownToken:            unknownToken,
 		continuingSubwordPrefix: continuingSubwordPrefix,
 		endOfWordSuffix:         endOfWordSuffix,
+		unknownFusionEnabled:    unknownFusionEnabled,
 	}
 }
 
@@ -72,82 +75,134 @@ func NewDefaultBpeModel() *BpeModel {
 		unknownToken:            "",
 		continuingSubwordPrefix: "",
 		endOfWordSuffix:         "",
+		unknownFusionEnabled:    false,
 	}
 }
 
-func (m *BpeModel) Tokenize(sentence []pretokenizers.PreToken) ([]models.Token, error) {
-	if len(sentence) == 0 {
-		return []models.Token{}, nil
+func (m *BpeModel) Tokenize(sequence string) ([]models.Token, error) {
+	if len(sequence) == 0 {
+		return nil, nil
 	}
 
-	if m.hasDropout() {
-		// If using dropout we don't want to use the cache.
-		return m.tokenizeWithoutCache(sentence)
+	if !m.hasDropout() {
+		return m.tokenizeWithCache(sequence)
 	}
 
-	encoded := make([]models.Token, 0, len(sentence))
-	shouldUpdateCache := false
-	cacheKeys := m.extractSentenceStrings(sentence)
-	cachedWords := m.cache.GetValues(cacheKeys)
+	word, err := m.mergeWord(sequence)
+	if err != nil {
+		return nil, err
+	}
+	return m.wordToTokens(word)
+}
 
-	for i, preToken := range sentence {
-		word := cachedWords[i]
+func (m *BpeModel) tokenizeWithCache(sequence string) ([]models.Token, error) {
+	hit := m.cache.Get(sequence)
+	if hit != nil {
+		return m.wordToTokens(hit)
+	}
 
-		if word == nil {
-			// No cache hit: re-compute merges and add to cache.
-			var err error
-			word, err = m.mergeWord(preToken.String)
-			if err != nil {
-				return nil, err
+	word, err := m.mergeWord(sequence)
+	if err != nil {
+		return nil, err
+	}
+
+	tokens, err := m.wordToTokens(word)
+	if err != nil {
+		return nil, err
+	}
+	m.cache.Set(sequence, word)
+	return tokens, nil
+}
+
+func (m *BpeModel) mergeWord(w string) (*Word, error) {
+	word := NewWordWithCapacity(len(w))
+
+	var unkTokenID int
+
+	if m.hasUnknownToken() {
+		var unkTokenExists bool
+		unkTokenID, unkTokenExists = m.vocab.GetID(m.unknownToken)
+		if !unkTokenExists {
+			return nil, ErrUnknownTokenOutOfVocabulary
+		}
+	}
+
+	var unk *Symbol
+
+	runes := []rune(w)
+	lastRuneIndex := len(runes) - 1
+
+	for i, r := range runes {
+		s := string(r)
+		byteLen := len(s)
+
+		if i == 0 && m.hasContinuingSubwordPrefix() {
+			s = m.continuingSubwordPrefix + s
+		}
+		if i == lastRuneIndex && m.hasEndOfWordSuffix() {
+			s = s + m.endOfWordSuffix
+		}
+
+		id, foundInVocab := m.vocab.GetID(s)
+		if foundInVocab {
+			if unk != nil {
+				word.Add(unk.ID, unk.Length)
+				unk = nil
 			}
-			cachedWords[i] = word
-			shouldUpdateCache = true
-		} else {
-			// Avoid a possible needless cache update later.
-			cachedWords[i] = nil
-		}
+			word.Add(id, byteLen)
+		} else if m.hasUnknownToken() {
+			if unk != nil {
+				if m.unknownFusionEnabled {
+					unk.Length += byteLen
+				} else {
+					// Do not fuse unk, add the previous one
+					word.Add(unk.ID, unk.Length)
 
-		tokens, err := m.wordToTokens(i, word, preToken.Start)
-		if err != nil {
-			return nil, err
+					unk.ID = unkTokenID
+					unk.Length = byteLen
+				}
+			} else {
+				unk = &Symbol{
+					ID:     unkTokenID,
+					Length: byteLen,
+				}
+			}
 		}
-		encoded = append(encoded, tokens...)
 	}
 
-	// Try updating the cache if we need to.
-	if shouldUpdateCache {
-		m.cache.SetValues(cacheKeys, cachedWords)
+	if unk != nil {
+		word.Add(unk.ID, unk.Length)
 	}
 
-	return encoded, nil
+	word.MergeAll(m.merges, m.dropout)
+
+	return word, nil
 }
 
-func (m *BpeModel) tokenizeWithoutCache(
-	sentence []pretokenizers.PreToken,
-) ([]models.Token, error) {
-	encoded := make([]models.Token, 0, len(sentence))
-
-	for i, preToken := range sentence {
-		word, err := m.mergeWord(preToken.String)
-		if err != nil {
-			return nil, err
+func (m *BpeModel) wordToTokens(word *Word) ([]models.Token, error) {
+	tokens := make([]models.Token, word.Len())
+	offsetStart := 0
+	for i, wordSymbol := range *word {
+		value, ok := m.vocab.GetString(wordSymbol.ID)
+		if !ok {
+			return nil, fmt.Errorf("ID %d not found in vocabulary", wordSymbol.ID)
 		}
-		tokens, err := m.wordToTokens(i, word, preToken.Start)
-		if err != nil {
-			return nil, err
+		offsetEnd := offsetStart + wordSymbol.Length
+		tokens[i] = models.Token{
+			ID:    wordSymbol.ID,
+			Value: value,
+			Offsets: models.TokenOffsets{
+				Start: offsetStart,
+				End:   offsetEnd,
+			},
 		}
-		encoded = append(encoded, tokens...)
+		offsetStart = offsetEnd
 	}
-
-	return encoded, nil
+	return tokens, nil
 }
 
 func (m *BpeModel) hasDropout() bool {
 	return m.dropout > 0
-}
-
-func (m *BpeModel) hasUnknownToken() bool {
-	return len(m.unknownToken) != 0
 }
 
 func (m *BpeModel) hasContinuingSubwordPrefix() bool {
@@ -158,74 +213,6 @@ func (m *BpeModel) hasEndOfWordSuffix() bool {
 	return len(m.endOfWordSuffix) != 0
 }
 
-func (m *BpeModel) extractSentenceStrings(sentence []pretokenizers.PreToken) []string {
-	s := make([]string, len(sentence))
-	for i, preToken := range sentence {
-		s[i] = preToken.String
-	}
-	return s
-}
-
-func (m *BpeModel) mergeWord(w string) (*Word, error) {
-	word := NewWord()
-
-	hasUnknownToken := m.hasUnknownToken()
-	hasContinuingSubwordPrefix := m.hasContinuingSubwordPrefix()
-	hasEndOfWordSuffix := m.hasEndOfWordSuffix()
-
-	runes := []rune(w)
-	lastRuneIndex := len(runes) - 1
-
-	for i, r := range runes {
-		s := string(r)
-
-		if hasContinuingSubwordPrefix && i > 0 {
-			s = m.continuingSubwordPrefix + s
-		}
-		if hasEndOfWordSuffix && i == lastRuneIndex {
-			s = s + m.endOfWordSuffix
-		}
-
-		id, ok := m.vocab.GetID(s)
-		if !ok {
-			if !hasUnknownToken {
-				continue
-			}
-			id, ok = m.vocab.GetID(m.unknownToken)
-			if !ok {
-				return nil, ErrUnknownTokenOutOfVocabulary
-			}
-		}
-		word.Add(id)
-	}
-
-	word.MergeAll(m.merges, m.dropout)
-
-	return word, nil
-}
-
-func (m *BpeModel) wordToTokens(
-	wordIndex int,
-	word *Word,
-	initialOffset int,
-) ([]models.Token, error) {
-	tokens := make([]models.Token, word.Len())
-	offset := initialOffset
-	for i, wordSymbol := range *word {
-		value, ok := m.vocab.GetString(wordSymbol.ID)
-		if !ok {
-			return nil, fmt.Errorf("ID %d not found in vocabulary", wordSymbol.ID)
-		}
-		tokens[i] = models.Token{
-			ID:    wordSymbol.ID,
-			Value: value,
-			Offsets: models.TokenOffsets{
-				Start: offset,
-				End:   offset + wordSymbol.Length,
-			},
-			WordIndex: wordIndex,
-		}
-		offset += wordSymbol.Length
-	}
-	return tokens, nil
+func (m *BpeModel) hasUnknownToken() bool {
+	return len(m.unknownToken) != 0
 }

@@ -6,7 +6,6 @@ package bpemodel
 
 import (
 	"github.com/nlpodyssey/gotokenizers/models"
-	"github.com/nlpodyssey/gotokenizers/pretokenizers"
 	"github.com/nlpodyssey/gotokenizers/vocabulary"
 	"reflect"
 	"testing"
@@ -70,23 +69,19 @@ func TestTokenizeWithAndWithoutDropout(t *testing.T) {
 		"",
 		"",
 		"",
+		false,
 	)
 
-	sentence := []pretokenizers.PreToken{
-		{String: "unrelated", Start: 0, End: 9},
-	}
-
 	// With no dropout:
-	tokens, err := bpe.Tokenize(sentence)
+	tokens, err := bpe.Tokenize("unrelated")
 	if err != nil {
 		t.Error(err)
 	}
 	expectedTokens := []models.Token{
 		{
-			ID:        15,
-			Value:     "unrelated",
-			Offsets:   models.TokenOffsets{Start: 0, End: 9},
-			WordIndex: 0,
+			ID:      15,
+			Value:   "unrelated",
+			Offsets: models.TokenOffsets{Start: 0, End: 9},
 		},
 	}
 	if !reflect.DeepEqual(tokens, expectedTokens) {
@@ -102,22 +97,23 @@ func TestTokenizeWithAndWithoutDropout(t *testing.T) {
 		"",
 		"",
 		"",
+		false,
 	)
-	tokens, err = bpe.Tokenize(sentence)
+	tokens, err = bpe.Tokenize("unrelated")
 	if err != nil {
 		t.Error(err)
 	}
 
 	expectedTokens = []models.Token{
-		{ID: 0, Value: "u", Offsets: models.TokenOffsets{Start: 0, End: 1}, WordIndex: 0},
-		{ID: 1, Value: "n", Offsets: models.TokenOffsets{Start: 1, End: 2}, WordIndex: 0},
-		{ID: 2, Value: "r", Offsets: models.TokenOffsets{Start: 2, End: 3}, WordIndex: 0},
-		{ID: 3, Value: "e", Offsets: models.TokenOffsets{Start: 3, End: 4}, WordIndex: 0},
-		{ID: 4, Value: "l", Offsets: models.TokenOffsets{Start: 4, End: 5}, WordIndex: 0},
-		{ID: 5, Value: "a", Offsets: models.TokenOffsets{Start: 5, End: 6}, WordIndex: 0},
-		{ID: 6, Value: "t", Offsets: models.TokenOffsets{Start: 6, End: 7}, WordIndex: 0},
-		{ID: 3, Value: "e", Offsets: models.TokenOffsets{Start: 7, End: 8}, WordIndex: 0},
-		{ID: 7, Value: "d", Offsets: models.TokenOffsets{Start: 8, End: 9}, WordIndex: 0},
+		{ID: 0, Value: "u", Offsets: models.TokenOffsets{Start: 0, End: 1}},
+		{ID: 1, Value: "n", Offsets: models.TokenOffsets{Start: 1, End: 2}},
+		{ID: 2, Value: "r", Offsets: models.TokenOffsets{Start: 2, End: 3}},
+		{ID: 3, Value: "e", Offsets: models.TokenOffsets{Start: 3, End: 4}},
+		{ID: 4, Value: "l", Offsets: models.TokenOffsets{Start: 4, End: 5}},
+		{ID: 5, Value: "a", Offsets: models.TokenOffsets{Start: 5, End: 6}},
+		{ID: 6, Value: "t", Offsets: models.TokenOffsets{Start: 6, End: 7}},
+		{ID: 3, Value: "e", Offsets: models.TokenOffsets{Start: 7, End: 8}},
+		{ID: 7, Value: "d", Offsets: models.TokenOffsets{Start: 8, End: 9}},
 	}
 	if !reflect.DeepEqual(tokens, expectedTokens) {
 		t.Errorf("expected %+v, actual %+v", expectedTokens, tokens)
@@ -132,8 +128,9 @@ func TestTokenizeWithAndWithoutDropout(t *testing.T) {
 		"",
 		"",
 		"",
+		false,
 	)
-	tokens, err = bpe.Tokenize(sentence)
+	tokens, err = bpe.Tokenize("unrelated")
 	if err != nil {
 		t.Error(err)
 	}
