@@ -53,7 +53,7 @@ func NewDefaultWordPieceModel() *WordPieceModel {
 func (m *WordPieceModel) Tokenize(sentence []pretokenizers.PreToken) ([]models.Token, error) {
 	outputTokens := make([]models.Token, 0, len(sentence))
 
-	for index, preToken := range sentence {
+	for _, preToken := range sentence {
 		runes := []rune(preToken.String)
 		runesLen := len(runes)
 
@@ -69,7 +69,6 @@ func (m *WordPieceModel) Tokenize(sentence []pretokenizers.PreToken) ([]models.T
 					Start: preToken.Start,
 					End:   preToken.End,
 				},
-				WordIndex: index,
 			})
 			continue
 		}
@@ -97,7 +96,6 @@ func (m *WordPieceModel) Tokenize(sentence []pretokenizers.PreToken) ([]models.T
 							Start: preToken.Start + start,
 							End:   preToken.Start + end,
 						},
-						WordIndex: index,
 					}
 					tokenFound = true
 					break
@@ -125,7 +123,6 @@ func (m *WordPieceModel) Tokenize(sentence []pretokenizers.PreToken) ([]models.T
 					Start: preToken.Start,
 					End:   preToken.End,
 				},
-				WordIndex: index,
 			})
 		} else {
 			outputTokens = append(outputTokens, subTokens...)

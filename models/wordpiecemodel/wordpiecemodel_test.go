@@ -53,15 +53,15 @@ func TestWordPieceModelTokenize(t *testing.T) {
 		t.Error(err)
 	}
 	expectedTokens := []models.Token{
-		{ID: 1, Value: "foo", Offsets: models.TokenOffsets{Start: 0, End: 3}, WordIndex: 0},
-		{ID: 3, Value: "bar", Offsets: models.TokenOffsets{Start: 3, End: 6}, WordIndex: 1},
-		{ID: 6, Value: "##baz", Offsets: models.TokenOffsets{Start: 6, End: 9}, WordIndex: 1},
-		{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 9, End: 23}, WordIndex: 2},
-		{ID: 1, Value: "foo", Offsets: models.TokenOffsets{Start: 23, End: 26}, WordIndex: 3},
-		{ID: 4, Value: "##bar", Offsets: models.TokenOffsets{Start: 26, End: 29}, WordIndex: 3},
-		{ID: 6, Value: "##baz", Offsets: models.TokenOffsets{Start: 29, End: 32}, WordIndex: 3},
-		{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 32, End: 35}, WordIndex: 4},
-		{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 35, End: 51}, WordIndex: 5},
+		{ID: 1, Value: "foo", Offsets: models.TokenOffsets{Start: 0, End: 3}},
+		{ID: 3, Value: "bar", Offsets: models.TokenOffsets{Start: 3, End: 6}},
+		{ID: 6, Value: "##baz", Offsets: models.TokenOffsets{Start: 6, End: 9}},
+		{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 9, End: 23}},
+		{ID: 1, Value: "foo", Offsets: models.TokenOffsets{Start: 23, End: 26}},
+		{ID: 4, Value: "##bar", Offsets: models.TokenOffsets{Start: 26, End: 29}},
+		{ID: 6, Value: "##baz", Offsets: models.TokenOffsets{Start: 29, End: 32}},
+		{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 32, End: 35}},
+		{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 35, End: 51}},
 	}
 	if !reflect.DeepEqual(tokens, expectedTokens) {
 		t.Errorf("expected %+v, actual %+v", expectedTokens, tokens)
