@@ -4,6 +4,6 @@
 
 module github.com/nlpodyssey/gotokenizers
 
-go 1.14
+go 1.15
 
 require github.com/dlclark/regexp2 v1.4.0
