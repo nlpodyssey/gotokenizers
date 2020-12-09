@@ -6,21 +6,21 @@ package sequencenormalizer
 
 import (
 	"fmt"
-	. "github.com/nlpodyssey/gotokenizers/normalizers"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/lowercasenormalizer"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/stripnormalizer"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/normalizers"
+	"github.com/nlpodyssey/gotokenizers/normalizers/lowercasenormalizer"
+	"github.com/nlpodyssey/gotokenizers/normalizers/stripnormalizer"
 	"testing"
 )
 
 func TestSequenceNormalizerWithTwoNormalizers(t *testing.T) {
 	t.Parallel()
 
-	sn := NewSequenceNormalizer([]Normalizer{
-		NewLowerCaseNormalizer(),
-		NewStripNormalizer(true, true),
+	sn := NewSequenceNormalizer([]normalizers.Normalizer{
+		lowercasenormalizer.NewLowerCaseNormalizer(),
+		stripnormalizer.NewStripNormalizer(true, true),
 	})
-	ns := NewNormalizedString("  Foo Bar SÜẞ  ")
+	ns := normalizedstring.FromString("  Foo Bar SÜẞ  ")
 	err := sn.Normalize(ns)
 	if err != nil {
 		t.Error(err)
@@ -34,10 +34,10 @@ func TestSequenceNormalizerWithTwoNormalizers(t *testing.T) {
 func TestSequenceNormalizerWithOneNormalizer(t *testing.T) {
 	t.Parallel()
 
-	sn := NewSequenceNormalizer([]Normalizer{
-		NewStripNormalizer(true, true),
+	sn := NewSequenceNormalizer([]normalizers.Normalizer{
+		stripnormalizer.NewStripNormalizer(true, true),
 	})
-	ns := NewNormalizedString("  foo  ")
+	ns := normalizedstring.FromString("  foo  ")
 	err := sn.Normalize(ns)
 	if err != nil {
 		t.Error(err)
@@ -51,8 +51,8 @@ func TestSequenceNormalizerWithOneNormalizer(t *testing.T) {
 func TestSequenceNormalizerWithEmptySequence(t *testing.T) {
 	t.Parallel()
 
-	sn := NewSequenceNormalizer([]Normalizer{})
-	ns := NewNormalizedString("  foo  ")
+	sn := NewSequenceNormalizer([]normalizers.Normalizer{})
+	ns := normalizedstring.FromString("  foo  ")
 	err := sn.Normalize(ns)
 	if err != nil {
 		t.Error(err)
@@ -65,21 +65,21 @@ func TestSequenceNormalizerWithEmptySequence(t *testing.T) {
 
 type ErrorNormalizer struct{}
 
-var _ Normalizer = &ErrorNormalizer{}
+var _ normalizers.Normalizer = &ErrorNormalizer{}
 
-func (sn *ErrorNormalizer) Normalize(_ *NormalizedString) error {
+func (sn *ErrorNormalizer) Normalize(_ *normalizedstring.NormalizedString) error {
 	return fmt.Errorf("sample error")
 }
 
 func TestSequenceNormalizerReturnsTheFirstErrorEncountered(t *testing.T) {
 	t.Parallel()
 
-	sn := NewSequenceNormalizer([]Normalizer{
-		NewLowerCaseNormalizer(),
+	sn := NewSequenceNormalizer([]normalizers.Normalizer{
+		lowercasenormalizer.NewLowerCaseNormalizer(),
 		&ErrorNormalizer{},
-		NewStripNormalizer(true, true),
+		stripnormalizer.NewStripNormalizer(true, true),
 	})
-	ns := NewNormalizedString("Foo")
+	ns := normalizedstring.FromString("Foo")
 	err := sn.Normalize(ns)
 	if err == nil {
 		t.Errorf("expected error, actual nil")

@@ -5,8 +5,8 @@
 package sequencenormalizer
 
 import (
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/normalizers"
-	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
 )
 
 // SequenceNormalizer allows concatenating multiple other Normalizers as a
