@@ -38,8 +38,7 @@ func NewDefault() *WhiteSpacePreTokenizer {
 // separated by whitespace-like characters.
 func (w *WhiteSpacePreTokenizer) PreTokenize(pts *pretokenizedstring.PreTokenizedString) error {
 	splittingPattern := splitpattern.Invert(splitpattern.FromRegexp2(w.r))
-
-	err := pts.Split(
+	return pts.Split(
 		func(_ int, ns *normalizedstring.NormalizedString) ([]pretokenizedstring.Split, error) {
 			nss, err := ns.Split(splittingPattern, normalizedstring.SplitDelimiterRemoved)
 			if err != nil {
@@ -48,8 +47,4 @@ func (w *WhiteSpacePreTokenizer) PreTokenize(pts *pretokenizedstring.PreTokenize
 			return pretokenizedstring.SplitsFromNormalizedStrings(nss), nil
 		},
 	)
-	if err != nil {
-		return err
-	}
-	return nil
 }
