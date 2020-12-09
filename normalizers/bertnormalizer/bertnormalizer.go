@@ -5,8 +5,8 @@
 package bertnormalizer
 
 import (
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/normalizers"
-	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
 	"unicode"
 )
 
@@ -65,29 +65,36 @@ func (sn *BertNormalizer) Normalize(ns *normalizedstring.NormalizedString) error
 // cleanText replaces whitespace-like characters with simple whitespaces, and
 // removes control characters.
 func (sn *BertNormalizer) cleanText(ns *normalizedstring.NormalizedString) {
-	// Since '\t', '\n', and '\r' are also control characters, it's important
-	// to first map them to simple whitespaces, and only after that apply the
-	// filtering.
-	ns.Map(mapWhiteSpace)
-	ns.Filter(isNotControlCharacter)
+	ns.Filter(func(r rune) bool {
+		return !(r == 0 || r == unicode.ReplacementChar || isControlCharacter(r))
+	})
+	ns.Map(func(r rune) rune {
+		if isWhitespace(r) {
+			return ' '
+		}
+		return r
+	})
 }
 
-// isNotControlCharacter reports whether the given rune is not a control
-// character (or a similar control-like character).
-//
-// Control characters should be excluded from the normalized string, when text
-// cleaning is enabled.
-func isNotControlCharacter(r rune) bool {
-	return r != unicode.ReplacementChar && !unicode.In(r, unicode.Other)
-}
-
-// mapWhiteSpace returns a simple whitespace rune (' ') if the given rune is
-// a whitespace-like character; any other rune is returned as-is.
-func mapWhiteSpace(r rune) rune {
-	if unicode.In(r, unicode.White_Space) {
-		return ' '
+// isControlCharacter checks whether a character is a control character.
+func isControlCharacter(r rune) bool {
+	// These are technically control characters but we count them as whitespace
+	if r == '\t' || r == '\n' || r == '\r' {
+		return false
 	}
-	return r
+	// The definition here is quite large and contains also
+	// Cc, Cf, Cn or Co
+	// cf. https://unicode.org/reports/tr44/ (Table 12)
+	return unicode.In(r, unicode.Other)
+}
+
+// isWhitespace checks whether a character is a whitespace.
+func isWhitespace(r rune) bool {
+	// These are technically control characters but we count them as whitespace
+	if r == '\t' || r == '\n' || r == '\r' {
+		return true
+	}
+	return unicode.In(r, unicode.White_Space)
 }
 
 // chineseCharacters defines sets of chinese characters.
@@ -119,17 +126,17 @@ var chineseCharacters = &unicode.RangeTable{
 // handleChineseChars puts spaces around Chinese characters, so that they can
 // be split. All non-Chinese characters are left unchanged.
 func (sn *BertNormalizer) handleChineseChars(ns *normalizedstring.NormalizedString) {
-	runeChanges := make([]normalizedstring.RuneChanges, 0, ns.Len())
+	runeChanges := make([]normalizedstring.RuneChange, 0, ns.Len())
 	for _, r := range ns.Get() {
 		if unicode.In(r, chineseCharacters) {
-			runeChanges = append(
-				runeChanges,
-				normalizedstring.RuneChanges{Rune: ' ', Changes: 1},
-				normalizedstring.RuneChanges{Rune: r, Changes: 0},
-				normalizedstring.RuneChanges{Rune: ' ', Changes: 1},
+			runeChanges = append(runeChanges,
+				normalizedstring.RuneChange{Rune: ' ', Change: 0},
+				normalizedstring.RuneChange{Rune: r, Change: 1},
+				normalizedstring.RuneChange{Rune: ' ', Change: 1},
 			)
 		} else {
-			runeChanges = append(runeChanges, normalizedstring.RuneChanges{Rune: r, Changes: 0})
+			runeChanges = append(runeChanges,
+				normalizedstring.RuneChange{Rune: r, Change: 0})
 		}
 	}
 	ns.Transform(runeChanges, 0)
@@ -139,11 +146,7 @@ func (sn *BertNormalizer) handleChineseChars(ns *normalizedstring.NormalizedStri
 // normalized string.
 func (sn *BertNormalizer) stripAccents(ns *normalizedstring.NormalizedString) {
 	// TODO: ns.Nfd()
-	ns.Filter(isNotMarkNonSpacing)
-}
-
-// isNotMarkNonSpacing reports whether the given rune is not a Unicode
-// character in category Mn (Mark, non-spacing)
-func isNotMarkNonSpacing(r rune) bool {
-	return !unicode.In(r, unicode.Mn)
+	ns.Filter(func(r rune) bool {
+		return !unicode.In(r, unicode.Mn)
+	})
 }
