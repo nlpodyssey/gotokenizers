@@ -41,8 +41,6 @@ func TestWhiteSpacePreTokenizer_PreTokenize(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%#v", tc.input), func(t *testing.T) {
-			t.Parallel()
-
 			pt := NewDefault()
 			pts := pretokenizedstring.FromString(tc.input)
 			err := pt.PreTokenize(pts)
