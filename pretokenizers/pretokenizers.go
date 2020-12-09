@@ -4,7 +4,7 @@
 
 package pretokenizers
 
-import "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+import "github.com/nlpodyssey/gotokenizers/pretokenizedstring"
 
 // PreTokenizer is implemented by any value that has a PreTokenize method,
 // which takes care of performing a pre-segmentation step.
@@ -13,7 +13,7 @@ import "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
 // track of the offsets between the original string and the substrings.
 // In some occasions, the NormalizedString might be modified.
 type PreTokenizer interface {
-	PreTokenize(ns *normalizedstring.NormalizedString) ([]PreToken, error)
+	PreTokenize(pts *pretokenizedstring.PreTokenizedString) error
 }
 
 // PreToken represents a pre-tokenized substring, along with its offsets
