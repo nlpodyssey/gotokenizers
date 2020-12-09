@@ -84,7 +84,7 @@ func (b *ByteLevelPreTokenizer) PreTokenize(pts *pretokenizedstring.PreTokenized
 		return err
 	}
 
-	err = pts.Normalize(func(ns *normalizedstring.NormalizedString) error {
+	return pts.Normalize(func(ns *normalizedstring.NormalizedString) error {
 		s := ns.Get()
 		transformations := make([]normalizedstring.RuneChange, 0, len(s))
 		i := 0
@@ -107,10 +107,6 @@ func (b *ByteLevelPreTokenizer) PreTokenize(pts *pretokenizedstring.PreTokenized
 		ns.Transform(transformations, 0)
 		return nil
 	})
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func startsWithWhitespace(s string) bool {
