@@ -6,64 +6,53 @@ package whitespacesplitpretokenizer
 
 import (
 	"fmt"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
-	. "github.com/nlpodyssey/gotokenizers/pretokenizers"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
 	"reflect"
 	"testing"
 )
 
-func TestWhiteSpaceSplitPreTokenizer(t *testing.T) {
+func TestWhiteSpaceSplitPreTokenizer_PreTokenize(t *testing.T) {
 	t.Parallel()
 
-	wt := NewWhiteSpaceSplitPreTokenizer()
-
-	tests := []struct {
-		str      string
-		expected []PreToken
+	testCases := []struct {
+		input          string
+		expectedSplits []pretokenizedstring.OriginalByteSplit
 	}{
-		{str: "", expected: []PreToken{}},
-		{str: " ", expected: []PreToken{}},
-		{str: " \n\t", expected: []PreToken{}},
-		{str: "x", expected: []PreToken{
-			{String: "x", Start: 0, End: 1},
-		}},
-		{str: "foo", expected: []PreToken{
-			{String: "foo", Start: 0, End: 3},
-		}},
-		{str: "foo bar", expected: []PreToken{
-			{String: "foo", Start: 0, End: 3},
-			{String: "bar", Start: 4, End: 7},
-		}},
-		{str: "foo \nbar", expected: []PreToken{
-			{String: "foo", Start: 0, End: 3},
-			{String: "bar", Start: 5, End: 8},
-		}},
-		{str: " foo bar ", expected: []PreToken{
-			{String: "foo", Start: 1, End: 4},
-			{String: "bar", Start: 5, End: 8},
-		}},
-		{str: "!", expected: []PreToken{
-			{String: "!", Start: 0, End: 1},
-		}},
-		{str: "!?.", expected: []PreToken{
-			{String: "!?.", Start: 0, End: 3},
-		}},
-		{str: "Süß Café!?", expected: []PreToken{
-			{String: "Süß", Start: 0, End: 3},
-			{String: "Café!?", Start: 4, End: 10},
-		}},
+		{
+			"Hey man!",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: "Hey", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
+				{String: "man!", Offsets: normalizedstring.Offsets{Start: 4, End: 8}},
+			},
+		},
+		{
+			"Hey, man, Good?",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: "Hey,", Offsets: normalizedstring.Offsets{Start: 0, End: 4}},
+				{String: "man,", Offsets: normalizedstring.Offsets{Start: 5, End: 9}},
+				{String: "Good?", Offsets: normalizedstring.Offsets{Start: 10, End: 15}},
+			},
+		},
 	}
 
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("%#v", test.str), func(t *testing.T) {
-			ns := NewNormalizedString(test.str)
-			tokens, err := wt.PreTokenize(ns)
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("%#v", tc.input), func(t *testing.T) {
+			pt := New()
+			pts := pretokenizedstring.FromString(tc.input)
+			err := pt.PreTokenize(pts)
 			if err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
-			if !reflect.DeepEqual(tokens, test.expected) {
-				t.Errorf("expected %v, actual %v", test.expected, tokens)
-			}
+
+			assertEqual(t, pts.GetOriginalByteSplits(), tc.expectedSplits)
 		})
+	}
+}
+
+func assertEqual(t *testing.T, actual, expected interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("expected\n  %#v\nactual\n  %#v", expected, actual)
 	}
 }

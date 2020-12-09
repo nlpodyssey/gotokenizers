@@ -5,54 +5,36 @@
 package whitespacesplitpretokenizer
 
 import (
-	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
 	"github.com/nlpodyssey/gotokenizers/pretokenizers"
+	"github.com/nlpodyssey/gotokenizers/splitpattern"
 	"unicode"
 )
 
 // WhiteSpaceSplitPreTokenizer allows the generation of pre-tokens splitting
-// by whitespace-lake characters.
+// by whitespace-like characters.
 type WhiteSpaceSplitPreTokenizer struct{}
 
 var _ pretokenizers.PreTokenizer = &WhiteSpaceSplitPreTokenizer{}
 
-// NewWhiteSpaceSplitPreTokenizer returns a new WhiteSpaceSplitPreTokenizer.
-func NewWhiteSpaceSplitPreTokenizer() *WhiteSpaceSplitPreTokenizer {
+// New returns a new WhiteSpaceSplitPreTokenizer.
+func New() *WhiteSpaceSplitPreTokenizer {
 	return &WhiteSpaceSplitPreTokenizer{}
 }
 
 // PreTokenize splits the NormalizedString by whitespace-like characters
-func (w *WhiteSpaceSplitPreTokenizer) PreTokenize(
-	ns *normalizedstring.NormalizedString,
-) ([]pretokenizers.PreToken, error) {
-	tokens := make([]pretokenizers.PreToken, 0)
-	word := make([]rune, 0)
-
-	index := 0
-	for _, r := range ns.Get() {
-		if unicode.In(r, unicode.White_Space) {
-			if len(word) > 0 {
-				tokens = append(tokens, pretokenizers.PreToken{
-					String: string(word),
-					Start:  index - len(word),
-					End:    index,
-				})
-				word = word[:0]
+func (w *WhiteSpaceSplitPreTokenizer) PreTokenize(pts *pretokenizedstring.PreTokenizedString) error {
+	splittingPattern := splitpattern.FromFunc(func(r rune) bool {
+		return unicode.In(r, unicode.White_Space)
+	})
+	return pts.Split(
+		func(_ int, ns *normalizedstring.NormalizedString) ([]pretokenizedstring.Split, error) {
+			nss, err := ns.Split(splittingPattern, normalizedstring.SplitDelimiterRemoved)
+			if err != nil {
+				return nil, err
 			}
-		} else {
-			word = append(word, r)
-		}
-		index++
-	}
-
-	if len(word) > 0 {
-		end := ns.Len()
-		tokens = append(tokens, pretokenizers.PreToken{
-			String: string(word),
-			Start:  end - len(word),
-			End:    end,
-		})
-	}
-
-	return tokens, nil
+			return pretokenizedstring.SplitsFromNormalizedStrings(nss), nil
+		},
+	)
 }
