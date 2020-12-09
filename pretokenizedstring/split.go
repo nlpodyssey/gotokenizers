@@ -41,3 +41,13 @@ type NormalizedByteSplit struct {
 	// The potential tokens
 	Tokens *[]models.Token
 }
+
+// SplitsFromNormalizedStrings transforms a slice of NormalizedStrings
+// into a corresponding slice of Splits, with nil tokens.
+func SplitsFromNormalizedStrings(nss []*normalizedstring.NormalizedString) []Split {
+	splits := make([]Split, len(nss))
+	for i, ns := range nss {
+		splits[i] = Split{NormalizedString: ns, Tokens: nil}
+	}
+	return splits
+}
