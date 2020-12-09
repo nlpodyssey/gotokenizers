@@ -5,8 +5,8 @@
 package stripnormalizer
 
 import (
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/normalizers"
-	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
 )
 
 // StripNormalizer allows string normalization removing leading spaces,

@@ -732,22 +732,22 @@ func (ns *NormalizedString) ToLower() {
 
 // Trim removes leading and trailing spaces from the "normalized" string.
 func (ns *NormalizedString) Trim() {
-	ns.trimLeftRight(true, true)
+	ns.TrimLeftRight(true, true)
 }
 
 // TrimLeft removes leading spaces from the "normalized" string.
 func (ns *NormalizedString) TrimLeft() {
-	ns.trimLeftRight(true, false)
+	ns.TrimLeftRight(true, false)
 }
 
 // TrimRight removes trailing spaces from the "normalized" string.
 func (ns *NormalizedString) TrimRight() {
-	ns.trimLeftRight(false, true)
+	ns.TrimLeftRight(false, true)
 }
 
-// trimLeftRight removes leading (left) and/or trailing (right) spaces from
+// TrimLeftRight removes leading (left) and/or trailing (right) spaces from
 // the "normalized" string.
-func (ns *NormalizedString) trimLeftRight(left, right bool) {
+func (ns *NormalizedString) TrimLeftRight(left, right bool) {
 	runes := []rune(ns.normalized)
 	lenRunes := len(runes)
 

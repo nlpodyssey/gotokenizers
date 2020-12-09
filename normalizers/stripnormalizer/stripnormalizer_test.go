@@ -5,7 +5,7 @@
 package stripnormalizer
 
 import (
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"testing"
 )
 
@@ -13,7 +13,7 @@ func TestStripNormalizerLeftOnly(t *testing.T) {
 	t.Parallel()
 
 	sn := NewStripNormalizer(true, false)
-	ns := NewNormalizedString(" \n\tfoo\t\n ")
+	ns := normalizedstring.FromString(" \n\tfoo\t\n ")
 	err := sn.Normalize(ns)
 	if err != nil {
 		t.Error(err)
@@ -28,7 +28,7 @@ func TestStripNormalizerRightOnly(t *testing.T) {
 	t.Parallel()
 
 	sn := NewStripNormalizer(false, true)
-	ns := NewNormalizedString(" \n\tfoo\t\n ")
+	ns := normalizedstring.FromString(" \n\tfoo\t\n ")
 	err := sn.Normalize(ns)
 	if err != nil {
 		t.Error(err)
@@ -43,7 +43,7 @@ func TestStripNormalizerLeftAndRight(t *testing.T) {
 	t.Parallel()
 
 	sn := NewStripNormalizer(true, true)
-	ns := NewNormalizedString(" \n\tfoo\t\n ")
+	ns := normalizedstring.FromString(" \n\tfoo\t\n ")
 	err := sn.Normalize(ns)
 	if err != nil {
 		t.Error(err)
@@ -58,7 +58,7 @@ func TestStripNormalizerNoLeftAndNoRight(t *testing.T) {
 	t.Parallel()
 
 	sn := NewStripNormalizer(false, false)
-	ns := NewNormalizedString(" \n\tfoo\t\n ")
+	ns := normalizedstring.FromString(" \n\tfoo\t\n ")
 	err := sn.Normalize(ns)
 	if err != nil {
 		t.Error(err)
