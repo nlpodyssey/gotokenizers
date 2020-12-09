@@ -4,7 +4,7 @@
 
 package normalizers
 
-import "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+import "github.com/nlpodyssey/gotokenizers/normalizedstring"
 
 // Normalizer is implemented by any value that has a Normalize method,
 // which takes care of pre-processing strings.
