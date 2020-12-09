@@ -5,8 +5,8 @@
 package lowercasenormalizer
 
 import (
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/normalizers"
-	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
 )
 
 // LowerCaseNormalizer allows string normalization remapping all Unicode

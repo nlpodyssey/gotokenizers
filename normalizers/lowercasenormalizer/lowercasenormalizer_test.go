@@ -5,7 +5,7 @@
 package lowercasenormalizer
 
 import (
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"testing"
 )
 
@@ -13,7 +13,7 @@ func TestLowerCaseNormalizer(t *testing.T) {
 	t.Parallel()
 
 	sn := NewLowerCaseNormalizer()
-	ns := NewNormalizedString("Foo Bar SÜẞ")
+	ns := normalizedstring.FromString("Foo Bar SÜẞ")
 	err := sn.Normalize(ns)
 	if err != nil {
 		t.Error(err)
