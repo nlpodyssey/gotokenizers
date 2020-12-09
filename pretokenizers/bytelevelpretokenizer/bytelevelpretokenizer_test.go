@@ -6,299 +6,150 @@ package bytelevelpretokenizer
 
 import (
 	"fmt"
-	"github.com/dlclark/regexp2"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
-	. "github.com/nlpodyssey/gotokenizers/pretokenizers"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
 	"reflect"
 	"testing"
 )
 
-func TestByteLevelPreTokenizerWithPrefixSpaceDisabled(t *testing.T) {
+func TestByteLevelPreTokenizer_PreTokenize(t *testing.T) {
 	t.Parallel()
 
-	b := NewByteLevelPreTokenizer(DefaultSplittingRegexp, false)
+	t.Run("Prefix space disabled", func(t *testing.T) {
+		t.Parallel()
 
-	tests := []struct {
-		str            string
-		expectedStr    string
-		expectedTokens []PreToken
-	}{
-		{
-			str:            "",
-			expectedStr:    "",
-			expectedTokens: []PreToken{},
-		},
-		{
-			str:         " ",
-			expectedStr: "Ġ",
-			expectedTokens: []PreToken{
-				{String: "Ġ", Start: 0, End: 1},
-			},
-		},
-		{
-			str:         " \n\r",
-			expectedStr: "ĠĊč",
-			expectedTokens: []PreToken{
-				{String: "ĠĊč", Start: 0, End: 3},
-			},
-		},
-		{
-			str:         "x",
-			expectedStr: "x",
-			expectedTokens: []PreToken{
-				{String: "x", Start: 0, End: 1},
-			},
-		},
-		{
-			str:         "Foo",
-			expectedStr: "Foo",
-			expectedTokens: []PreToken{
-				{String: "Foo", Start: 0, End: 3},
-			},
-		},
-		{
-			str:         "Foo bar baz",
-			expectedStr: "FooĠbarĠbaz",
-			expectedTokens: []PreToken{
-				{String: "Foo", Start: 0, End: 3},
-				{String: "Ġbar", Start: 3, End: 7},
-				{String: "Ġbaz", Start: 7, End: 11},
-			},
-		},
-		{
-			str:         "  Foo  bar  ",
-			expectedStr: "ĠĠFooĠĠbarĠĠ",
-			expectedTokens: []PreToken{
-				{String: "Ġ", Start: 0, End: 1},
-				{String: "ĠFoo", Start: 1, End: 5},
-				{String: "Ġ", Start: 5, End: 6},
-				{String: "Ġbar", Start: 6, End: 10},
-				{String: "ĠĠ", Start: 10, End: 12},
-			},
-		},
-		{
-			str:         "Foo\nbar baz",
-			expectedStr: "FooĊbarĠbaz",
-			expectedTokens: []PreToken{
-				{String: "Foo", Start: 0, End: 3},
-				{String: "Ċ", Start: 3, End: 4},
-				{String: "bar", Start: 4, End: 7},
-				{String: "Ġbaz", Start: 7, End: 11},
-			},
-		},
-		{
-			str:         "\nSüß Café!?\r",
-			expectedStr: "ĊSÃ¼ÃŁĠCafÃ©!?č",
-			expectedTokens: []PreToken{
-				{String: "Ċ", Start: 0, End: 1},
-				{String: "SÃ¼ÃŁ", Start: 1, End: 6},
-				{String: "ĠCafÃ©", Start: 6, End: 12},
-				{String: "!?", Start: 12, End: 14},
-				{String: "č", Start: 14, End: 15},
-			},
-		},
-	}
+		pt := New(DefaultSplittingRegexp, false, true)
+		pts := pretokenizedstring.FromString("Hello my friend, how is your day going?")
 
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("%#v", test.str), func(t *testing.T) {
-			ns := NewNormalizedString(test.str)
-			tokens, err := b.PreTokenize(ns)
-			if err != nil {
-				t.Error(err)
-			}
-			if !reflect.DeepEqual(tokens, test.expectedTokens) {
-				t.Errorf("expected %v, actual %v", test.expectedTokens, tokens)
-			}
-			if ns.Get() != test.expectedStr {
-				t.Errorf("expected %#v, actual %#v", test.expectedStr, ns.Get())
-			}
+		err := pt.PreTokenize(pts)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
+			{String: "Hello", Offsets: normalizedstring.Offsets{Start: 0, End: 5}},
+			{String: "Ġmy", Offsets: normalizedstring.Offsets{Start: 5, End: 8}},
+			{String: "Ġfriend", Offsets: normalizedstring.Offsets{Start: 8, End: 15}},
+			{String: ",", Offsets: normalizedstring.Offsets{Start: 15, End: 16}},
+			{String: "Ġhow", Offsets: normalizedstring.Offsets{Start: 16, End: 20}},
+			{String: "Ġis", Offsets: normalizedstring.Offsets{Start: 20, End: 23}},
+			{String: "Ġyour", Offsets: normalizedstring.Offsets{Start: 23, End: 28}},
+			{String: "Ġday", Offsets: normalizedstring.Offsets{Start: 28, End: 32}},
+			{String: "Ġgoing", Offsets: normalizedstring.Offsets{Start: 32, End: 38}},
+			{String: "?", Offsets: normalizedstring.Offsets{Start: 38, End: 39}},
 		})
-	}
+	})
+
+	t.Run("Prefix space enabled", func(t *testing.T) {
+		t.Parallel()
+
+		pt := New(DefaultSplittingRegexp, true, true)
+
+		strings := []string{
+			" Hello my friend, how is your day going?",
+			"Hello my friend, how is your day going?",
+		}
+
+		for _, str := range strings {
+			t.Run(fmt.Sprintf("with string %#v", str), func(t *testing.T) {
+				pts := pretokenizedstring.FromString(str)
+
+				err := pt.PreTokenize(pts)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				assertEqual(t, pts.GetNormalizedByteSplits(), []pretokenizedstring.NormalizedByteSplit{
+					{String: "ĠHello", Offsets: normalizedstring.Offsets{Start: 0, End: 7}},
+					{String: "Ġmy", Offsets: normalizedstring.Offsets{Start: 7, End: 11}},
+					{String: "Ġfriend", Offsets: normalizedstring.Offsets{Start: 11, End: 19}},
+					{String: ",", Offsets: normalizedstring.Offsets{Start: 19, End: 20}},
+					{String: "Ġhow", Offsets: normalizedstring.Offsets{Start: 20, End: 25}},
+					{String: "Ġis", Offsets: normalizedstring.Offsets{Start: 25, End: 29}},
+					{String: "Ġyour", Offsets: normalizedstring.Offsets{Start: 29, End: 35}},
+					{String: "Ġday", Offsets: normalizedstring.Offsets{Start: 35, End: 40}},
+					{String: "Ġgoing", Offsets: normalizedstring.Offsets{Start: 40, End: 47}},
+					{String: "?", Offsets: normalizedstring.Offsets{Start: 47, End: 48}},
+				})
+			})
+		}
+	})
+
+	t.Run("Handling of newlines", func(t *testing.T) {
+		t.Parallel()
+
+		pt := New(DefaultSplittingRegexp, false, true)
+		pts := pretokenizedstring.FromString("Hello there\nHello there")
+
+		err := pt.PreTokenize(pts)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
+			{String: "Hello", Offsets: normalizedstring.Offsets{Start: 0, End: 5}},
+			{String: "Ġthere", Offsets: normalizedstring.Offsets{Start: 5, End: 11}},
+			{String: "Ċ", Offsets: normalizedstring.Offsets{Start: 11, End: 12}},
+			{String: "Hello", Offsets: normalizedstring.Offsets{Start: 12, End: 17}},
+			{String: "Ġthere", Offsets: normalizedstring.Offsets{Start: 17, End: 23}},
+		})
+	})
+
+	t.Run("Handling of multiple whitespaces", func(t *testing.T) {
+		t.Parallel()
+
+		pt := New(DefaultSplittingRegexp, false, true)
+		pts := pretokenizedstring.FromString("Hello there       dear")
+
+		err := pt.PreTokenize(pts)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
+			{String: "Hello", Offsets: normalizedstring.Offsets{Start: 0, End: 5}},
+			{String: "Ġthere", Offsets: normalizedstring.Offsets{Start: 5, End: 11}},
+			{String: "ĠĠĠĠĠĠ", Offsets: normalizedstring.Offsets{Start: 11, End: 17}},
+			{String: "Ġdear", Offsets: normalizedstring.Offsets{Start: 17, End: 22}},
+		})
+	})
+
+	t.Run("Offsets when character splits up", func(t *testing.T) {
+		t.Parallel()
+
+		pt := New(DefaultSplittingRegexp, false, true)
+
+		input := "i⭢j"
+		pts := pretokenizedstring.FromString(input)
+
+		err := pt.PreTokenize(pts)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
+			{String: "i", Offsets: normalizedstring.Offsets{Start: 0, End: 1}},
+			{String: "âŃ¢", Offsets: normalizedstring.Offsets{Start: 1, End: 4}},
+			{String: "j", Offsets: normalizedstring.Offsets{Start: 4, End: 5}},
+		})
+
+		assertEqual(t, pts.GetNormalizedByteSplits(), []pretokenizedstring.NormalizedByteSplit{
+			{String: "i", Offsets: normalizedstring.Offsets{Start: 0, End: 1}},
+			{String: "âŃ¢", Offsets: normalizedstring.Offsets{Start: 1, End: 7}},
+			{String: "j", Offsets: normalizedstring.Offsets{Start: 7, End: 8}},
+		})
+
+		strings := make([]string, 0)
+		for _, split := range pts.GetOriginalByteSplits() {
+			strings = append(strings, input[split.Offsets.Start:split.Offsets.End])
+		}
+		assertEqual(t, strings, []string{"i", "⭢", "j"})
+	})
 }
 
-func TestByteLevelPreTokenizerWithPrefixSpaceEnabled(t *testing.T) {
-	t.Parallel()
-
-	b := NewByteLevelPreTokenizer(DefaultSplittingRegexp, true)
-
-	tests := []struct {
-		str            string
-		expectedStr    string
-		expectedTokens []PreToken
-	}{
-		{
-			str:         "",
-			expectedStr: "Ġ",
-			expectedTokens: []PreToken{
-				{String: "Ġ", Start: 0, End: 1},
-			},
-		},
-		{
-			str:         " ",
-			expectedStr: "Ġ",
-			expectedTokens: []PreToken{
-				{String: "Ġ", Start: 0, End: 1},
-			},
-		},
-		{
-			str:         " \n\r",
-			expectedStr: "ĠĊč",
-			expectedTokens: []PreToken{
-				{String: "ĠĊč", Start: 0, End: 3},
-			},
-		},
-		{
-			str:         "x",
-			expectedStr: "Ġx",
-			expectedTokens: []PreToken{
-				{String: "Ġx", Start: 0, End: 2},
-			},
-		},
-		{
-			str:         "Foo",
-			expectedStr: "ĠFoo",
-			expectedTokens: []PreToken{
-				{String: "ĠFoo", Start: 0, End: 4},
-			},
-		},
-		{
-			str:         "Foo bar baz",
-			expectedStr: "ĠFooĠbarĠbaz",
-			expectedTokens: []PreToken{
-				{String: "ĠFoo", Start: 0, End: 4},
-				{String: "Ġbar", Start: 4, End: 8},
-				{String: "Ġbaz", Start: 8, End: 12},
-			},
-		},
-		{
-			str:         "  Foo  bar  ",
-			expectedStr: "ĠĠFooĠĠbarĠĠ",
-			expectedTokens: []PreToken{
-				{String: "Ġ", Start: 0, End: 1},
-				{String: "ĠFoo", Start: 1, End: 5},
-				{String: "Ġ", Start: 5, End: 6},
-				{String: "Ġbar", Start: 6, End: 10},
-				{String: "ĠĠ", Start: 10, End: 12},
-			},
-		},
-		{
-			str:         "\nSüß Café!?\r",
-			expectedStr: "ĊSÃ¼ÃŁĠCafÃ©!?č",
-			expectedTokens: []PreToken{
-				{String: "Ċ", Start: 0, End: 1},
-				{String: "SÃ¼ÃŁ", Start: 1, End: 6},
-				{String: "ĠCafÃ©", Start: 6, End: 12},
-				{String: "!?", Start: 12, End: 14},
-				{String: "č", Start: 14, End: 15},
-			},
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("%#v", test.str), func(t *testing.T) {
-			ns := NewNormalizedString(test.str)
-			tokens, err := b.PreTokenize(ns)
-			if err != nil {
-				t.Error(err)
-			}
-			if !reflect.DeepEqual(tokens, test.expectedTokens) {
-				t.Errorf("expected %v, actual %v", test.expectedTokens, tokens)
-			}
-			if ns.Get() != test.expectedStr {
-				t.Errorf("expected %#v, actual %#v", test.expectedStr, ns.Get())
-			}
-		})
-	}
-}
-
-func TestDefaultByteLevelPreTokenizer(t *testing.T) {
-	t.Parallel()
-
-	b := DefaultByteLevelPreTokenizer()
-
-	tests := []struct {
-		str            string
-		expectedStr    string
-		expectedTokens []PreToken
-	}{
-		{
-			str:         "Foo bar baz",
-			expectedStr: "ĠFooĠbarĠbaz",
-			expectedTokens: []PreToken{
-				{String: "ĠFoo", Start: 0, End: 4},
-				{String: "Ġbar", Start: 4, End: 8},
-				{String: "Ġbaz", Start: 8, End: 12},
-			},
-		},
-		{
-			str:         "\nSüß Café!?\r",
-			expectedStr: "ĊSÃ¼ÃŁĠCafÃ©!?č",
-			expectedTokens: []PreToken{
-				{String: "Ċ", Start: 0, End: 1},
-				{String: "SÃ¼ÃŁ", Start: 1, End: 6},
-				{String: "ĠCafÃ©", Start: 6, End: 12},
-				{String: "!?", Start: 12, End: 14},
-				{String: "č", Start: 14, End: 15},
-			},
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("%#v", test.str), func(t *testing.T) {
-			ns := NewNormalizedString(test.str)
-			tokens, err := b.PreTokenize(ns)
-			if err != nil {
-				t.Error(err)
-			}
-			if !reflect.DeepEqual(tokens, test.expectedTokens) {
-				t.Errorf("expected %v, actual %v", test.expectedTokens, tokens)
-			}
-			if ns.Get() != test.expectedStr {
-				t.Errorf("expected %#v, actual %#v", test.expectedStr, ns.Get())
-			}
-		})
-	}
-}
-
-func TestByteLevelPreTokenizerWithCustomRegexp(t *testing.T) {
-	t.Parallel()
-
-	splittingRegepx := regexp2.MustCompile(`foo|süß|bar`, regexp2.None)
-	b := NewByteLevelPreTokenizer(splittingRegepx, false)
-
-	tests := []struct {
-		str            string
-		expectedStr    string
-		expectedTokens []PreToken
-	}{
-		{
-			str:         " x foo baz süß café bar qux ",
-			expectedStr: "ĠxĠfooĠbazĠsÃ¼ÃŁĠcafÃ©ĠbarĠquxĠ",
-			expectedTokens: []PreToken{
-				{String: "ĠxĠ", Start: 0, End: 3},
-				{String: "foo", Start: 3, End: 6},
-				{String: "ĠbazĠ", Start: 6, End: 11},
-				{String: "sÃ¼ÃŁ", Start: 11, End: 16},
-				{String: "ĠcafÃ©Ġ", Start: 16, End: 23},
-				{String: "bar", Start: 23, End: 26},
-				{String: "ĠquxĠ", Start: 26, End: 31},
-			},
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("%#v", test.str), func(t *testing.T) {
-			ns := NewNormalizedString(test.str)
-			tokens, err := b.PreTokenize(ns)
-			if err != nil {
-				t.Error(err)
-			}
-			if !reflect.DeepEqual(tokens, test.expectedTokens) {
-				t.Errorf("expected %v, actual %v", test.expectedTokens, tokens)
-			}
-			if ns.Get() != test.expectedStr {
-				t.Errorf("expected %#v, actual %#v", test.expectedStr, ns.Get())
-			}
-		})
+func assertEqual(t *testing.T, actual, expected interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("expected\n  %#v\nactual\n  %#v", expected, actual)
 	}
 }
