@@ -6,66 +6,104 @@ package runedelimiterpretokenizer
 
 import (
 	"fmt"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
-	. "github.com/nlpodyssey/gotokenizers/pretokenizers"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
 	"reflect"
 	"testing"
 )
 
-func TestRuneDelimiterPreTokenizer(t *testing.T) {
+func TestWhiteSpaceSplitPreTokenizer_PreTokenize(t *testing.T) {
 	t.Parallel()
 
-	wt := NewRuneDelimiterPreTokenizer('Ʊ')
-
-	tests := []struct {
-		str      string
-		expected []PreToken
+	testCases := []struct {
+		input          string
+		expectedSplits []pretokenizedstring.OriginalByteSplit
 	}{
-		{str: "", expected: []PreToken{}},
-		{str: "Ʊ", expected: []PreToken{}},
-		{str: "ƱƱ", expected: []PreToken{}},
-		{str: " ", expected: []PreToken{
-			{String: " ", Start: 0, End: 1},
-		}},
-		{str: " \n\t", expected: []PreToken{
-			{String: " \n\t", Start: 0, End: 3},
-		}},
-		{str: "x", expected: []PreToken{
-			{String: "x", Start: 0, End: 1},
-		}},
-		{str: "foo", expected: []PreToken{
-			{String: "foo", Start: 0, End: 3},
-		}},
-		{str: "foo bar", expected: []PreToken{
-			{String: "foo bar", Start: 0, End: 7},
-		}},
-		{str: "fooƱbarƱbaz", expected: []PreToken{
-			{String: "foo", Start: 0, End: 3},
-			{String: "bar", Start: 4, End: 7},
-			{String: "baz", Start: 8, End: 11},
-		}},
-		{str: "Ʊfoo", expected: []PreToken{
-			{String: "foo", Start: 1, End: 4},
-		}},
-		{str: "fooƱ", expected: []PreToken{
-			{String: "foo", Start: 0, End: 3},
-		}},
-		{str: "ƱSüßƱCafé!?Ʊ", expected: []PreToken{
-			{String: "Süß", Start: 1, End: 4},
-			{String: "Café!?", Start: 5, End: 11},
-		}},
+		{
+			"",
+			[]pretokenizedstring.OriginalByteSplit{}},
+		{
+			"Ʊ",
+			[]pretokenizedstring.OriginalByteSplit{}},
+		{
+			"ƱƱ",
+			[]pretokenizedstring.OriginalByteSplit{}},
+		{
+			" ",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: " ", Offsets: normalizedstring.Offsets{Start: 0, End: 1}},
+			},
+		},
+		{
+			" \n\t",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: " \n\t", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
+			},
+		},
+		{
+			"x",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: "x", Offsets: normalizedstring.Offsets{Start: 0, End: 1}},
+			},
+		},
+		{
+			"foo",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: "foo", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
+			},
+		},
+		{
+			"foo bar",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: "foo bar", Offsets: normalizedstring.Offsets{Start: 0, End: 7}},
+			},
+		},
+		{
+			"fooƱbarƱbaz",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: "foo", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
+				{String: "bar", Offsets: normalizedstring.Offsets{Start: 5, End: 8}},
+				{String: "baz", Offsets: normalizedstring.Offsets{Start: 10, End: 13}},
+			},
+		},
+		{
+			"Ʊfoo",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: "foo", Offsets: normalizedstring.Offsets{Start: 2, End: 5}},
+			},
+		},
+		{
+			"fooƱ",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: "foo", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
+			},
+		},
+		{
+			"ƱSüßƱCafé!?Ʊ",
+			[]pretokenizedstring.OriginalByteSplit{
+				{String: "Süß", Offsets: normalizedstring.Offsets{Start: 2, End: 7}},
+				{String: "Café!?", Offsets: normalizedstring.Offsets{Start: 9, End: 16}},
+			},
+		},
 	}
 
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("%#v", test.str), func(t *testing.T) {
-			ns := NewNormalizedString(test.str)
-			tokens, err := wt.PreTokenize(ns)
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("%#v", tc.input), func(t *testing.T) {
+			pt := New('Ʊ')
+			pts := pretokenizedstring.FromString(tc.input)
+			err := pt.PreTokenize(pts)
 			if err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
-			if !reflect.DeepEqual(tokens, test.expected) {
-				t.Errorf("expected %v, actual %v", test.expected, tokens)
-			}
+
+			assertEqual(t, pts.GetOriginalByteSplits(), tc.expectedSplits)
 		})
+	}
+}
+
+func assertEqual(t *testing.T, actual, expected interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("expected\n  %#v\nactual\n  %#v", expected, actual)
 	}
 }
