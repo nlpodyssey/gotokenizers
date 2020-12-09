@@ -77,11 +77,7 @@ func (b *ByteLevelPreTokenizer) PreTokenize(pts *pretokenizedstring.PreTokenized
 			if err != nil {
 				return nil, err
 			}
-			splits := make([]pretokenizedstring.Split, len(nss))
-			for i, ns := range nss {
-				splits[i] = pretokenizedstring.Split{NormalizedString: ns, Tokens: nil}
-			}
-			return splits, nil
+			return pretokenizedstring.SplitsFromNormalizedStrings(nss), nil
 		},
 	)
 	if err != nil {
