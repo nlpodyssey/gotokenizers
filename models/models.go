@@ -4,6 +4,13 @@
 
 package models
 
+// Model represents a model used during Tokenization (like BPE or Word or Unigram).
+type Model interface {
+	// Tokenize tokenizes the given sequence into multiple underlying Tokens.
+	// The Token.Offsets are expected to be relative to the given sequence.
+	Tokenize(sequence string) ([]Token, error)
+}
+
 type Token struct {
 	ID      int
 	Value   string
