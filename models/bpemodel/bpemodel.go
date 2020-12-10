@@ -45,8 +45,8 @@ type BPEModel struct {
 
 var _ models.Model = &BPEModel{}
 
-// NewBPEModel returns a new BPEModel initialized with the given options.
-func NewBPEModel(
+// New returns a new BPEModel initialized with the given options.
+func New(
 	vocab *vocabulary.Vocabulary,
 	merges *MergeMap,
 	cacheCapacity int,
@@ -68,7 +68,7 @@ func NewBPEModel(
 	}
 }
 
-func NewDefaultBPEModel() *BPEModel {
+func NewDefault() *BPEModel {
 	return &BPEModel{
 		vocab:                   vocabulary.NewVocabulary(),
 		merges:                  NewMergeMap(),
