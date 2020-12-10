@@ -6,16 +6,20 @@ package splitpattern
 
 type RuneSplitPattern struct {
 	r rune
+	f *FuncSplitPattern
 }
 
 var _ SplitPattern = &RuneSplitPattern{}
 
 func FromRune(r rune) *RuneSplitPattern {
-	return &RuneSplitPattern{r: r}
+	return &RuneSplitPattern{
+		r: r,
+		f: FromFunc(func(other rune) bool {
+			return other == r
+		}),
+	}
 }
 
 func (sp *RuneSplitPattern) FindMatches(s string) ([]Capture, error) {
-	return FromFunc(func(r rune) bool {
-		return r == sp.r
-	}).FindMatches(s)
+	return sp.f.FindMatches(s)
 }
