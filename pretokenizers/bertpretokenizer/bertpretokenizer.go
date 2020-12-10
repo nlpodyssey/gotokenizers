@@ -5,8 +5,10 @@
 package bertpretokenizer
 
 import (
-	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
 	"github.com/nlpodyssey/gotokenizers/pretokenizers"
+	"github.com/nlpodyssey/gotokenizers/splitpattern"
 	"unicode"
 )
 
@@ -21,60 +23,40 @@ type BertPreTokenizer struct{}
 
 var _ pretokenizers.PreTokenizer = &BertPreTokenizer{}
 
-// NewBertPreTokenizer returns a new BertPreTokenizer.
-func NewBertPreTokenizer() *BertPreTokenizer {
+// New returns a new BertPreTokenizer.
+func New() *BertPreTokenizer {
 	return &BertPreTokenizer{}
 }
 
 // PreTokenize splits the NormalizedString into pre-tokens suitable for BERT
 // models.
-func (rd *BertPreTokenizer) PreTokenize(
-	ns *normalizedstring.NormalizedString,
-) ([]pretokenizers.PreToken, error) {
-	tokens := make([]pretokenizers.PreToken, 0)
-	word := make([]rune, 0)
-
-	index := 0
-	for _, r := range ns.Get() {
-		switch {
-		case unicode.In(r, unicode.White_Space):
-			if len(word) > 0 {
-				tokens = append(tokens, pretokenizers.PreToken{
-					String: string(word),
-					Start:  index - len(word),
-					End:    index,
-				})
-				word = word[:0]
+func (b *BertPreTokenizer) PreTokenize(pts *pretokenizedstring.PreTokenizedString) error {
+	isWhitespacePattern := splitpattern.FromFunc(func(r rune) bool {
+		return unicode.In(r, unicode.White_Space)
+	})
+	isBertPunctuationPattern := splitpattern.FromFunc(func(r rune) bool {
+		//TODO: (from Rust) char::is_ascii_punctuation(&x) || ...
+		return unicode.In(r, unicode.Punct)
+	})
+	err := pts.Split(
+		func(_ int, ns *normalizedstring.NormalizedString) ([]pretokenizedstring.Split, error) {
+			nss, err := ns.Split(isWhitespacePattern, normalizedstring.SplitDelimiterRemoved)
+			if err != nil {
+				return nil, err
 			}
-		case unicode.In(r, unicode.Punct):
-			if len(word) > 0 {
-				tokens = append(tokens, pretokenizers.PreToken{
-					String: string(word),
-					Start:  index - len(word),
-					End:    index,
-				})
-				word = word[:0]
+			return pretokenizedstring.SplitsFromNormalizedStrings(nss), nil
+		},
+	)
+	if err != nil {
+		return err
+	}
+	return pts.Split(
+		func(_ int, ns *normalizedstring.NormalizedString) ([]pretokenizedstring.Split, error) {
+			nss, err := ns.Split(isBertPunctuationPattern, normalizedstring.SplitDelimiterIsolated)
+			if err != nil {
+				return nil, err
 			}
-			tokens = append(tokens, pretokenizers.PreToken{
-				String: string(r),
-				Start:  index,
-				End:    index + 1,
-			})
-		default:
-			word = append(word, r)
-		}
-
-		index++
-	}
-
-	if len(word) > 0 {
-		end := ns.Len()
-		tokens = append(tokens, pretokenizers.PreToken{
-			String: string(word),
-			Start:  end - len(word),
-			End:    end,
-		})
-	}
-
-	return tokens, nil
+			return pretokenizedstring.SplitsFromNormalizedStrings(nss), nil
+		},
+	)
 }

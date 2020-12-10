@@ -5,76 +5,76 @@
 package bertpretokenizer
 
 import (
-	"fmt"
-	. "github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
-	. "github.com/nlpodyssey/gotokenizers/pretokenizers"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
 	"reflect"
 	"testing"
 )
 
-func TestBertPreTokenizer(t *testing.T) {
+func TestBertPreTokenizer_PreTokenize(t *testing.T) {
 	t.Parallel()
 
-	wt := NewBertPreTokenizer()
+	t.Run("Basic", func(t *testing.T) {
+		pt := New()
+		pts := pretokenizedstring.FromString("Hey friend!     How are you?!?")
+		err := pt.PreTokenize(pts)
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	tests := []struct {
-		str      string
-		expected []PreToken
-	}{
-		{str: "", expected: []PreToken{}},
-		{str: " ", expected: []PreToken{}},
-		{str: " \n\t", expected: []PreToken{}},
-		{str: "x", expected: []PreToken{
-			{String: "x", Start: 0, End: 1},
-		}},
-		{str: "foo", expected: []PreToken{
-			{String: "foo", Start: 0, End: 3},
-		}},
-		{str: "foo bar baz", expected: []PreToken{
-			{String: "foo", Start: 0, End: 3},
-			{String: "bar", Start: 4, End: 7},
-			{String: "baz", Start: 8, End: 11},
-		}},
-		{str: " foo ", expected: []PreToken{
-			{String: "foo", Start: 1, End: 4},
-		}},
-		{str: "  foo  ", expected: []PreToken{
-			{String: "foo", Start: 2, End: 5},
-		}},
-		{str: " \nfoo   bar \t  baz\n\r", expected: []PreToken{
-			{String: "foo", Start: 2, End: 5},
-			{String: "bar", Start: 8, End: 11},
-			{String: "baz", Start: 15, End: 18},
-		}},
-		{str: "!", expected: []PreToken{
-			{String: "!", Start: 0, End: 1},
-		}},
-		{str: "!?", expected: []PreToken{
-			{String: "!", Start: 0, End: 1},
-			{String: "?", Start: 1, End: 2},
-		}},
-		{str: " ! ? ", expected: []PreToken{
-			{String: "!", Start: 1, End: 2},
-			{String: "?", Start: 3, End: 4},
-		}},
-		{str: "Süß Café!?", expected: []PreToken{
-			{String: "Süß", Start: 0, End: 3},
-			{String: "Café", Start: 4, End: 8},
-			{String: "!", Start: 8, End: 9},
-			{String: "?", Start: 9, End: 10},
-		}},
-	}
-
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("%#v", test.str), func(t *testing.T) {
-			ns := NewNormalizedString(test.str)
-			tokens, err := wt.PreTokenize(ns)
-			if err != nil {
-				t.Error(err)
-			}
-			if !reflect.DeepEqual(tokens, test.expected) {
-				t.Errorf("expected %v, actual %v", test.expected, tokens)
-			}
+		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
+			{String: "Hey", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
+			{String: "friend", Offsets: normalizedstring.Offsets{Start: 4, End: 10}},
+			{String: "!", Offsets: normalizedstring.Offsets{Start: 10, End: 11}},
+			{String: "How", Offsets: normalizedstring.Offsets{Start: 16, End: 19}},
+			{String: "are", Offsets: normalizedstring.Offsets{Start: 20, End: 23}},
+			{String: "you", Offsets: normalizedstring.Offsets{Start: 24, End: 27}},
+			{String: "?", Offsets: normalizedstring.Offsets{Start: 27, End: 28}},
+			{String: "!", Offsets: normalizedstring.Offsets{Start: 28, End: 29}},
+			{String: "?", Offsets: normalizedstring.Offsets{Start: 29, End: 30}},
 		})
+	})
+
+	t.Run("Chinese characters", func(t *testing.T) {
+		pt := New()
+
+		ns := normalizedstring.FromString("野口里佳 Noguchi Rika")
+		runeChanges := make([]normalizedstring.RuneChange, 0, ns.Len())
+		for _, r := range ns.Get() {
+			if r > 0x4E00 {
+				runeChanges = append(runeChanges,
+					normalizedstring.RuneChange{Rune: ' ', Change: 0},
+					normalizedstring.RuneChange{Rune: r, Change: 1},
+					normalizedstring.RuneChange{Rune: ' ', Change: 1},
+				)
+			} else {
+				runeChanges = append(runeChanges,
+					normalizedstring.RuneChange{Rune: r, Change: 0})
+			}
+		}
+		ns.Transform(runeChanges, 0)
+
+		pts := pretokenizedstring.FromNormalizedString(ns)
+
+		err := pt.PreTokenize(pts)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
+			{String: "野", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
+			{String: "口", Offsets: normalizedstring.Offsets{Start: 3, End: 6}},
+			{String: "里", Offsets: normalizedstring.Offsets{Start: 6, End: 9}},
+			{String: "佳", Offsets: normalizedstring.Offsets{Start: 9, End: 12}},
+			{String: "Noguchi", Offsets: normalizedstring.Offsets{Start: 13, End: 20}},
+			{String: "Rika", Offsets: normalizedstring.Offsets{Start: 21, End: 25}},
+		})
+	})
+}
+
+func assertEqual(t *testing.T, actual, expected interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("expected\n  %#v\nactual\n  %#v", expected, actual)
 	}
 }
