@@ -151,3 +151,7 @@ func (p *PreTokenizedString) GetNormalizedByteSplits() []NormalizedByteSplit {
 	}
 	return result
 }
+
+func (p *PreTokenizedString) Splits() []Split {
+	return p.splits
+}
