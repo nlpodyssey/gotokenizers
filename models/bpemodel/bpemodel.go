@@ -12,10 +12,10 @@ import (
 
 var ErrUnknownTokenOutOfVocabulary = fmt.Errorf("the provided unk token is out of vocabulary")
 
-// BpeModel is a Byte Pair Encoding (BPE) model.
+// BPEModel is a Byte Pair Encoding (BPE) model.
 //
 // See: https://www.aclweb.org/anthology/P16-1162/
-type BpeModel struct {
+type BPEModel struct {
 	// Vocabulary of tokens
 	vocab *vocabulary.Vocabulary
 	// Mapping between symbol pairs and their (rank, new_id).
@@ -43,8 +43,10 @@ type BpeModel struct {
 	unknownFusionEnabled bool
 }
 
-// NewBpeModel returns a new BpeModel initialized with the given options.
-func NewBpeModel(
+var _ models.Model = &BPEModel{}
+
+// NewBPEModel returns a new BPEModel initialized with the given options.
+func NewBPEModel(
 	vocab *vocabulary.Vocabulary,
 	merges *MergeMap,
 	cacheCapacity int,
@@ -53,8 +55,8 @@ func NewBpeModel(
 	continuingSubwordPrefix string,
 	endOfWordSuffix string,
 	unknownFusionEnabled bool,
-) *BpeModel {
-	return &BpeModel{
+) *BPEModel {
+	return &BPEModel{
 		vocab:                   vocab,
 		merges:                  merges,
 		cache:                   NewCache(cacheCapacity),
@@ -66,8 +68,8 @@ func NewBpeModel(
 	}
 }
 
-func NewDefaultBpeModel() *BpeModel {
-	return &BpeModel{
+func NewDefaultBPEModel() *BPEModel {
+	return &BPEModel{
 		vocab:                   vocabulary.NewVocabulary(),
 		merges:                  NewMergeMap(),
 		cache:                   NewDefaultCache(),
@@ -79,7 +81,7 @@ func NewDefaultBpeModel() *BpeModel {
 	}
 }
 
-func (m *BpeModel) Tokenize(sequence string) ([]models.Token, error) {
+func (m *BPEModel) Tokenize(sequence string) ([]models.Token, error) {
 	if len(sequence) == 0 {
 		return nil, nil
 	}
@@ -95,7 +97,7 @@ func (m *BpeModel) Tokenize(sequence string) ([]models.Token, error) {
 	return m.wordToTokens(word)
 }
 
-func (m *BpeModel) tokenizeWithCache(sequence string) ([]models.Token, error) {
+func (m *BPEModel) tokenizeWithCache(sequence string) ([]models.Token, error) {
 	hit := m.cache.Get(sequence)
 	if hit != nil {
 		return m.wordToTokens(hit)
@@ -114,7 +116,7 @@ func (m *BpeModel) tokenizeWithCache(sequence string) ([]models.Token, error) {
 	return tokens, nil
 }
 
-func (m *BpeModel) mergeWord(w string) (*Word, error) {
+func (m *BPEModel) mergeWord(w string) (*Word, error) {
 	word := NewWordWithCapacity(len(w))
 
 	var unkTokenID int
@@ -179,7 +181,7 @@ func (m *BpeModel) mergeWord(w string) (*Word, error) {
 	return word, nil
 }
 
-func (m *BpeModel) wordToTokens(word *Word) ([]models.Token, error) {
+func (m *BPEModel) wordToTokens(word *Word) ([]models.Token, error) {
 	tokens := make([]models.Token, word.Len())
 	offsetStart := 0
 	for i, wordSymbol := range *word {
@@ -201,18 +203,18 @@ func (m *BpeModel) wordToTokens(word *Word) ([]models.Token, error) {
 	return tokens, nil
 }
 
-func (m *BpeModel) hasDropout() bool {
+func (m *BPEModel) hasDropout() bool {
 	return m.dropout > 0
 }
 
-func (m *BpeModel) hasContinuingSubwordPrefix() bool {
+func (m *BPEModel) hasContinuingSubwordPrefix() bool {
 	return len(m.continuingSubwordPrefix) != 0
 }
 
-func (m *BpeModel) hasEndOfWordSuffix() bool {
+func (m *BPEModel) hasEndOfWordSuffix() bool {
 	return len(m.endOfWordSuffix) != 0
 }
 
-func (m *BpeModel) hasUnknownToken() bool {
+func (m *BPEModel) hasUnknownToken() bool {
 	return len(m.unknownToken) != 0
 }

@@ -4,7 +4,7 @@
 
 package bpemodel
 
-// DefaultCacheCapacity is the default capacity for BpeModel internal cache.
+// DefaultCacheCapacity is the default capacity for BPEModel internal cache.
 const DefaultCacheCapacity = 10_000
 
 type WordCache struct {

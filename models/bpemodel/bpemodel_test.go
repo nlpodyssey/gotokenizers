@@ -61,7 +61,7 @@ func TestTokenizeWithAndWithoutDropout(t *testing.T) {
 		merges.Set(id1, id2, MergeValue{Rank: m.rank, ID: id3})
 	}
 
-	bpe := NewBpeModel(
+	bpe := NewBPEModel(
 		vocab,
 		merges,
 		DefaultCacheCapacity,
@@ -89,7 +89,7 @@ func TestTokenizeWithAndWithoutDropout(t *testing.T) {
 	}
 
 	// Now set dropout to 1.0. Result should be no merges performed.
-	bpe = NewBpeModel(
+	bpe = NewBPEModel(
 		vocab,
 		merges,
 		DefaultCacheCapacity,
@@ -120,7 +120,7 @@ func TestTokenizeWithAndWithoutDropout(t *testing.T) {
 	}
 
 	// Now try with dropout between 0 and 1.
-	bpe = NewBpeModel(
+	bpe = NewBPEModel(
 		vocab,
 		merges,
 		DefaultCacheCapacity,
