@@ -4,7 +4,10 @@
 
 package pretokenizedstring
 
-import "github.com/nlpodyssey/gotokenizers/normalizedstring"
+import (
+	"github.com/nlpodyssey/gotokenizers/models"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+)
 
 // PreTokenizedString is in charge of splitting an underlying string,
 // making sure everything is fine while doing so, and providing ways to
@@ -81,7 +84,7 @@ func (p *PreTokenizedString) Split(splitFunc SplitFunc) error {
 	return nil
 }
 
-/// Normalize normalizes all the splits that do not have attached Split.Tokens,
+// Normalize normalizes all the splits that do not have attached Split.Tokens,
 // using the provided normalization function.
 func (p *PreTokenizedString) Normalize(
 	normalize func(ns *normalizedstring.NormalizedString) error,
@@ -94,6 +97,24 @@ func (p *PreTokenizedString) Normalize(
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// Normalize tokenizes all the splits that do not have attached Split.Tokens,
+// using the provided tokenization function.
+func (p *PreTokenizedString) Tokenize(
+	tokenize func(ns *normalizedstring.NormalizedString) ([]models.Token, error),
+) error {
+	for i, split := range p.splits {
+		if split.Tokens != nil {
+			continue
+		}
+		tokens, err := tokenize(split.NormalizedString)
+		if err != nil {
+			return err
+		}
+		p.splits[i].Tokens = &tokens
 	}
 	return nil
 }
