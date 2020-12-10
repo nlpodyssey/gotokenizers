@@ -601,6 +601,48 @@ func (ns *NormalizedString) Split(
 	return result, nil
 }
 
+// Replace replaces anything that matches the pattern with the given content.
+func (ns *NormalizedString) Replace(
+	pattern splitpattern.SplitPattern,
+	content string,
+) error {
+	offset := 0
+
+	captures, err := pattern.FindMatches(ns.normalized)
+	if err != nil {
+		return err
+	}
+	for _, capture := range captures {
+		if !capture.IsMatch {
+			continue
+		}
+		rStart := capture.Offsets.Start + offset
+		if rStart < 0 {
+			rStart = 0
+		}
+		rEnd := capture.Offsets.End + offset
+		if rEnd < 0 {
+			rEnd = 0
+		}
+		rng := NewNormalizedRange(rStart, rEnd)
+
+		changes := make([]RuneChange, 0, len(content))
+		for _, r := range content {
+			changes = append(changes, RuneChange{Rune: r, Change: 1})
+		}
+
+		removedRunes := len([]rune(ns.normalized[rng.Start():rng.End()]))
+
+		ns.TransformRange(rng, changes, removedRunes)
+
+		newLen := len(content)
+		oldLen := capture.Offsets.End - capture.Offsets.Start
+		offset += newLen - oldLen
+	}
+
+	return nil
+}
+
 // Slice returns a slice of the current NormalizedString. It also returns a flag
 // which reports whether the operation is successful or not.
 func (ns *NormalizedString) Slice(rng Range) (*NormalizedString, bool) {

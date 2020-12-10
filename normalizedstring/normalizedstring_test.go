@@ -7,6 +7,7 @@ package normalizedstring
 import (
 	"github.com/nlpodyssey/gotokenizers/splitpattern"
 	"reflect"
+	"regexp"
 	"testing"
 	"unicode"
 )
@@ -558,6 +559,56 @@ func TestNormalizedStringSplit(t *testing.T) {
 	test(SplitDelimiterMergedWithPrevious, []string{"The-", "final-", "-", "countdown"})
 	test(SplitDelimiterMergedWithNext, []string{"The", "-final", "-", "-countdown"})
 	test(SplitDelimiterContiguous, []string{"The", "-", "final", "--", "countdown"})
+}
+
+func TestNormalizedStringReplace(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Simple 1", func(t *testing.T) {
+		t.Parallel()
+
+		ns := FromString(" Hello   friend ")
+		err := ns.Replace(splitpattern.FromRune(' '), "_")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assertEqual(t, ns.Get(), "_Hello___friend_")
+	})
+
+	t.Run("Simple 2", func(t *testing.T) {
+		t.Parallel()
+
+		ns := FromString("aaaab")
+		err := ns.Replace(splitpattern.FromRune('a'), "b")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assertEqual(t, ns.Get(), "bbbbb")
+	})
+
+	t.Run("Overlapping", func(t *testing.T) {
+		t.Parallel()
+
+		ns := FromString("aaaab")
+		err := ns.Replace(splitpattern.FromString("aaa"), "b")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assertEqual(t, ns.Get(), "bab")
+	})
+
+	t.Run("Regex", func(t *testing.T) {
+		t.Parallel()
+
+		ns := FromString(" Hello   friend ")
+		r := regexp.MustCompile(`\s+`)
+
+		err := ns.Replace(splitpattern.FromRegexp(r), "_")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assertEqual(t, ns.Get(), "_Hello_friend_")
+	})
 }
 
 func TestNormalizedStringTransformRange(t *testing.T) {
