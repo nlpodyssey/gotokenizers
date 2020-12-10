@@ -5,9 +5,11 @@
 package metaspacepretokenizer
 
 import (
-	"github.com/nlpodyssey/gotokenizers/normalizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
 	"github.com/nlpodyssey/gotokenizers/pretokenizers"
-	"unicode"
+	"github.com/nlpodyssey/gotokenizers/splitpattern"
+	"strings"
 )
 
 // MetaSpacePreTokenizer allows the generation of pre-tokens by virtually
@@ -17,35 +19,33 @@ import (
 // A whitespace prefix (' ') can be optionally prepended to the input string,
 // unless the first rune of the string is already a unicode whitespace.
 type MetaSpacePreTokenizer struct {
-	metaCharacter      rune
+	replacement        rune
+	strReplacement     string
 	prefixSpaceEnabled bool
 }
 
 var _ pretokenizers.PreTokenizer = &MetaSpacePreTokenizer{}
 
-// NewMetaSpacePreTokenizer returns a new MetaSpacePreTokenizer, setting
-// the meta-character, and the flag which indicates whether to add
-// a whitespace prefix.
-func NewMetaSpacePreTokenizer(
-	metaCharacter rune, prefixSpaceEnabled bool,
-) *MetaSpacePreTokenizer {
+// DefaultReplacementCharacter is the default meta-character (rune) used to
+// initialize a NewDefault.
+//
+// This value is a lower one eighth block U+2581.
+const DefaultReplacementCharacter = '▁'
+
+// New returns a new MetaSpacePreTokenizer.
+func New(replacement rune, prefixSpaceEnabled bool) *MetaSpacePreTokenizer {
 	return &MetaSpacePreTokenizer{
-		metaCharacter:      metaCharacter,
+		replacement:        replacement,
+		strReplacement:     string(replacement),
 		prefixSpaceEnabled: prefixSpaceEnabled,
 	}
 }
 
-// DefaultMetaCharacter is the default meta-character (rune) used to
-// initialize a DefaultMetaSpacePreTokenizer.
-//
-// This value is a lower one eighth block U+2581.
-const DefaultMetaCharacter = '▁'
-
-// DefaultMetaSpacePreTokenizer returns a new MetaSpacePreTokenizer with
-// meta-character set to DefaultMetaCharacter ('▁', i.e. lower one eighth
+// NewDefault returns a new MetaSpacePreTokenizer with
+// meta-character set to DefaultReplacementCharacter ('▁', i.e. lower one eighth
 // block U+2581), and prefix space enabled.
-func DefaultMetaSpacePreTokenizer() *MetaSpacePreTokenizer {
-	return NewMetaSpacePreTokenizer(DefaultMetaCharacter, true)
+func NewDefault() *MetaSpacePreTokenizer {
+	return New(DefaultReplacementCharacter, true)
 }
 
 // PreTokenize virtually replaces all the whitespace-like characters with the
@@ -54,46 +54,22 @@ func DefaultMetaSpacePreTokenizer() *MetaSpacePreTokenizer {
 // If whitespace prefix is enabled, a whitespace (' ') is prepended to
 // the NormalizedString, actually modifying its "normalized" value, only if
 // the first rune of the string is not already a unicode whitespace.
-func (m *MetaSpacePreTokenizer) PreTokenize(
-	ns *normalizedstring.NormalizedString,
-) ([]pretokenizers.PreToken, error) {
-	if m.prefixSpaceEnabled && !startsWithWhitespace(ns.Get()) {
-		ns.Prepend(" ")
-	}
-
-	tokens := make([]pretokenizers.PreToken, 0)
-	word := make([]rune, 0)
-
-	index := 0
-	for _, r := range ns.Get() {
-		if unicode.In(r, unicode.White_Space) {
-			if len(word) > 0 {
-				tokens = append(tokens, pretokenizers.PreToken{
-					String: string(word),
-					Start:  index - len(word),
-					End:    index,
-				})
-				word = word[:0]
+func (m *MetaSpacePreTokenizer) PreTokenize(pts *pretokenizedstring.PreTokenizedString) error {
+	splittingPattern := splitpattern.FromRune(m.replacement)
+	return pts.Split(
+		func(_ int, ns *normalizedstring.NormalizedString) ([]pretokenizedstring.Split, error) {
+			if m.prefixSpaceEnabled && !strings.HasPrefix(ns.Get(), m.strReplacement) {
+				ns.Prepend(m.strReplacement)
 			}
-			word = append(word, m.metaCharacter)
-		} else {
-			word = append(word, r)
-		}
-		index++
-	}
-
-	if len(word) > 0 {
-		end := ns.Len()
-		tokens = append(tokens, pretokenizers.PreToken{
-			String: string(word),
-			Start:  end - len(word),
-			End:    end,
-		})
-	}
-
-	return tokens, nil
-}
-
-func startsWithWhitespace(s string) bool {
-	return len(s) != 0 && unicode.In([]rune(s)[0], unicode.White_Space)
+			err := ns.Replace(splitpattern.FromRune(' '), m.strReplacement)
+			if err != nil {
+				return nil, err
+			}
+			nss, err := ns.Split(splittingPattern, normalizedstring.SplitDelimiterMergedWithNext)
+			if err != nil {
+				return nil, err
+			}
+			return pretokenizedstring.SplitsFromNormalizedStrings(nss), nil
+		},
+	)
 }
