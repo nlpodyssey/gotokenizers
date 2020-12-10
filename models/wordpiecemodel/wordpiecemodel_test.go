@@ -5,14 +5,16 @@
 package wordpiecemodel
 
 import (
+	"fmt"
 	"github.com/nlpodyssey/gotokenizers/models"
-	"github.com/nlpodyssey/gotokenizers/pretokenizers"
 	"github.com/nlpodyssey/gotokenizers/vocabulary"
 	"reflect"
 	"testing"
 )
 
 func TestWordPieceModelTokenize(t *testing.T) {
+	t.Parallel()
+
 	terms := []string{
 		"[UNK]",            // 0
 		"foo",              // 1
@@ -32,38 +34,72 @@ func TestWordPieceModelTokenize(t *testing.T) {
 		vocab.AddTerm(term)
 	}
 
-	wordPiece := NewWordPieceModel(
+	wordPiece := New(
 		vocab,
 		"[UNK]",
 		"##",
 		15,
 	)
 
-	sentence := []pretokenizers.PreToken{
-		{String: "foo", Start: 0, End: 3},
-		{String: "barbaz", Start: 3, End: 9},
-		{String: "alphabetagamma", Start: 9, End: 23},
-		{String: "foobarbaz", Start: 23, End: 32},
-		{String: "qux", Start: 32, End: 35},
-		{String: "veryverylongterm", Start: 35, End: 51},
+	testCases := []struct {
+		input    string
+		expected []models.Token
+	}{
+		{
+			"foo",
+			[]models.Token{
+				{ID: 1, Value: "foo", Offsets: models.TokenOffsets{Start: 0, End: 3}},
+			},
+		},
+		{
+			"barbaz",
+			[]models.Token{
+				{ID: 3, Value: "bar", Offsets: models.TokenOffsets{Start: 0, End: 3}},
+				{ID: 6, Value: "##baz", Offsets: models.TokenOffsets{Start: 3, End: 6}},
+			},
+		},
+		{
+			"alphabetagamma",
+			[]models.Token{
+				{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 0, End: 14}},
+			},
+		},
+		{
+			"foobarbaz",
+			[]models.Token{
+				{ID: 1, Value: "foo", Offsets: models.TokenOffsets{Start: 0, End: 3}},
+				{ID: 4, Value: "##bar", Offsets: models.TokenOffsets{Start: 3, End: 6}},
+				{ID: 6, Value: "##baz", Offsets: models.TokenOffsets{Start: 6, End: 9}},
+			},
+		},
+		{
+			"qux",
+			[]models.Token{
+				{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 0, End: 3}},
+			},
+		},
+		{
+			"veryverylongterm",
+			[]models.Token{
+				{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 0, End: 16}},
+			},
+		},
 	}
 
-	tokens, err := wordPiece.Tokenize(sentence)
-	if err != nil {
-		t.Error(err)
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("%#v", tc.input), func(t *testing.T) {
+			tokens, err := wordPiece.Tokenize(tc.input)
+			if err != nil {
+				t.Fatal(err)
+			}
+			assertEqual(t, tokens, tc.expected)
+		})
 	}
-	expectedTokens := []models.Token{
-		{ID: 1, Value: "foo", Offsets: models.TokenOffsets{Start: 0, End: 3}},
-		{ID: 3, Value: "bar", Offsets: models.TokenOffsets{Start: 3, End: 6}},
-		{ID: 6, Value: "##baz", Offsets: models.TokenOffsets{Start: 6, End: 9}},
-		{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 9, End: 23}},
-		{ID: 1, Value: "foo", Offsets: models.TokenOffsets{Start: 23, End: 26}},
-		{ID: 4, Value: "##bar", Offsets: models.TokenOffsets{Start: 26, End: 29}},
-		{ID: 6, Value: "##baz", Offsets: models.TokenOffsets{Start: 29, End: 32}},
-		{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 32, End: 35}},
-		{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 35, End: 51}},
-	}
-	if !reflect.DeepEqual(tokens, expectedTokens) {
-		t.Errorf("expected %+v, actual %+v", expectedTokens, tokens)
+}
+
+func assertEqual(t *testing.T, actual, expected interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("expected\n  %#v\nactual\n  %#v", expected, actual)
 	}
 }

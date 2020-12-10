@@ -7,7 +7,6 @@ package wordpiecemodel
 import (
 	"fmt"
 	"github.com/nlpodyssey/gotokenizers/models"
-	"github.com/nlpodyssey/gotokenizers/pretokenizers"
 	"github.com/nlpodyssey/gotokenizers/vocabulary"
 )
 
@@ -27,7 +26,9 @@ type WordPieceModel struct {
 	maxInputCharsPerWord int
 }
 
-func NewWordPieceModel(
+var _ models.Model = &WordPieceModel{}
+
+func New(
 	vocab *vocabulary.Vocabulary,
 	unknownToken string,
 	continuingSubwordPrefix string,
@@ -41,7 +42,7 @@ func NewWordPieceModel(
 	}
 }
 
-func NewDefaultWordPieceModel() *WordPieceModel {
+func NewDefault() *WordPieceModel {
 	return &WordPieceModel{
 		vocab:                   vocabulary.NewVocabulary(),
 		unknownToken:            "[UNK]",
@@ -50,84 +51,72 @@ func NewDefaultWordPieceModel() *WordPieceModel {
 	}
 }
 
-func (m *WordPieceModel) Tokenize(sentence []pretokenizers.PreToken) ([]models.Token, error) {
-	outputTokens := make([]models.Token, 0, len(sentence))
-
-	for _, preToken := range sentence {
-		runes := []rune(preToken.String)
-		runesLen := len(runes)
-
-		if len(runes) > m.maxInputCharsPerWord {
-			unknownTokenID, ok := m.vocab.GetID(m.unknownToken)
-			if !ok {
-				return nil, ErrUnknownTokenOutOfVocabulary
-			}
-			outputTokens = append(outputTokens, models.Token{
-				ID:    unknownTokenID,
-				Value: m.unknownToken,
-				Offsets: models.TokenOffsets{
-					Start: preToken.Start,
-					End:   preToken.End,
-				},
-			})
-			continue
+func (m *WordPieceModel) Tokenize(sequence string) ([]models.Token, error) {
+	if len([]rune(sequence)) > m.maxInputCharsPerWord {
+		unkTokenID, unkTokenExists := m.vocab.GetID(m.unknownToken)
+		if !unkTokenExists {
+			return nil, ErrUnknownTokenOutOfVocabulary
 		}
+		return []models.Token{{
+			ID:      unkTokenID,
+			Value:   m.unknownToken,
+			Offsets: models.TokenOffsets{Start: 0, End: len(sequence)},
+		}}, nil
+	}
 
-		isBad := false
-		start := 0
-		subTokens := make([]models.Token, 0)
+	isBad := false
+	start := 0
+	subTokens := make([]models.Token, 0)
 
-		for start < runesLen {
-			end := runesLen
-			var curToken models.Token
-			tokenFound := false
+	for start < len(sequence) {
+		end := len(sequence)
+		hasCurToken := false
+		var curToken models.Token
 
-			for ; start < end; end-- {
-				subStr := string(runes[start:end])
-				if start > 0 {
-					subStr = m.continuingSubwordPrefix + subStr
-				}
+		for start < end {
+			subStr := sequence[start:end]
 
-				if id, ok := m.vocab.GetID(subStr); ok {
-					curToken = models.Token{
-						ID:    id,
-						Value: subStr,
-						Offsets: models.TokenOffsets{
-							Start: preToken.Start + start,
-							End:   preToken.Start + end,
-						},
-					}
-					tokenFound = true
-					break
-				}
+			if start > 0 {
+				subStr = m.continuingSubwordPrefix + subStr
 			}
 
-			if !tokenFound {
-				isBad = true
+			if id, ok := m.vocab.GetID(subStr); ok {
+				hasCurToken = true
+				curToken = models.Token{
+					ID:      id,
+					Value:   subStr,
+					Offsets: models.TokenOffsets{Start: start, End: end},
+				}
 				break
 			}
 
-			subTokens = append(subTokens, curToken)
-			start = end
+			if len(subStr) > 0 {
+				end -= len(string(subStr[len(subStr)-1]))
+			} else {
+				end -= 1
+			}
 		}
 
-		if isBad {
-			unknownTokenID, ok := m.vocab.GetID(m.unknownToken)
-			if !ok {
-				return nil, ErrUnknownTokenOutOfVocabulary
-			}
-			outputTokens = append(outputTokens, models.Token{
-				ID:    unknownTokenID,
-				Value: m.unknownToken,
-				Offsets: models.TokenOffsets{
-					Start: preToken.Start,
-					End:   preToken.End,
-				},
-			})
-		} else {
-			outputTokens = append(outputTokens, subTokens...)
+		if !hasCurToken {
+			isBad = true
+			break
 		}
+
+		subTokens = append(subTokens, curToken)
+		start = end
 	}
 
-	return outputTokens, nil
+	if isBad {
+		unkTokenID, unkTokenExists := m.vocab.GetID(m.unknownToken)
+		if !unkTokenExists {
+			return nil, ErrUnknownTokenOutOfVocabulary
+		}
+		return []models.Token{{
+			ID:      unkTokenID,
+			Value:   m.unknownToken,
+			Offsets: models.TokenOffsets{Start: 0, End: len(sequence)},
+		}}, nil
+	}
+
+	return subTokens, nil
 }
