@@ -29,3 +29,19 @@ func IsRuneBoundary(s string, index int) bool {
 	// This is bit magic equivalent to: s[index] < 128 || s[index] >= 192
 	return int8(s[index]) >= -0x40
 }
+
+// ByteOffsets represents a (start, end) range of byte offset positions.
+type ByteOffsets struct {
+	// Start byte position, inclusive.
+	Start int
+	// End byte position, exclusive.
+	End int
+}
+
+// RuneOffsets represents a (start, end) range of byte rune positions.
+type RuneOffsets struct {
+	// Start rune position, inclusive.
+	Start int
+	// End rune position, exclusive.
+	End int
+}
