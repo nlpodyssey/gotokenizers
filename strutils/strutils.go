@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package strings
+package strutils
 
 // IsRuneBoundary checks that `index`-th byte is the first byte in a UTF-8 code
 // point sequence or the end of the string.

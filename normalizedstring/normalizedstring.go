@@ -7,7 +7,7 @@ package normalizedstring
 import (
 	"fmt"
 	"github.com/nlpodyssey/gotokenizers/splitpattern"
-	gotokstrings "github.com/nlpodyssey/gotokenizers/strings"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"strings"
 	"unicode"
 )
@@ -836,8 +836,8 @@ func (ns *NormalizedString) rangeIsValid(r Range) bool {
 		panic(fmt.Sprintf("unexpected Range implementation: %#v", r))
 	}
 
-	return gotokstrings.IsRuneBoundary(s, r.Start()) &&
-		gotokstrings.IsRuneBoundary(s, r.End())
+	return strutils.IsRuneBoundary(s, r.Start()) &&
+		strutils.IsRuneBoundary(s, r.End())
 }
 
 // countLeadingSpaces returns the number of leading spaces in the given slice
