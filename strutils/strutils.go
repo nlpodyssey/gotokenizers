@@ -45,3 +45,34 @@ type RuneOffsets struct {
 	// End rune position, exclusive.
 	End int
 }
+
+type BytesToRuneOffsetConverter struct {
+	mapping []int
+}
+
+func NewBytesToRuneOffsetConverter(sequence string) *BytesToRuneOffsetConverter {
+	mapping := make([]int, 0, len(sequence))
+	for runeIndex, r := range sequence {
+		for _ = range []byte(string(r)) {
+			mapping = append(mapping, runeIndex)
+		}
+	}
+	return &BytesToRuneOffsetConverter{mapping: mapping}
+}
+
+func (b *BytesToRuneOffsetConverter) Convert(offsets ByteOffsets) RuneOffsets {
+	if len(b.mapping) == 0 {
+		return RuneOffsets{Start: 0, End: 0}
+	}
+
+	start := b.mapping[offsets.Start]
+
+	var end int
+	if offsets.End == len(b.mapping) {
+		end = b.mapping[offsets.End-1] + 1
+	} else {
+		end = b.mapping[offsets.End]
+	}
+
+	return RuneOffsets{Start: start, End: end}
+}
