@@ -102,7 +102,7 @@ func (p *PreTokenizedString) Normalize(
 	return nil
 }
 
-// Normalize tokenizes all the splits that do not have attached Split.Tokens,
+// Tokenize tokenizes all the splits that do not have attached Split.Tokens,
 // using the provided tokenization function.
 func (p *PreTokenizedString) Tokenize(
 	tokenize func(ns *normalizedstring.NormalizedString) ([]models.Token, error),
@@ -133,7 +133,7 @@ func (p *PreTokenizedString) GetOriginalByteSplits() []OriginalByteSplit {
 	return result
 }
 
-// GetOriginalByteSplits returns a list of NormalizedByteSplit.
+// GetNormalizedByteSplits returns a list of NormalizedByteSplit.
 func (p *PreTokenizedString) GetNormalizedByteSplits() []NormalizedByteSplit {
 	result := make([]NormalizedByteSplit, len(p.splits))
 	offset := 0

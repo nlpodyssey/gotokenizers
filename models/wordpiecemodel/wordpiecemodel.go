@@ -94,7 +94,7 @@ func (m *WordPieceModel) Tokenize(sequence string) ([]models.Token, error) {
 			if len(subStr) > 0 {
 				end -= len(string(subStr[len(subStr)-1]))
 			} else {
-				end -= 1
+				end--
 			}
 		}
 

@@ -53,7 +53,7 @@ type BytesToRuneOffsetConverter struct {
 func NewBytesToRuneOffsetConverter(sequence string) *BytesToRuneOffsetConverter {
 	mapping := make([]int, 0, len(sequence))
 	for runeIndex, r := range sequence {
-		for _ = range []byte(string(r)) {
+		for range []byte(string(r)) {
 			mapping = append(mapping, runeIndex)
 		}
 	}

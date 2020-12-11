@@ -56,7 +56,7 @@ func NewWord() *Word {
 	return &w
 }
 
-// NewWord returns a new empty Word with the given capacity.
+// NewWordWithCapacity returns a new empty Word with the given capacity.
 func NewWordWithCapacity(capacity int) *Word {
 	w := make(Word, 0, capacity)
 	return &w

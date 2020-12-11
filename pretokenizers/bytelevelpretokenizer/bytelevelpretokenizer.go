@@ -55,7 +55,7 @@ func New(
 	}
 }
 
-// DefaultByteLevelPreTokenizer returns a new ByteLevelPreTokenizer, using
+// NewDefault returns a new ByteLevelPreTokenizer, using
 // DefaultSplittingRegexp, and enabling prefix space insertion.
 func NewDefault() *ByteLevelPreTokenizer {
 	return New(DefaultSplittingRegexp, true, true)
