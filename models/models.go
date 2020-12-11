@@ -4,6 +4,8 @@
 
 package models
 
+import "github.com/nlpodyssey/gotokenizers/strutils"
+
 // Model represents a model used during Tokenization (like BPE or Word or Unigram).
 type Model interface {
 	// Tokenize tokenizes the given sequence into multiple underlying Tokens.
@@ -14,10 +16,5 @@ type Model interface {
 type Token struct {
 	ID      int
 	Value   string
-	Offsets TokenOffsets
-}
-
-type TokenOffsets struct {
-	Start int
-	End   int
+	Offsets strutils.ByteOffsets
 }

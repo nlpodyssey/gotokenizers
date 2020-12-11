@@ -6,6 +6,7 @@ package bpemodel
 
 import (
 	"github.com/nlpodyssey/gotokenizers/models"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"github.com/nlpodyssey/gotokenizers/vocabulary"
 	"reflect"
 	"testing"
@@ -81,7 +82,7 @@ func TestTokenizeWithAndWithoutDropout(t *testing.T) {
 		{
 			ID:      15,
 			Value:   "unrelated",
-			Offsets: models.TokenOffsets{Start: 0, End: 9},
+			Offsets: strutils.ByteOffsets{Start: 0, End: 9},
 		},
 	}
 	if !reflect.DeepEqual(tokens, expectedTokens) {
@@ -105,15 +106,15 @@ func TestTokenizeWithAndWithoutDropout(t *testing.T) {
 	}
 
 	expectedTokens = []models.Token{
-		{ID: 0, Value: "u", Offsets: models.TokenOffsets{Start: 0, End: 1}},
-		{ID: 1, Value: "n", Offsets: models.TokenOffsets{Start: 1, End: 2}},
-		{ID: 2, Value: "r", Offsets: models.TokenOffsets{Start: 2, End: 3}},
-		{ID: 3, Value: "e", Offsets: models.TokenOffsets{Start: 3, End: 4}},
-		{ID: 4, Value: "l", Offsets: models.TokenOffsets{Start: 4, End: 5}},
-		{ID: 5, Value: "a", Offsets: models.TokenOffsets{Start: 5, End: 6}},
-		{ID: 6, Value: "t", Offsets: models.TokenOffsets{Start: 6, End: 7}},
-		{ID: 3, Value: "e", Offsets: models.TokenOffsets{Start: 7, End: 8}},
-		{ID: 7, Value: "d", Offsets: models.TokenOffsets{Start: 8, End: 9}},
+		{ID: 0, Value: "u", Offsets: strutils.ByteOffsets{Start: 0, End: 1}},
+		{ID: 1, Value: "n", Offsets: strutils.ByteOffsets{Start: 1, End: 2}},
+		{ID: 2, Value: "r", Offsets: strutils.ByteOffsets{Start: 2, End: 3}},
+		{ID: 3, Value: "e", Offsets: strutils.ByteOffsets{Start: 3, End: 4}},
+		{ID: 4, Value: "l", Offsets: strutils.ByteOffsets{Start: 4, End: 5}},
+		{ID: 5, Value: "a", Offsets: strutils.ByteOffsets{Start: 5, End: 6}},
+		{ID: 6, Value: "t", Offsets: strutils.ByteOffsets{Start: 6, End: 7}},
+		{ID: 3, Value: "e", Offsets: strutils.ByteOffsets{Start: 7, End: 8}},
+		{ID: 7, Value: "d", Offsets: strutils.ByteOffsets{Start: 8, End: 9}},
 	}
 	if !reflect.DeepEqual(tokens, expectedTokens) {
 		t.Errorf("expected %+v, actual %+v", expectedTokens, tokens)

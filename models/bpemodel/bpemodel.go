@@ -7,6 +7,7 @@ package bpemodel
 import (
 	"fmt"
 	"github.com/nlpodyssey/gotokenizers/models"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"github.com/nlpodyssey/gotokenizers/vocabulary"
 )
 
@@ -193,7 +194,7 @@ func (m *BPEModel) wordToTokens(word *Word) ([]models.Token, error) {
 		tokens[i] = models.Token{
 			ID:    wordSymbol.ID,
 			Value: value,
-			Offsets: models.TokenOffsets{
+			Offsets: strutils.ByteOffsets{
 				Start: offsetStart,
 				End:   offsetEnd,
 			},

@@ -7,6 +7,7 @@ package wordpiecemodel
 import (
 	"fmt"
 	"github.com/nlpodyssey/gotokenizers/models"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"github.com/nlpodyssey/gotokenizers/vocabulary"
 )
 
@@ -60,7 +61,7 @@ func (m *WordPieceModel) Tokenize(sequence string) ([]models.Token, error) {
 		return []models.Token{{
 			ID:      unkTokenID,
 			Value:   m.unknownToken,
-			Offsets: models.TokenOffsets{Start: 0, End: len(sequence)},
+			Offsets: strutils.ByteOffsets{Start: 0, End: len(sequence)},
 		}}, nil
 	}
 
@@ -85,7 +86,7 @@ func (m *WordPieceModel) Tokenize(sequence string) ([]models.Token, error) {
 				curToken = models.Token{
 					ID:      id,
 					Value:   subStr,
-					Offsets: models.TokenOffsets{Start: start, End: end},
+					Offsets: strutils.ByteOffsets{Start: start, End: end},
 				}
 				break
 			}
@@ -114,7 +115,7 @@ func (m *WordPieceModel) Tokenize(sequence string) ([]models.Token, error) {
 		return []models.Token{{
 			ID:      unkTokenID,
 			Value:   m.unknownToken,
-			Offsets: models.TokenOffsets{Start: 0, End: len(sequence)},
+			Offsets: strutils.ByteOffsets{Start: 0, End: len(sequence)},
 		}}, nil
 	}
 

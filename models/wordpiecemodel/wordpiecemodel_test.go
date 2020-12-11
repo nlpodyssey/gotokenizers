@@ -7,6 +7,7 @@ package wordpiecemodel
 import (
 	"fmt"
 	"github.com/nlpodyssey/gotokenizers/models"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"github.com/nlpodyssey/gotokenizers/vocabulary"
 	"reflect"
 	"testing"
@@ -48,40 +49,40 @@ func TestWordPieceModelTokenize(t *testing.T) {
 		{
 			"foo",
 			[]models.Token{
-				{ID: 1, Value: "foo", Offsets: models.TokenOffsets{Start: 0, End: 3}},
+				{ID: 1, Value: "foo", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
 			},
 		},
 		{
 			"barbaz",
 			[]models.Token{
-				{ID: 3, Value: "bar", Offsets: models.TokenOffsets{Start: 0, End: 3}},
-				{ID: 6, Value: "##baz", Offsets: models.TokenOffsets{Start: 3, End: 6}},
+				{ID: 3, Value: "bar", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
+				{ID: 6, Value: "##baz", Offsets: strutils.ByteOffsets{Start: 3, End: 6}},
 			},
 		},
 		{
 			"alphabetagamma",
 			[]models.Token{
-				{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 0, End: 14}},
+				{ID: 0, Value: "[UNK]", Offsets: strutils.ByteOffsets{Start: 0, End: 14}},
 			},
 		},
 		{
 			"foobarbaz",
 			[]models.Token{
-				{ID: 1, Value: "foo", Offsets: models.TokenOffsets{Start: 0, End: 3}},
-				{ID: 4, Value: "##bar", Offsets: models.TokenOffsets{Start: 3, End: 6}},
-				{ID: 6, Value: "##baz", Offsets: models.TokenOffsets{Start: 6, End: 9}},
+				{ID: 1, Value: "foo", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
+				{ID: 4, Value: "##bar", Offsets: strutils.ByteOffsets{Start: 3, End: 6}},
+				{ID: 6, Value: "##baz", Offsets: strutils.ByteOffsets{Start: 6, End: 9}},
 			},
 		},
 		{
 			"qux",
 			[]models.Token{
-				{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 0, End: 3}},
+				{ID: 0, Value: "[UNK]", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
 			},
 		},
 		{
 			"veryverylongterm",
 			[]models.Token{
-				{ID: 0, Value: "[UNK]", Offsets: models.TokenOffsets{Start: 0, End: 16}},
+				{ID: 0, Value: "[UNK]", Offsets: strutils.ByteOffsets{Start: 0, End: 16}},
 			},
 		},
 	}
