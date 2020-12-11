@@ -513,7 +513,7 @@ func (ns *NormalizedString) Split(
 	}
 
 	type SplitMatch struct {
-		Offsets      splitpattern.Offsets
+		Offsets      strutils.ByteOffsets
 		ShouldRemove bool
 	}
 

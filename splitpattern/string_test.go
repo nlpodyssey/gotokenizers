@@ -5,6 +5,7 @@
 package splitpattern
 
 import (
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"testing"
 )
 
@@ -15,18 +16,18 @@ func TestStringSplitPatternFindMatches(t *testing.T) {
 		sp := FromString("a")
 
 		runTest(t, sp, "aba", []Capture{
-			{Offsets{0, 1}, true},
-			{Offsets{1, 2}, false},
-			{Offsets{2, 3}, true},
+			{strutils.ByteOffsets{Start: 0, End: 1}, true},
+			{strutils.ByteOffsets{Start: 1, End: 2}, false},
+			{strutils.ByteOffsets{Start: 2, End: 3}, true},
 		})
 		runTest(t, sp, "bbbba", []Capture{
-			{Offsets{0, 4}, false},
-			{Offsets{4, 5}, true},
+			{strutils.ByteOffsets{Start: 0, End: 4}, false},
+			{strutils.ByteOffsets{Start: 4, End: 5}, true},
 		})
 		runTest(t, sp, "aabbb", []Capture{
-			{Offsets{0, 1}, true},
-			{Offsets{1, 2}, true},
-			{Offsets{2, 5}, false},
+			{strutils.ByteOffsets{Start: 0, End: 1}, true},
+			{strutils.ByteOffsets{Start: 1, End: 2}, true},
+			{strutils.ByteOffsets{Start: 2, End: 5}, false},
 		})
 	}
 
@@ -34,15 +35,15 @@ func TestStringSplitPatternFindMatches(t *testing.T) {
 		sp := FromString("ab")
 
 		runTest(t, sp, "aabbb", []Capture{
-			{Offsets{0, 1}, false},
-			{Offsets{1, 3}, true},
-			{Offsets{3, 5}, false},
+			{strutils.ByteOffsets{Start: 0, End: 1}, false},
+			{strutils.ByteOffsets{Start: 1, End: 3}, true},
+			{strutils.ByteOffsets{Start: 3, End: 5}, false},
 		})
 		runTest(t, sp, "aabbab", []Capture{
-			{Offsets{0, 1}, false},
-			{Offsets{1, 3}, true},
-			{Offsets{3, 4}, false},
-			{Offsets{4, 6}, true},
+			{strutils.ByteOffsets{Start: 0, End: 1}, false},
+			{strutils.ByteOffsets{Start: 1, End: 3}, true},
+			{strutils.ByteOffsets{Start: 3, End: 4}, false},
+			{strutils.ByteOffsets{Start: 4, End: 6}, true},
 		})
 	}
 
@@ -50,14 +51,14 @@ func TestStringSplitPatternFindMatches(t *testing.T) {
 		sp := FromString("")
 
 		runTest(t, sp, "", []Capture{
-			{Offsets{0, 0}, false},
+			{strutils.ByteOffsets{Start: 0, End: 0}, false},
 		})
 		runTest(t, sp, "aaa", []Capture{
-			{Offsets{0, 3}, false},
+			{strutils.ByteOffsets{Start: 0, End: 3}, false},
 		})
 	}
 
 	runTest(t, FromString("b"), "aaa", []Capture{
-		{Offsets{0, 3}, false},
+		{strutils.ByteOffsets{Start: 0, End: 3}, false},
 	})
 }

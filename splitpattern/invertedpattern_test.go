@@ -5,6 +5,7 @@
 package splitpattern
 
 import (
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"testing"
 )
 
@@ -14,8 +15,8 @@ func TestInvertedPatternFindMatches(t *testing.T) {
 	sp := Invert(FromRune('a'))
 
 	runTest(t, sp, "aba", []Capture{
-		{Offsets{0, 1}, false},
-		{Offsets{1, 2}, true},
-		{Offsets{2, 3}, false},
+		{strutils.ByteOffsets{Start: 0, End: 1}, false},
+		{strutils.ByteOffsets{Start: 1, End: 2}, true},
+		{strutils.ByteOffsets{Start: 2, End: 3}, false},
 	})
 }

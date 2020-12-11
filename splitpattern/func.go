@@ -4,6 +4,8 @@
 
 package splitpattern
 
+import "github.com/nlpodyssey/gotokenizers/strutils"
+
 type FuncSplitPattern struct {
 	f func(rune) bool
 }
@@ -17,7 +19,7 @@ func FromFunc(f func(rune) bool) *FuncSplitPattern {
 func (sp *FuncSplitPattern) FindMatches(s string) ([]Capture, error) {
 	if len(s) == 0 {
 		return []Capture{{
-			Offsets: Offsets{Start: 0, End: 0},
+			Offsets: strutils.ByteOffsets{Start: 0, End: 0},
 			IsMatch: false,
 		}}, nil
 	}
@@ -38,12 +40,12 @@ func (sp *FuncSplitPattern) FindMatches(s string) ([]Capture, error) {
 		if lastOffset < i {
 			// We need to emit what was before this match
 			splits = append(splits, Capture{
-				Offsets: Offsets{Start: lastOffset, End: i},
+				Offsets: strutils.ByteOffsets{Start: lastOffset, End: i},
 				IsMatch: false,
 			})
 		}
 		splits = append(splits, Capture{
-			Offsets: Offsets{Start: i, End: lastSeen},
+			Offsets: strutils.ByteOffsets{Start: i, End: lastSeen},
 			IsMatch: true,
 		})
 		lastOffset = lastSeen
@@ -52,7 +54,7 @@ func (sp *FuncSplitPattern) FindMatches(s string) ([]Capture, error) {
 	// Do not forget the last potential split
 	if lastSeen > lastOffset {
 		splits = append(splits, Capture{
-			Offsets: Offsets{Start: lastOffset, End: lastSeen},
+			Offsets: strutils.ByteOffsets{Start: lastOffset, End: lastSeen},
 			IsMatch: false,
 		})
 	}

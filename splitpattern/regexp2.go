@@ -4,7 +4,10 @@
 
 package splitpattern
 
-import "github.com/dlclark/regexp2"
+import (
+	"github.com/dlclark/regexp2"
+	"github.com/nlpodyssey/gotokenizers/strutils"
+)
 
 type Regexp2SplitPattern struct {
 	r *regexp2.Regexp
@@ -18,7 +21,10 @@ func FromRegexp2(r *regexp2.Regexp) *Regexp2SplitPattern {
 
 func (sp *Regexp2SplitPattern) FindMatches(s string) ([]Capture, error) {
 	if len(s) == 0 {
-		return []Capture{{Offsets: Offsets{Start: 0, End: 0}, IsMatch: false}}, nil
+		return []Capture{{
+			Offsets: strutils.ByteOffsets{Start: 0, End: 0},
+			IsMatch: false,
+		}}, nil
 	}
 
 	runes := []rune(s)
@@ -36,12 +42,12 @@ func (sp *Regexp2SplitPattern) FindMatches(s string) ([]Capture, error) {
 
 		if prev != startByte {
 			splits = append(splits, Capture{
-				Offsets: Offsets{Start: prev, End: startByte},
+				Offsets: strutils.ByteOffsets{Start: prev, End: startByte},
 				IsMatch: false,
 			})
 		}
 		splits = append(splits, Capture{
-			Offsets: Offsets{Start: startByte, End: endByte},
+			Offsets: strutils.ByteOffsets{Start: startByte, End: endByte},
 			IsMatch: true,
 		})
 		prev = endByte
@@ -54,7 +60,7 @@ func (sp *Regexp2SplitPattern) FindMatches(s string) ([]Capture, error) {
 
 	if prev != len(s) {
 		splits = append(splits, Capture{
-			Offsets: Offsets{Start: prev, End: len(s)},
+			Offsets: strutils.ByteOffsets{Start: prev, End: len(s)},
 			IsMatch: false,
 		})
 	}

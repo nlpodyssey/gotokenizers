@@ -4,7 +4,10 @@
 
 package splitpattern
 
-import "regexp"
+import (
+	"github.com/nlpodyssey/gotokenizers/strutils"
+	"regexp"
+)
 
 type StringSplitPattern struct {
 	s string
@@ -26,7 +29,7 @@ func (sp *StringSplitPattern) FindMatches(s string) ([]Capture, error) {
 		// If we try to find the matches with an empty string, just don't match anything
 		return []Capture{{
 			// FIXME: is len of runes (and not bytes) correct?
-			Offsets: Offsets{0, len([]rune(s))},
+			Offsets: strutils.ByteOffsets{Start: 0, End: len([]rune(s))},
 			IsMatch: false,
 		}}, nil
 	}

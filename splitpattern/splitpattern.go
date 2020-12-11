@@ -4,6 +4,8 @@
 
 package splitpattern
 
+import "github.com/nlpodyssey/gotokenizers/strutils"
+
 // SplitPattern is implemented by any value which represents a pattern
 // for splitting a string.
 type SplitPattern interface {
@@ -18,14 +20,6 @@ type SplitPattern interface {
 // which provides offset positions and a flag reporting whether this is a
 // match or not.
 type Capture struct {
-	Offsets Offsets
+	Offsets strutils.ByteOffsets
 	IsMatch bool
-}
-
-// Offsets represents a (start, end) range of offset positions.
-type Offsets struct {
-	// Start byte position, inclusive.
-	Start int
-	// End byte position, exclusive.
-	End int
 }

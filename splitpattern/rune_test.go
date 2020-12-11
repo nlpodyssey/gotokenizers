@@ -5,6 +5,7 @@
 package splitpattern
 
 import (
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"testing"
 )
 
@@ -14,23 +15,23 @@ func TestRuneSplitPatternFindMatches(t *testing.T) {
 	sp := FromRune('a')
 
 	runTest(t, sp, "aba", []Capture{
-		{Offsets{0, 1}, true},
-		{Offsets{1, 2}, false},
-		{Offsets{2, 3}, true},
+		{strutils.ByteOffsets{Start: 0, End: 1}, true},
+		{strutils.ByteOffsets{Start: 1, End: 2}, false},
+		{strutils.ByteOffsets{Start: 2, End: 3}, true},
 	})
 	runTest(t, sp, "bbbba", []Capture{
-		{Offsets{0, 4}, false},
-		{Offsets{4, 5}, true},
+		{strutils.ByteOffsets{Start: 0, End: 4}, false},
+		{strutils.ByteOffsets{Start: 4, End: 5}, true},
 	})
 	runTest(t, sp, "aabbb", []Capture{
-		{Offsets{0, 1}, true},
-		{Offsets{1, 2}, true},
-		{Offsets{2, 5}, false},
+		{strutils.ByteOffsets{Start: 0, End: 1}, true},
+		{strutils.ByteOffsets{Start: 1, End: 2}, true},
+		{strutils.ByteOffsets{Start: 2, End: 5}, false},
 	})
 	runTest(t, sp, "", []Capture{
-		{Offsets{0, 0}, false},
+		{strutils.ByteOffsets{Start: 0, End: 0}, false},
 	})
 	runTest(t, sp, "bbb", []Capture{
-		{Offsets{0, 3}, false},
+		{strutils.ByteOffsets{Start: 0, End: 3}, false},
 	})
 }

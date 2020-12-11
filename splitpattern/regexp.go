@@ -4,7 +4,10 @@
 
 package splitpattern
 
-import "regexp"
+import (
+	"github.com/nlpodyssey/gotokenizers/strutils"
+	"regexp"
+)
 
 type RegexpSplitPattern struct {
 	r *regexp.Regexp
@@ -18,7 +21,10 @@ func FromRegexp(r *regexp.Regexp) *RegexpSplitPattern {
 
 func (sp *RegexpSplitPattern) FindMatches(s string) ([]Capture, error) {
 	if len(s) == 0 {
-		return []Capture{{Offsets: Offsets{Start: 0, End: 0}, IsMatch: false}}, nil
+		return []Capture{{
+			Offsets: strutils.ByteOffsets{Start: 0, End: 0},
+			IsMatch: false,
+		}}, nil
 	}
 
 	prev := 0
@@ -31,12 +37,12 @@ func (sp *RegexpSplitPattern) FindMatches(s string) ([]Capture, error) {
 
 		if prev != startByte {
 			splits = append(splits, Capture{
-				Offsets: Offsets{Start: prev, End: startByte},
+				Offsets: strutils.ByteOffsets{Start: prev, End: startByte},
 				IsMatch: false,
 			})
 		}
 		splits = append(splits, Capture{
-			Offsets: Offsets{Start: startByte, End: endByte},
+			Offsets: strutils.ByteOffsets{Start: startByte, End: endByte},
 			IsMatch: true,
 		})
 		prev = endByte
@@ -44,7 +50,7 @@ func (sp *RegexpSplitPattern) FindMatches(s string) ([]Capture, error) {
 
 	if prev != len(s) {
 		splits = append(splits, Capture{
-			Offsets: Offsets{Start: prev, End: len(s)},
+			Offsets: strutils.ByteOffsets{Start: prev, End: len(s)},
 			IsMatch: false,
 		})
 	}
