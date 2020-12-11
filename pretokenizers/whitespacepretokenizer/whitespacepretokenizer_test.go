@@ -6,8 +6,8 @@ package whitespacepretokenizer
 
 import (
 	"fmt"
-	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"reflect"
 	"testing"
 )
@@ -22,19 +22,19 @@ func TestWhiteSpacePreTokenizer_PreTokenize(t *testing.T) {
 		{
 			"Hey man!",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "Hey", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
-				{String: "man", Offsets: normalizedstring.Offsets{Start: 4, End: 7}},
-				{String: "!", Offsets: normalizedstring.Offsets{Start: 7, End: 8}},
+				{String: "Hey", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
+				{String: "man", Offsets: strutils.ByteOffsets{Start: 4, End: 7}},
+				{String: "!", Offsets: strutils.ByteOffsets{Start: 7, End: 8}},
 			},
 		},
 		{
 			"How are you doing?",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "How", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
-				{String: "are", Offsets: normalizedstring.Offsets{Start: 4, End: 7}},
-				{String: "you", Offsets: normalizedstring.Offsets{Start: 8, End: 11}},
-				{String: "doing", Offsets: normalizedstring.Offsets{Start: 12, End: 17}},
-				{String: "?", Offsets: normalizedstring.Offsets{Start: 17, End: 18}},
+				{String: "How", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
+				{String: "are", Offsets: strutils.ByteOffsets{Start: 4, End: 7}},
+				{String: "you", Offsets: strutils.ByteOffsets{Start: 8, End: 11}},
+				{String: "doing", Offsets: strutils.ByteOffsets{Start: 12, End: 17}},
+				{String: "?", Offsets: strutils.ByteOffsets{Start: 17, End: 18}},
 			},
 		},
 	}

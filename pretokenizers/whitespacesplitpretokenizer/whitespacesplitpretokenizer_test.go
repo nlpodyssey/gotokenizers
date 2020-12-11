@@ -6,8 +6,8 @@ package whitespacesplitpretokenizer
 
 import (
 	"fmt"
-	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"reflect"
 	"testing"
 )
@@ -22,16 +22,16 @@ func TestWhiteSpaceSplitPreTokenizer_PreTokenize(t *testing.T) {
 		{
 			"Hey man!",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "Hey", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
-				{String: "man!", Offsets: normalizedstring.Offsets{Start: 4, End: 8}},
+				{String: "Hey", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
+				{String: "man!", Offsets: strutils.ByteOffsets{Start: 4, End: 8}},
 			},
 		},
 		{
 			"Hey, man, Good?",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "Hey,", Offsets: normalizedstring.Offsets{Start: 0, End: 4}},
-				{String: "man,", Offsets: normalizedstring.Offsets{Start: 5, End: 9}},
-				{String: "Good?", Offsets: normalizedstring.Offsets{Start: 10, End: 15}},
+				{String: "Hey,", Offsets: strutils.ByteOffsets{Start: 0, End: 4}},
+				{String: "man,", Offsets: strutils.ByteOffsets{Start: 5, End: 9}},
+				{String: "Good?", Offsets: strutils.ByteOffsets{Start: 10, End: 15}},
 			},
 		},
 	}

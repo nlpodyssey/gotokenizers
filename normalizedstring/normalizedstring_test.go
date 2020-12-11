@@ -6,6 +6,7 @@ package normalizedstring
 
 import (
 	"github.com/nlpodyssey/gotokenizers/splitpattern"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"reflect"
 	"regexp"
 	"testing"
@@ -169,22 +170,22 @@ func TestNormalizedStringOriginalOffsets(t *testing.T) {
 	t.Parallel()
 
 	ns := New("", "x", []AlignmentRange{}, 0)
-	assertEqual(t, ns.OriginalOffsets(), Offsets{0, 0})
+	assertEqual(t, ns.OriginalOffsets(), strutils.ByteOffsets{Start: 0, End: 0})
 
 	ns = New("", "x", []AlignmentRange{}, 42)
-	assertEqual(t, ns.OriginalOffsets(), Offsets{42, 42})
+	assertEqual(t, ns.OriginalOffsets(), strutils.ByteOffsets{Start: 42, End: 42})
 
 	ns = New("Foo", "", []AlignmentRange{}, 0)
-	assertEqual(t, ns.OriginalOffsets(), Offsets{0, 3})
+	assertEqual(t, ns.OriginalOffsets(), strutils.ByteOffsets{Start: 0, End: 3})
 
 	ns = New("Foo", "", []AlignmentRange{}, 42)
-	assertEqual(t, ns.OriginalOffsets(), Offsets{42, 45})
+	assertEqual(t, ns.OriginalOffsets(), strutils.ByteOffsets{Start: 42, End: 45})
 
 	ns = New("ℝ", "", []AlignmentRange{}, 0)
-	assertEqual(t, ns.OriginalOffsets(), Offsets{0, 3})
+	assertEqual(t, ns.OriginalOffsets(), strutils.ByteOffsets{Start: 0, End: 3})
 
 	ns = New("ℝ", "", []AlignmentRange{}, 42)
-	assertEqual(t, ns.OriginalOffsets(), Offsets{42, 45})
+	assertEqual(t, ns.OriginalOffsets(), strutils.ByteOffsets{Start: 42, End: 45})
 }
 
 func TestNormalizedStringPrepend(t *testing.T) {

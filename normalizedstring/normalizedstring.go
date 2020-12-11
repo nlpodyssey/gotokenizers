@@ -46,14 +46,6 @@ type AlignmentRange struct {
 	end int
 }
 
-// Offsets represents a (start, end) range of offsets.
-type Offsets struct {
-	// Start byte position, inclusive.
-	Start int
-	// End byte position, exclusive.
-	End int
-}
-
 // New returns a new NormalizedString.
 func New(
 	original string,
@@ -122,8 +114,8 @@ func (ns *NormalizedString) IsEmpty() bool {
 }
 
 // OriginalOffsets returns the original offsets.
-func (ns *NormalizedString) OriginalOffsets() Offsets {
-	return Offsets{
+func (ns *NormalizedString) OriginalOffsets() strutils.ByteOffsets {
+	return strutils.ByteOffsets{
 		Start: ns.originalShift,
 		End:   ns.originalShift + ns.OriginalLen(),
 	}

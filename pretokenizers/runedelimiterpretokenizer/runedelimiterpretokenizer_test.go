@@ -6,8 +6,8 @@ package runedelimiterpretokenizer
 
 import (
 	"fmt"
-	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"reflect"
 	"testing"
 )
@@ -31,58 +31,58 @@ func TestWhiteSpaceSplitPreTokenizer_PreTokenize(t *testing.T) {
 		{
 			" ",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: " ", Offsets: normalizedstring.Offsets{Start: 0, End: 1}},
+				{String: " ", Offsets: strutils.ByteOffsets{Start: 0, End: 1}},
 			},
 		},
 		{
 			" \n\t",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: " \n\t", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
+				{String: " \n\t", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
 			},
 		},
 		{
 			"x",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "x", Offsets: normalizedstring.Offsets{Start: 0, End: 1}},
+				{String: "x", Offsets: strutils.ByteOffsets{Start: 0, End: 1}},
 			},
 		},
 		{
 			"foo",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "foo", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
+				{String: "foo", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
 			},
 		},
 		{
 			"foo bar",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "foo bar", Offsets: normalizedstring.Offsets{Start: 0, End: 7}},
+				{String: "foo bar", Offsets: strutils.ByteOffsets{Start: 0, End: 7}},
 			},
 		},
 		{
 			"fooƱbarƱbaz",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "foo", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
-				{String: "bar", Offsets: normalizedstring.Offsets{Start: 5, End: 8}},
-				{String: "baz", Offsets: normalizedstring.Offsets{Start: 10, End: 13}},
+				{String: "foo", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
+				{String: "bar", Offsets: strutils.ByteOffsets{Start: 5, End: 8}},
+				{String: "baz", Offsets: strutils.ByteOffsets{Start: 10, End: 13}},
 			},
 		},
 		{
 			"Ʊfoo",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "foo", Offsets: normalizedstring.Offsets{Start: 2, End: 5}},
+				{String: "foo", Offsets: strutils.ByteOffsets{Start: 2, End: 5}},
 			},
 		},
 		{
 			"fooƱ",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "foo", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
+				{String: "foo", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
 			},
 		},
 		{
 			"ƱSüßƱCafé!?Ʊ",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "Süß", Offsets: normalizedstring.Offsets{Start: 2, End: 7}},
-				{String: "Café!?", Offsets: normalizedstring.Offsets{Start: 9, End: 16}},
+				{String: "Süß", Offsets: strutils.ByteOffsets{Start: 2, End: 7}},
+				{String: "Café!?", Offsets: strutils.ByteOffsets{Start: 9, End: 16}},
 			},
 		},
 	}

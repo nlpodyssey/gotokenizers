@@ -7,6 +7,7 @@ package pretokenizedstring
 import (
 	"github.com/nlpodyssey/gotokenizers/models"
 	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 )
 
 // PreTokenizedString is in charge of splitting an underlying string,
@@ -142,7 +143,7 @@ func (p *PreTokenizedString) GetNormalizedByteSplits() []NormalizedByteSplit {
 
 		result[i] = NormalizedByteSplit{
 			String: split.NormalizedString.Get(),
-			Offsets: normalizedstring.Offsets{
+			Offsets: strutils.ByteOffsets{
 				Start: start,
 				End:   offset,
 			},

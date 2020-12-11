@@ -7,6 +7,7 @@ package bertpretokenizer
 import (
 	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"reflect"
 	"testing"
 )
@@ -23,15 +24,15 @@ func TestBertPreTokenizer_PreTokenize(t *testing.T) {
 		}
 
 		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
-			{String: "Hey", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
-			{String: "friend", Offsets: normalizedstring.Offsets{Start: 4, End: 10}},
-			{String: "!", Offsets: normalizedstring.Offsets{Start: 10, End: 11}},
-			{String: "How", Offsets: normalizedstring.Offsets{Start: 16, End: 19}},
-			{String: "are", Offsets: normalizedstring.Offsets{Start: 20, End: 23}},
-			{String: "you", Offsets: normalizedstring.Offsets{Start: 24, End: 27}},
-			{String: "?", Offsets: normalizedstring.Offsets{Start: 27, End: 28}},
-			{String: "!", Offsets: normalizedstring.Offsets{Start: 28, End: 29}},
-			{String: "?", Offsets: normalizedstring.Offsets{Start: 29, End: 30}},
+			{String: "Hey", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
+			{String: "friend", Offsets: strutils.ByteOffsets{Start: 4, End: 10}},
+			{String: "!", Offsets: strutils.ByteOffsets{Start: 10, End: 11}},
+			{String: "How", Offsets: strutils.ByteOffsets{Start: 16, End: 19}},
+			{String: "are", Offsets: strutils.ByteOffsets{Start: 20, End: 23}},
+			{String: "you", Offsets: strutils.ByteOffsets{Start: 24, End: 27}},
+			{String: "?", Offsets: strutils.ByteOffsets{Start: 27, End: 28}},
+			{String: "!", Offsets: strutils.ByteOffsets{Start: 28, End: 29}},
+			{String: "?", Offsets: strutils.ByteOffsets{Start: 29, End: 30}},
 		})
 	})
 
@@ -62,12 +63,12 @@ func TestBertPreTokenizer_PreTokenize(t *testing.T) {
 		}
 
 		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
-			{String: "野", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
-			{String: "口", Offsets: normalizedstring.Offsets{Start: 3, End: 6}},
-			{String: "里", Offsets: normalizedstring.Offsets{Start: 6, End: 9}},
-			{String: "佳", Offsets: normalizedstring.Offsets{Start: 9, End: 12}},
-			{String: "Noguchi", Offsets: normalizedstring.Offsets{Start: 13, End: 20}},
-			{String: "Rika", Offsets: normalizedstring.Offsets{Start: 21, End: 25}},
+			{String: "野", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
+			{String: "口", Offsets: strutils.ByteOffsets{Start: 3, End: 6}},
+			{String: "里", Offsets: strutils.ByteOffsets{Start: 6, End: 9}},
+			{String: "佳", Offsets: strutils.ByteOffsets{Start: 9, End: 12}},
+			{String: "Noguchi", Offsets: strutils.ByteOffsets{Start: 13, End: 20}},
+			{String: "Rika", Offsets: strutils.ByteOffsets{Start: 21, End: 25}},
 		})
 	})
 }

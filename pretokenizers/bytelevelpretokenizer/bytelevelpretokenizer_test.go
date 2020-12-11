@@ -6,8 +6,8 @@ package bytelevelpretokenizer
 
 import (
 	"fmt"
-	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"reflect"
 	"testing"
 )
@@ -27,16 +27,16 @@ func TestByteLevelPreTokenizer_PreTokenize(t *testing.T) {
 		}
 
 		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
-			{String: "Hello", Offsets: normalizedstring.Offsets{Start: 0, End: 5}},
-			{String: "Ġmy", Offsets: normalizedstring.Offsets{Start: 5, End: 8}},
-			{String: "Ġfriend", Offsets: normalizedstring.Offsets{Start: 8, End: 15}},
-			{String: ",", Offsets: normalizedstring.Offsets{Start: 15, End: 16}},
-			{String: "Ġhow", Offsets: normalizedstring.Offsets{Start: 16, End: 20}},
-			{String: "Ġis", Offsets: normalizedstring.Offsets{Start: 20, End: 23}},
-			{String: "Ġyour", Offsets: normalizedstring.Offsets{Start: 23, End: 28}},
-			{String: "Ġday", Offsets: normalizedstring.Offsets{Start: 28, End: 32}},
-			{String: "Ġgoing", Offsets: normalizedstring.Offsets{Start: 32, End: 38}},
-			{String: "?", Offsets: normalizedstring.Offsets{Start: 38, End: 39}},
+			{String: "Hello", Offsets: strutils.ByteOffsets{Start: 0, End: 5}},
+			{String: "Ġmy", Offsets: strutils.ByteOffsets{Start: 5, End: 8}},
+			{String: "Ġfriend", Offsets: strutils.ByteOffsets{Start: 8, End: 15}},
+			{String: ",", Offsets: strutils.ByteOffsets{Start: 15, End: 16}},
+			{String: "Ġhow", Offsets: strutils.ByteOffsets{Start: 16, End: 20}},
+			{String: "Ġis", Offsets: strutils.ByteOffsets{Start: 20, End: 23}},
+			{String: "Ġyour", Offsets: strutils.ByteOffsets{Start: 23, End: 28}},
+			{String: "Ġday", Offsets: strutils.ByteOffsets{Start: 28, End: 32}},
+			{String: "Ġgoing", Offsets: strutils.ByteOffsets{Start: 32, End: 38}},
+			{String: "?", Offsets: strutils.ByteOffsets{Start: 38, End: 39}},
 		})
 	})
 
@@ -60,16 +60,16 @@ func TestByteLevelPreTokenizer_PreTokenize(t *testing.T) {
 				}
 
 				assertEqual(t, pts.GetNormalizedByteSplits(), []pretokenizedstring.NormalizedByteSplit{
-					{String: "ĠHello", Offsets: normalizedstring.Offsets{Start: 0, End: 7}},
-					{String: "Ġmy", Offsets: normalizedstring.Offsets{Start: 7, End: 11}},
-					{String: "Ġfriend", Offsets: normalizedstring.Offsets{Start: 11, End: 19}},
-					{String: ",", Offsets: normalizedstring.Offsets{Start: 19, End: 20}},
-					{String: "Ġhow", Offsets: normalizedstring.Offsets{Start: 20, End: 25}},
-					{String: "Ġis", Offsets: normalizedstring.Offsets{Start: 25, End: 29}},
-					{String: "Ġyour", Offsets: normalizedstring.Offsets{Start: 29, End: 35}},
-					{String: "Ġday", Offsets: normalizedstring.Offsets{Start: 35, End: 40}},
-					{String: "Ġgoing", Offsets: normalizedstring.Offsets{Start: 40, End: 47}},
-					{String: "?", Offsets: normalizedstring.Offsets{Start: 47, End: 48}},
+					{String: "ĠHello", Offsets: strutils.ByteOffsets{Start: 0, End: 7}},
+					{String: "Ġmy", Offsets: strutils.ByteOffsets{Start: 7, End: 11}},
+					{String: "Ġfriend", Offsets: strutils.ByteOffsets{Start: 11, End: 19}},
+					{String: ",", Offsets: strutils.ByteOffsets{Start: 19, End: 20}},
+					{String: "Ġhow", Offsets: strutils.ByteOffsets{Start: 20, End: 25}},
+					{String: "Ġis", Offsets: strutils.ByteOffsets{Start: 25, End: 29}},
+					{String: "Ġyour", Offsets: strutils.ByteOffsets{Start: 29, End: 35}},
+					{String: "Ġday", Offsets: strutils.ByteOffsets{Start: 35, End: 40}},
+					{String: "Ġgoing", Offsets: strutils.ByteOffsets{Start: 40, End: 47}},
+					{String: "?", Offsets: strutils.ByteOffsets{Start: 47, End: 48}},
 				})
 			})
 		}
@@ -87,11 +87,11 @@ func TestByteLevelPreTokenizer_PreTokenize(t *testing.T) {
 		}
 
 		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
-			{String: "Hello", Offsets: normalizedstring.Offsets{Start: 0, End: 5}},
-			{String: "Ġthere", Offsets: normalizedstring.Offsets{Start: 5, End: 11}},
-			{String: "Ċ", Offsets: normalizedstring.Offsets{Start: 11, End: 12}},
-			{String: "Hello", Offsets: normalizedstring.Offsets{Start: 12, End: 17}},
-			{String: "Ġthere", Offsets: normalizedstring.Offsets{Start: 17, End: 23}},
+			{String: "Hello", Offsets: strutils.ByteOffsets{Start: 0, End: 5}},
+			{String: "Ġthere", Offsets: strutils.ByteOffsets{Start: 5, End: 11}},
+			{String: "Ċ", Offsets: strutils.ByteOffsets{Start: 11, End: 12}},
+			{String: "Hello", Offsets: strutils.ByteOffsets{Start: 12, End: 17}},
+			{String: "Ġthere", Offsets: strutils.ByteOffsets{Start: 17, End: 23}},
 		})
 	})
 
@@ -107,10 +107,10 @@ func TestByteLevelPreTokenizer_PreTokenize(t *testing.T) {
 		}
 
 		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
-			{String: "Hello", Offsets: normalizedstring.Offsets{Start: 0, End: 5}},
-			{String: "Ġthere", Offsets: normalizedstring.Offsets{Start: 5, End: 11}},
-			{String: "ĠĠĠĠĠĠ", Offsets: normalizedstring.Offsets{Start: 11, End: 17}},
-			{String: "Ġdear", Offsets: normalizedstring.Offsets{Start: 17, End: 22}},
+			{String: "Hello", Offsets: strutils.ByteOffsets{Start: 0, End: 5}},
+			{String: "Ġthere", Offsets: strutils.ByteOffsets{Start: 5, End: 11}},
+			{String: "ĠĠĠĠĠĠ", Offsets: strutils.ByteOffsets{Start: 11, End: 17}},
+			{String: "Ġdear", Offsets: strutils.ByteOffsets{Start: 17, End: 22}},
 		})
 	})
 
@@ -128,15 +128,15 @@ func TestByteLevelPreTokenizer_PreTokenize(t *testing.T) {
 		}
 
 		assertEqual(t, pts.GetOriginalByteSplits(), []pretokenizedstring.OriginalByteSplit{
-			{String: "i", Offsets: normalizedstring.Offsets{Start: 0, End: 1}},
-			{String: "âŃ¢", Offsets: normalizedstring.Offsets{Start: 1, End: 4}},
-			{String: "j", Offsets: normalizedstring.Offsets{Start: 4, End: 5}},
+			{String: "i", Offsets: strutils.ByteOffsets{Start: 0, End: 1}},
+			{String: "âŃ¢", Offsets: strutils.ByteOffsets{Start: 1, End: 4}},
+			{String: "j", Offsets: strutils.ByteOffsets{Start: 4, End: 5}},
 		})
 
 		assertEqual(t, pts.GetNormalizedByteSplits(), []pretokenizedstring.NormalizedByteSplit{
-			{String: "i", Offsets: normalizedstring.Offsets{Start: 0, End: 1}},
-			{String: "âŃ¢", Offsets: normalizedstring.Offsets{Start: 1, End: 7}},
-			{String: "j", Offsets: normalizedstring.Offsets{Start: 7, End: 8}},
+			{String: "i", Offsets: strutils.ByteOffsets{Start: 0, End: 1}},
+			{String: "âŃ¢", Offsets: strutils.ByteOffsets{Start: 1, End: 7}},
+			{String: "j", Offsets: strutils.ByteOffsets{Start: 7, End: 8}},
 		})
 
 		strings := make([]string, 0)

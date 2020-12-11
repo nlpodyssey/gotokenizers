@@ -7,6 +7,7 @@ package pretokenizedstring
 import (
 	"github.com/nlpodyssey/gotokenizers/models"
 	"github.com/nlpodyssey/gotokenizers/normalizedstring"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 )
 
 // Split is a wrapper for a subpart of a NormalizedString.
@@ -28,7 +29,7 @@ type OriginalByteSplit struct {
 	// A slice of the normalized string
 	String string
 	// The associated bytes offsets, in the original referential
-	Offsets normalizedstring.Offsets
+	Offsets strutils.ByteOffsets
 	// The potential tokens
 	Tokens *[]models.Token
 }
@@ -37,7 +38,7 @@ type NormalizedByteSplit struct {
 	// A slice of the normalized string
 	String string
 	// The associated bytes offsets, in the normalized referential
-	Offsets normalizedstring.Offsets
+	Offsets strutils.ByteOffsets
 	// The potential tokens
 	Tokens *[]models.Token
 }

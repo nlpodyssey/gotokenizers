@@ -6,8 +6,8 @@ package metaspacepretokenizer
 
 import (
 	"fmt"
-	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/pretokenizedstring"
+	"github.com/nlpodyssey/gotokenizers/strutils"
 	"reflect"
 	"testing"
 )
@@ -23,27 +23,27 @@ func TestMetaSpacePreTokenizer_PreTokenize(t *testing.T) {
 		{
 			"Hey friend!",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "▁Hey", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
-				{String: "▁friend!", Offsets: normalizedstring.Offsets{Start: 3, End: 11}},
+				{String: "▁Hey", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
+				{String: "▁friend!", Offsets: strutils.ByteOffsets{Start: 3, End: 11}},
 			},
 			[]pretokenizedstring.NormalizedByteSplit{
-				{String: "▁Hey", Offsets: normalizedstring.Offsets{Start: 0, End: 6}},
-				{String: "▁friend!", Offsets: normalizedstring.Offsets{Start: 6, End: 16}},
+				{String: "▁Hey", Offsets: strutils.ByteOffsets{Start: 0, End: 6}},
+				{String: "▁friend!", Offsets: strutils.ByteOffsets{Start: 6, End: 16}},
 			},
 		},
 		{
 			"Hey   friend!",
 			[]pretokenizedstring.OriginalByteSplit{
-				{String: "▁Hey", Offsets: normalizedstring.Offsets{Start: 0, End: 3}},
-				{String: "▁", Offsets: normalizedstring.Offsets{Start: 3, End: 4}},
-				{String: "▁", Offsets: normalizedstring.Offsets{Start: 4, End: 5}},
-				{String: "▁friend!", Offsets: normalizedstring.Offsets{Start: 5, End: 13}},
+				{String: "▁Hey", Offsets: strutils.ByteOffsets{Start: 0, End: 3}},
+				{String: "▁", Offsets: strutils.ByteOffsets{Start: 3, End: 4}},
+				{String: "▁", Offsets: strutils.ByteOffsets{Start: 4, End: 5}},
+				{String: "▁friend!", Offsets: strutils.ByteOffsets{Start: 5, End: 13}},
 			},
 			[]pretokenizedstring.NormalizedByteSplit{
-				{String: "▁Hey", Offsets: normalizedstring.Offsets{Start: 0, End: 6}},
-				{String: "▁", Offsets: normalizedstring.Offsets{Start: 6, End: 9}},
-				{String: "▁", Offsets: normalizedstring.Offsets{Start: 9, End: 12}},
-				{String: "▁friend!", Offsets: normalizedstring.Offsets{Start: 12, End: 22}},
+				{String: "▁Hey", Offsets: strutils.ByteOffsets{Start: 0, End: 6}},
+				{String: "▁", Offsets: strutils.ByteOffsets{Start: 6, End: 9}},
+				{String: "▁", Offsets: strutils.ByteOffsets{Start: 9, End: 12}},
+				{String: "▁friend!", Offsets: strutils.ByteOffsets{Start: 12, End: 22}},
 			},
 		},
 	}
