@@ -5,6 +5,8 @@
 package pretokenizedstring
 
 import (
+	"fmt"
+	"github.com/nlpodyssey/gotokenizers/encodings"
 	"github.com/nlpodyssey/gotokenizers/models"
 	"github.com/nlpodyssey/gotokenizers/normalizedstring"
 	"github.com/nlpodyssey/gotokenizers/strutils"
@@ -155,4 +157,68 @@ func (p *PreTokenizedString) GetNormalizedByteSplits() []NormalizedByteSplit {
 
 func (p *PreTokenizedString) Splits() []Split {
 	return p.splits
+}
+
+// IntoEncoding transforms the current PreTokenizedString into an
+// encodings.Encoding.
+//
+// If a wordIndex is provided (i.e. >= 0), any word in the generated Encoding
+// will be set to this value. This is generally used with pre-tokenized
+// input, that does not need the PreTokenizedString to generate word ids.
+//
+// This method will fail if some splits do not have associated Token.
+//
+// Offset indices are based on bytes (not runes).
+func (p *PreTokenizedString) IntoEncoding(wordIndex int, typeID int) (*encodings.Encoding, error) {
+	if len(p.splits) == 0 {
+		return encodings.NewDefaultEncoding(), nil
+	}
+	if !p.allSplitsHaveTokens() {
+		return nil, fmt.Errorf("splits have not been tokenized, call `PreTokenizedString.Tokenize` first")
+	}
+
+	sequence := make([]encodings.EncodableToken, 0)
+
+	for splitIndex, split := range p.splits {
+		nsOffsets := split.NormalizedString.OriginalOffsets()
+
+		actualWordIndex := wordIndex
+		if actualWordIndex < 0 {
+			actualWordIndex = splitIndex
+		}
+
+		for _, token := range *split.Tokens {
+			var offsets strutils.ByteOffsets
+
+			tokenOrigRange, ok := split.NormalizedString.CoerceRangeToOriginal(
+				normalizedstring.NewNormalizedRange(token.Offsets.Start, token.Offsets.End))
+			if ok {
+				offsets = strutils.ByteOffsets{
+					Start: nsOffsets.Start + tokenOrigRange.Start(),
+					End:   nsOffsets.Start + tokenOrigRange.End(),
+				}
+			} else {
+				offsets = token.Offsets
+			}
+
+			sequence = append(sequence, encodings.EncodableToken{
+				ID:        token.ID,
+				Token:     token.Value,
+				Offsets:   offsets,
+				WordIndex: actualWordIndex,
+				TypeID:    typeID,
+			})
+		}
+	}
+
+	return encodings.EncodingFromEncodableTokens(sequence), nil
+}
+
+func (p *PreTokenizedString) allSplitsHaveTokens() bool {
+	for _, split := range p.splits {
+		if split.Tokens == nil {
+			return false
+		}
+	}
+	return true
 }
